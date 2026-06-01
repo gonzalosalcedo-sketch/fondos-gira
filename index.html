@@ -3,199 +3,284 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fondos de Gira</title>
+<title>Fondos de Gira — Cuenca del Sur</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#ffffff;--bg2:#f5f5f4;--bg3:#efede6;
+  --bg:#fff;--bg2:#f5f5f4;--bg3:#efede6;
   --text:#1a1a1a;--text2:#6b6b6b;--text3:#9b9b9b;
   --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.25);
-  --success-bg:#eaf3de;--success-text:#3b6d11;--success-border:#639922;
-  --warning-bg:#faeeda;--warning-text:#854f0b;--warning-border:#ba7517;
-  --danger-bg:#fcebeb;--danger-text:#a32d2d;--danger-border:#e24b4a;
-  --info-bg:#e6f1fb;--info-text:#185fa5;--info-border:#378add;
-  --radius:8px;--radius-lg:12px;
+  --ok-bg:#eaf3de;--ok-t:#3b6d11;--ok-b:#639922;
+  --wa-bg:#faeeda;--wa-t:#854f0b;--wa-b:#ba7517;
+  --er-bg:#fcebeb;--er-t:#a32d2d;--er-b:#e24b4a;
+  --in-bg:#e6f1fb;--in-t:#185fa5;--in-b:#378add;
+  --r:8px;--rl:12px;
 }
 @media(prefers-color-scheme:dark){:root{
-  --bg:#1c1c1c;--bg2:#252525;--bg3:#111111;
-  --text:#f0f0f0;--text2:#a0a0a0;--text3:#666;
+  --bg:#1c1c1c;--bg2:#252525;--bg3:#111;
+  --text:#f0f0f0;--text2:#a0a0a0;--text3:#555;
   --border:rgba(255,255,255,0.12);--border2:rgba(255,255,255,0.25);
-  --success-bg:#1a2e0a;--success-text:#97c459;--success-border:#3b6d11;
-  --warning-bg:#2e1f05;--warning-text:#fac775;--warning-border:#854f0b;
-  --danger-bg:#2e0a0a;--danger-text:#f09595;--danger-border:#a32d2d;
-  --info-bg:#0a1e35;--info-text:#85b7eb;--info-border:#185fa5;
+  --ok-bg:#1a2e0a;--ok-t:#97c459;--ok-b:#3b6d11;
+  --wa-bg:#2e1f05;--wa-t:#fac775;--wa-b:#854f0b;
+  --er-bg:#2e0a0a;--er-t:#f09595;--er-b:#a32d2d;
+  --in-bg:#0a1e35;--in-t:#85b7eb;--in-b:#185fa5;
 }}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--text);background:var(--bg3);min-height:100vh}
-.app{max-width:920px;margin:0 auto;padding:1.5rem}
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px}
-.tab-bar{display:flex;gap:4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:4px;margin-bottom:1.5rem;flex-wrap:wrap}
-.tab{flex:1;min-width:90px;padding:8px 10px;border:none;background:transparent;border-radius:var(--radius);cursor:pointer;font-size:13px;color:var(--text2);display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;font-family:inherit}
-.tab.active{background:var(--bg);color:var(--text);border:0.5px solid var(--border);font-weight:500}
-.tab:hover:not(.active){background:var(--bg);color:var(--text)}
-.panel{display:none}.panel.active{display:block}
-.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem}
-.card.danger-card{border-color:var(--danger-border);background:var(--danger-bg)}
-.card-title{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.06em}
-.divider{height:0.5px;background:var(--border);margin:1rem 0}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-group{display:flex;flex-direction:column;gap:4px}
-.form-group.full{grid-column:1/-1}
+.app{max-width:960px;margin:0 auto;padding:1.5rem}
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px}
+.hdr-brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:500}
+.hdr-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.role-pill{font-size:12px;padding:3px 12px;border-radius:999px;border:0.5px solid var(--border)}
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--rl);padding:4px;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{flex:1;min-width:80px;padding:8px 8px;border:none;background:transparent;border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--text2);display:flex;align-items:center;justify-content:center;gap:5px;font-family:inherit;transition:all .15s;white-space:nowrap}
+.tab.on{background:var(--bg);color:var(--text);border:0.5px solid var(--border);font-weight:500}
+.tab:hover:not(.on){background:var(--bg);color:var(--text)}
+.panel{display:none}.panel.on{display:block}
+/* CARDS */
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
+.card.er{border-color:var(--er-b);background:var(--er-bg)}
+.card.wa{border-color:var(--wa-b);background:var(--wa-bg)}
+.ctitle{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.06em}
+.div{height:0.5px;background:var(--border);margin:1rem 0}
+/* FORMS */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.fi{display:flex;flex-direction:column;gap:4px}
+.fi.full{grid-column:1/-1}
 label{font-size:12px;color:var(--text2)}
-input,select,textarea{width:100%;padding:8px 10px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;transition:border-color .15s}
+input,select,textarea{width:100%;padding:8px 10px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-size:13px;font-family:inherit}
 input:focus,select:focus{outline:none;border-color:var(--border2)}
-.btn{padding:8px 16px;border:0.5px solid var(--border2);border-radius:var(--radius);cursor:pointer;font-size:13px;font-family:inherit;display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--text);transition:all .15s}
-.btn:hover{background:var(--bg2)}.btn:active{transform:scale(.98)}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-primary{background:var(--text);color:var(--bg);border-color:var(--text)}.btn-primary:hover{opacity:.85}
-.btn-success{color:var(--success-text);border-color:var(--success-border)}.btn-success:hover{background:var(--success-bg)}
-.btn-danger{color:var(--danger-text);border-color:var(--danger-border)}.btn-danger:hover{background:var(--danger-bg)}
-.btn-info{color:var(--info-text);border-color:var(--info-border)}.btn-info:hover{background:var(--info-bg)}
-.btn-warning{color:var(--warning-text);border-color:var(--warning-border)}.btn-warning:hover{background:var(--warning-bg)}
-.sbadge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
+/* BUTTONS */
+.btn{padding:8px 16px;border:0.5px solid var(--border2);border-radius:var(--r);cursor:pointer;font-size:13px;font-family:inherit;display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--text);transition:all .15s}
+.btn:hover{background:var(--bg2)}.btn:active{transform:scale(.98)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.pr{background:var(--text);color:var(--bg);border-color:var(--text)}.btn.pr:hover{opacity:.85}
+.btn.ok{color:var(--ok-t);border-color:var(--ok-b)}.btn.ok:hover{background:var(--ok-bg)}
+.btn.er{color:var(--er-t);border-color:var(--er-b)}.btn.er:hover{background:var(--er-bg)}
+.btn.in{color:var(--in-t);border-color:var(--in-b)}.btn.in:hover{background:var(--in-bg)}
+.btn.wa{color:var(--wa-t);border-color:var(--wa-b)}.btn.wa:hover{background:var(--wa-bg)}
+/* BADGES */
+.sb{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
 .s-borrador{background:var(--bg2);color:var(--text2)}
-.s-pendiente{background:var(--warning-bg);color:var(--warning-text)}
-.s-aprobado{background:var(--info-bg);color:var(--info-text)}
-.s-rendido{background:var(--success-bg);color:var(--success-text)}
+.s-pendiente{background:var(--wa-bg);color:var(--wa-t)}
+.s-aprobado{background:var(--in-bg);color:var(--in-t)}
+.s-rendido{background:var(--ok-bg);color:var(--ok-t)}
+.s-observado{background:var(--wa-bg);color:var(--wa-t)}
 .s-cerrado{background:var(--bg2);color:var(--text2)}
-.s-vencido{background:var(--danger-bg);color:var(--danger-text)}
-.nbadge{background:var(--danger-bg);color:var(--danger-text);border-radius:999px;font-size:11px;padding:1px 7px;font-weight:500}
-.wbadge{background:var(--warning-bg);color:var(--warning-text);border-radius:999px;font-size:11px;padding:1px 7px;font-weight:500}
-.metric-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
-.metric{background:var(--bg2);border-radius:var(--radius);padding:12px 14px}
-.metric .mlabel{font-size:11px;color:var(--text2);margin-bottom:4px}
-.metric .mval{font-size:20px;font-weight:500}
-.metric .msub{font-size:11px;color:var(--text2);margin-top:2px}
-.timeline{display:flex;flex-direction:column}
-.tl-step{display:flex;gap:12px;padding:8px 0}
-.tl-dot{display:flex;flex-direction:column;align-items:center}
-.tl-circle{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;border:0.5px solid var(--border)}
-.tl-line{width:1.5px;flex:1;min-height:8px;background:var(--border);margin:2px 0}
-.tl-content{flex:1;padding-bottom:6px}
-.tl-title{font-weight:500;font-size:13px;margin-bottom:2px}
-.tl-sub{font-size:12px;color:var(--text2)}
-.tl-done .tl-circle{background:var(--success-bg);color:var(--success-text);border-color:var(--success-border)}
-.tl-done .tl-line{background:var(--success-border)}
-.tl-active .tl-circle{background:var(--text);color:var(--bg);border-color:var(--text)}
-.tl-pending .tl-circle{background:var(--bg2);color:var(--text2)}
-.tl-danger .tl-circle{background:var(--danger-bg);color:var(--danger-text);border-color:var(--danger-border)}
-table.gastos{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
-table.gastos th{text-align:left;padding:8px;font-size:11px;font-weight:500;color:var(--text2);border-bottom:0.5px solid var(--border)}
-table.gastos td{padding:7px 8px;border-bottom:0.5px solid var(--border);vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
-table.gastos tr:last-child td{border-bottom:none}
-.resumen-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border)}
-.resumen-row:last-child{border-bottom:none}
-.resumen-total{font-weight:500;font-size:15px}
-.paso-bar{display:flex;align-items:center;margin-bottom:1.5rem;overflow-x:auto}
+.s-vencido{background:var(--er-bg);color:var(--er-t)}
+.nb{background:var(--er-bg);color:var(--er-t);border-radius:999px;font-size:11px;padding:1px 7px;font-weight:500}
+.wb{background:var(--wa-bg);color:var(--wa-t);border-radius:999px;font-size:11px;padding:1px 7px;font-weight:500}
+/* METRICS */
+.mrow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
+.mrow4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem}
+.met{background:var(--bg2);border-radius:var(--r);padding:12px 14px}
+.met .ml{font-size:11px;color:var(--text2);margin-bottom:4px}
+.met .mv{font-size:20px;font-weight:500}
+.met .ms{font-size:11px;color:var(--text2);margin-top:2px}
+/* TIMELINE */
+.tl{display:flex;flex-direction:column}
+.tls{display:flex;gap:12px;padding:8px 0}
+.tld{display:flex;flex-direction:column;align-items:center}
+.tlc{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;border:0.5px solid var(--border)}
+.tll{width:1.5px;flex:1;min-height:8px;background:var(--border);margin:2px 0}
+.tlco{flex:1;padding-bottom:6px}
+.tlt{font-weight:500;font-size:13px;margin-bottom:2px}
+.tlsu{font-size:12px;color:var(--text2)}
+.tl-done .tlc{background:var(--ok-bg);color:var(--ok-t);border-color:var(--ok-b)}
+.tl-done .tll{background:var(--ok-b)}
+.tl-active .tlc{background:var(--text);color:var(--bg);border-color:var(--text)}
+.tl-pending .tlc{background:var(--bg2);color:var(--text2)}
+.tl-danger .tlc{background:var(--er-bg);color:var(--er-t);border-color:var(--er-b)}
+.tl-warn .tlc{background:var(--wa-bg);color:var(--wa-t);border-color:var(--wa-b)}
+/* TABLE */
+table.gt{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+table.gt th{text-align:left;padding:8px;font-size:11px;font-weight:500;color:var(--text2);border-bottom:0.5px solid var(--border)}
+table.gt td{padding:7px 8px;border-bottom:0.5px solid var(--border);vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
+table.gt tr:last-child td{border-bottom:none}
+/* RESUMEN ROWS */
+.rr{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border)}
+.rr:last-child{border-bottom:none}
+.rrt{font-weight:500;font-size:15px}
+/* PASOS */
+.pbar{display:flex;align-items:center;margin-bottom:1.5rem;overflow-x:auto}
 .paso{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.paso-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);flex-shrink:0}
-.paso-num.done{background:var(--success-bg);border-color:var(--success-border);color:var(--success-text)}
-.paso-num.active{background:var(--text);border-color:var(--text);color:var(--bg)}
-.paso-label{font-size:12px;color:var(--text2)}
-.paso-label.active{color:var(--text);font-weight:500}
-.paso-sep{width:28px;height:0.5px;background:var(--border);margin:0 4px;flex-shrink:0}
-.check-list{display:flex;flex-direction:column;gap:8px}
-.check-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border:0.5px solid var(--border);border-radius:var(--radius);cursor:pointer;user-select:none;transition:all .15s}
-.check-item:hover{background:var(--bg2)}
-.check-item.checked{border-color:var(--success-border);background:var(--success-bg)}
-.check-item.checked span{color:var(--success-text)}
-.check-item input[type=checkbox]{width:16px;height:16px;cursor:pointer}
-.filter-bar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
-.filter-btn{padding:5px 14px;border:0.5px solid var(--border);border-radius:999px;font-size:12px;cursor:pointer;background:transparent;color:var(--text2);font-family:inherit;transition:all .15s}
-.filter-btn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
-.progress-bar{height:4px;background:var(--bg2);border-radius:999px;overflow:hidden;margin-top:6px}
-.progress-fill{height:100%;border-radius:999px;transition:width .3s}
-.overlay-wrap{display:none;min-height:480px;background:rgba(0,0,0,.5);align-items:center;justify-content:center;margin:-1.5rem;padding:2rem}
-.overlay-wrap.open{display:flex}
-.overlay-box{background:var(--bg);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:1.5rem;width:440px;max-width:100%}
-.alert-box{border:2px solid var(--danger-border)}
-#toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:10px 16px;border-radius:var(--radius);font-size:13px;display:flex;align-items:center;gap:8px;z-index:9999;max-width:300px;border:0.5px solid;opacity:0;transition:opacity .3s;pointer-events:none}
+.pn{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);flex-shrink:0}
+.pn.done{background:var(--ok-bg);border-color:var(--ok-b);color:var(--ok-t)}
+.pn.act{background:var(--text);border-color:var(--text);color:var(--bg)}
+.pl{font-size:12px;color:var(--text2)}
+.pl.act{color:var(--text);font-weight:500}
+.psep{width:24px;height:0.5px;background:var(--border);margin:0 4px;flex-shrink:0}
+/* CHECKS */
+.cklist{display:flex;flex-direction:column;gap:8px}
+.ckitem{display:flex;align-items:center;gap:10px;padding:8px 12px;border:0.5px solid var(--border);border-radius:var(--r);cursor:pointer;user-select:none;transition:all .15s}
+.ckitem:hover{background:var(--bg2)}
+.ckitem.on{border-color:var(--ok-b);background:var(--ok-bg)}
+.ckitem.on span{color:var(--ok-t)}
+.ckitem input[type=checkbox]{width:16px;height:16px;cursor:pointer}
+/* FILTROS */
+.fbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.fbtn{padding:5px 14px;border:0.5px solid var(--border);border-radius:999px;font-size:12px;cursor:pointer;background:transparent;color:var(--text2);font-family:inherit;transition:all .15s}
+.fbtn.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+/* PROGRESS */
+.pbar2{height:4px;background:var(--bg2);border-radius:999px;overflow:hidden;margin-top:6px}
+.pfill{height:100%;border-radius:999px;transition:width .3s}
+/* OVERLAY */
+.ov{display:none;min-height:520px;background:rgba(0,0,0,.52);align-items:flex-start;justify-content:center;margin:-1.5rem;padding:2rem;padding-top:2.5rem}
+.ov.open{display:flex}
+.ovbox{background:var(--bg);border-radius:var(--rl);border:0.5px solid var(--border);padding:1.5rem;width:460px;max-width:100%}
+.ovbox.er{border:2px solid var(--er-b)}
+.ovbox.wa{border:2px solid var(--wa-b)}
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg3)}
+.login-box{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:2rem;width:360px;max-width:90vw;text-align:center}
+/* ID CHIP */
+.idchip{font-family:monospace;font-size:11px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:2px 8px;color:var(--text2)}
+/* TOAST */
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:10px 16px;border-radius:var(--r);font-size:13px;display:flex;align-items:center;gap:8px;z-index:9999;max-width:320px;border:0.5px solid;opacity:0;transition:opacity .3s;pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--text2);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
 </style>
 </head>
 <body>
-<div class="app" id="app">
 
-<!-- OVERLAY ALERTA VENCIMIENTO -->
-<div class="overlay-wrap" id="ov-alerta" role="alertdialog">
-  <div class="overlay-box alert-box">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
-      <i class="ti ti-alert-triangle" style="font-size:24px;color:var(--danger-text)"></i>
-      <div>
-        <div style="font-weight:500;font-size:15px;color:var(--danger-text)">Rendiciones vencidas</div>
-        <div style="font-size:12px;color:var(--text2)">Más de <span id="alerta-dias">5</span> días sin rendir desde el regreso</div>
-      </div>
+<!-- ═══════════════ LOGIN SCREEN ═══════════════ -->
+<div id="login-screen" class="login-wrap">
+  <div class="login-box">
+    <i class="ti ti-route" style="font-size:40px;color:var(--text2);margin-bottom:1rem"></i>
+    <div style="font-size:20px;font-weight:500;margin-bottom:4px">Fondos de Gira</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem">Cuenca del Sur</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn pr" style="justify-content:center;padding:12px" onclick="loginVendedor()">
+        <i class="ti ti-user"></i> Ingresar como vendedor
+      </button>
+      <button class="btn" style="justify-content:center;padding:12px" onclick="showLoginTesorero()">
+        <i class="ti ti-building-bank"></i> Ingresar como tesorero
+      </button>
     </div>
-    <div id="alerta-lista" style="margin-bottom:1.25rem"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn" onclick="closeOverlay('ov-alerta')">Recordar más tarde</button>
-      <button class="btn btn-danger" onclick="closeOverlay('ov-alerta');showTab('seguimiento')">Ver en seguimiento</button>
+    <div id="tes-login-form" style="display:none;margin-top:1rem">
+      <input type="password" id="tes-pass" placeholder="Clave del tesorero" style="margin-bottom:8px" onkeydown="if(event.key==='Enter')loginTesorero()">
+      <button class="btn pr" style="width:100%;justify-content:center" onclick="loginTesorero()">Ingresar</button>
+      <p style="font-size:12px;color:var(--er-t);margin-top:6px;min-height:16px" id="tes-err"></p>
     </div>
   </div>
 </div>
 
-<!-- OVERLAY CONFIGURACION -->
-<div class="overlay-wrap" id="ov-config" role="dialog">
-  <div class="overlay-box">
+<!-- ═══════════════ APP MAIN ═══════════════ -->
+<div id="main-app" style="display:none">
+<div class="app" id="app">
+
+<!-- OVERLAY ALERTA VENCIMIENTO -->
+<div class="ov" id="ov-alerta" role="alertdialog">
+  <div class="ovbox er">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+      <i class="ti ti-alert-triangle" style="font-size:22px;color:var(--er-t)"></i>
+      <div>
+        <div style="font-weight:500;font-size:15px;color:var(--er-t)">Rendiciones vencidas</div>
+        <div style="font-size:12px;color:var(--text2)">Más de <span id="alerta-dias">5</span> días desde el regreso sin rendir</div>
+      </div>
+    </div>
+    <div id="alerta-lista" style="margin-bottom:1.25rem"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="closeOv('ov-alerta')">Recordar más tarde</button>
+      <button class="btn er" onclick="closeOv('ov-alerta');showTab('seguimiento')">Ver en seguimiento</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY OBSERVACION -->
+<div class="ov" id="ov-obs" role="dialog">
+  <div class="ovbox wa">
+    <div style="font-weight:500;font-size:15px;margin-bottom:1rem"><i class="ti ti-message-circle"></i> Devolver con observación</div>
+    <div class="fi" style="margin-bottom:1rem">
+      <label>Observación para el vendedor</label>
+      <textarea id="obs-texto" rows="4" placeholder="Describí qué debe corregir o justificar..."></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="closeOv('ov-obs')">Cancelar</button>
+      <button class="btn wa" onclick="confirmarObservacion()"><i class="ti ti-send"></i> Enviar observación</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY DENEGAR -->
+<div class="ov" id="ov-denegar" role="dialog">
+  <div class="ovbox er">
+    <div style="font-weight:500;font-size:15px;margin-bottom:1rem"><i class="ti ti-x"></i> Denegar solicitud</div>
+    <div class="fi" style="margin-bottom:1rem">
+      <label>Motivo de la denegación</label>
+      <textarea id="denegar-texto" rows="3" placeholder="Indicá el motivo..."></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="closeOv('ov-denegar')">Cancelar</button>
+      <button class="btn er" onclick="confirmarDenegar()"><i class="ti ti-x"></i> Denegar</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY CONFIG -->
+<div class="ov" id="ov-cfg" role="dialog">
+  <div class="ovbox">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
       <div style="font-weight:500;font-size:15px"><i class="ti ti-settings"></i> Configuración</div>
-      <button class="btn" onclick="closeOverlay('ov-config')" aria-label="Cerrar"><i class="ti ti-x"></i></button>
+      <button class="btn" onclick="closeOv('ov-cfg')" aria-label="Cerrar"><i class="ti ti-x"></i></button>
     </div>
-    <div id="cfg-locked">
-      <div style="text-align:center;padding:1.5rem 0">
-        <i class="ti ti-lock" style="font-size:36px;color:var(--text2)"></i>
-        <p style="margin:.75rem 0 .5rem;font-weight:500">Acceso restringido</p>
-        <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">Ingresá la clave de administración</p>
-        <input type="password" id="cfg-pass" placeholder="Contraseña" style="max-width:200px;margin-bottom:10px" onkeydown="if(event.key==='Enter')checkCfgPass()">
-        <br><button class="btn btn-primary" style="margin-top:8px" onclick="checkCfgPass()">Ingresar</button>
-        <p style="font-size:12px;color:var(--danger-text);margin-top:8px;min-height:18px" id="cfg-err"></p>
-      </div>
-    </div>
-    <div id="cfg-unlocked" style="display:none">
-      <div class="form-group" style="margin-bottom:1rem"><label>Viáticos por día ($)</label><input type="number" id="cfg-viat" value="60000"></div>
-      <div class="form-group" style="margin-bottom:1rem"><label>Hospedaje por día ($)</label><input type="number" id="cfg-hosp" value="100000"></div>
-      <div class="form-group" style="margin-bottom:1rem"><label>Días límite para rendir</label><input type="number" id="cfg-dias" value="5"></div>
-      <div class="form-group" style="margin-bottom:1rem"><label>Cambiar contraseña admin</label><input type="password" id="cfg-newpass" placeholder="Dejar vacío para no cambiar"></div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem">
-        <button class="btn" onclick="closeOverlay('ov-config')">Cancelar</button>
-        <button class="btn btn-primary" onclick="guardarConfig()">Guardar</button>
-      </div>
+    <div class="fi" style="margin-bottom:1rem"><label>Viáticos por día ($)</label><input type="number" id="cfg-viat" value="60000"></div>
+    <div class="fi" style="margin-bottom:1rem"><label>Hospedaje por día ($)</label><input type="number" id="cfg-hosp" value="100000"></div>
+    <div class="fi" style="margin-bottom:1rem"><label>Días límite para rendir</label><input type="number" id="cfg-dias" value="5"></div>
+    <div class="fi" style="margin-bottom:1rem"><label>Nueva clave tesorero (dejar vacío para no cambiar)</label><input type="password" id="cfg-newpass" placeholder="Nueva clave"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem">
+      <button class="btn" onclick="closeOv('ov-cfg')">Cancelar</button>
+      <button class="btn pr" onclick="guardarConfig()">Guardar</button>
     </div>
   </div>
 </div>
 
 <!-- HEADER -->
-<div class="header">
-  <div style="display:flex;align-items:center;gap:10px">
+<div class="hdr">
+  <div class="hdr-brand">
     <i class="ti ti-route" style="font-size:22px"></i>
-    <div style="font-size:18px;font-weight:500">Fondos de Gira</div>
+    Fondos de Gira
+    <span class="role-pill" id="role-pill">—</span>
   </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button class="btn" onclick="openOverlay('ov-config')"><i class="ti ti-settings"></i> Configuración</button>
-    <button class="btn btn-primary" onclick="nuevaSolicitud()"><i class="ti ti-plus"></i> Nueva gira</button>
+  <div class="hdr-right">
+    <span style="font-size:12px;color:var(--text2)" id="hdr-user"></span>
+    <button class="btn" id="btn-cfg" style="display:none" onclick="openOv('ov-cfg')"><i class="ti ti-settings"></i> Config</button>
+    <button class="btn pr" id="btn-nueva" onclick="nuevaSolicitud()"><i class="ti ti-plus"></i> Nueva gira</button>
+    <button class="btn" onclick="logout()"><i class="ti ti-logout"></i></button>
   </div>
 </div>
 
-<!-- TAB BAR -->
-<div class="tab-bar" role="tablist">
-  <button class="tab active" id="t-solicitudes" onclick="showTab('solicitudes')"><i class="ti ti-list"></i> Solicitudes</button>
-  <button class="tab" id="t-seguimiento" onclick="showTab('seguimiento')"><i class="ti ti-chart-gantt"></i> Seguimiento <span class="wbadge" id="badge-seg" style="display:none">0</span></button>
-  <button class="tab" id="t-nueva" onclick="showTab('nueva')"><i class="ti ti-forms"></i> Formulario</button>
-  <button class="tab" id="t-rendicion" onclick="showTab('rendicion')"><i class="ti ti-receipt"></i> Rendición</button>
-  <button class="tab" id="t-tesoreria" onclick="showTab('tesoreria')"><i class="ti ti-building-bank"></i> Tesorería <span class="nbadge" id="badge-tes" style="display:none">0</span></button>
+<!-- TABS -->
+<div class="tabs" role="tablist" id="tab-bar">
+  <button class="tab on" id="t-solicitudes" onclick="showTab('solicitudes')"><i class="ti ti-list"></i> Solicitudes</button>
+  <button class="tab" id="t-seguimiento" onclick="showTab('seguimiento')"><i class="ti ti-chart-gantt"></i> Seguimiento <span class="wb" id="badge-seg" style="display:none">0</span></button>
+  <button class="tab" id="t-nueva" onclick="showTab('nueva')" style="display:none"><i class="ti ti-forms"></i> Formulario</button>
+  <button class="tab" id="t-rendicion" onclick="showTab('rendicion')" style="display:none"><i class="ti ti-receipt"></i> Rendición</button>
+  <button class="tab" id="t-tesoreria" onclick="showTab('tesoreria')" style="display:none"><i class="ti ti-building-bank"></i> Tesorería <span class="nb" id="badge-tes" style="display:none">0</span></button>
+  <button class="tab" id="t-dashboard" onclick="showTab('dashboard')"><i class="ti ti-chart-bar"></i> Dashboard</button>
 </div>
 
-<!-- PANELES -->
-<div id="panel-solicitudes" class="panel active"></div>
+<!-- PANELS -->
+<div id="panel-solicitudes" class="panel on"></div>
 <div id="panel-seguimiento" class="panel"></div>
-<div id="panel-nueva" class="panel"><div class="paso-bar" id="paso-bar"></div><div id="step-content"></div></div>
+<div id="panel-nueva" class="panel"><div class="pbar" id="paso-bar"></div><div id="step-content"></div></div>
 <div id="panel-rendicion" class="panel"></div>
 <div id="panel-tesoreria" class="panel"></div>
+<div id="panel-dashboard" class="panel"></div>
 
 <div id="toast"></div>
 </div>
+</div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyPTb41zE1Cr90JsAvpDCGrXD9OJ7Ybsmew-VCYFML9dAwS1SM9YZETZ44S68QExQumxg/exec';
+// ══════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════
+const AS_URL = 'https://script.google.com/macros/s/AKfycbyPTb41zE1Cr90JsAvpDCGrXD9OJ7Ybsmew-VCYFML9dAwS1SM9YZETZ44S68QExQumxg/exec';
+const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS = [
   {cod:170,desc:'Pasajes y Movilidad'},{cod:172,desc:'Viáticos y Refrigerios'},
@@ -207,608 +292,783 @@ const RUBROS = [
   {cod:292,desc:'CI-Gastos Varios'},{cod:370,desc:'LE-Viáticos'},
   {cod:372,desc:'LE-Alojamiento'},{cod:368,desc:'LE-Pasajes'},{cod:388,desc:'LE-Gastos Varios'}
 ];
-const TIPOS_COMP = ['Factura A','Factura B','Ticket / Factura C','Recibo','Comprobante electrónico','Otro'];
+const TIPOS = ['Factura A','Factura B','Ticket / Factura C','Recibo','Comprobante electrónico','Otro'];
 const TRANSPORTES = ['Vehículo empresa','Vehículo propio','Colectivo','Avión'];
 const CHECKS_VEH = ['Seguro vigente','RTO al día','Autorización de manejo','Estado general del vehículo OK','Tarjeta YPF en ruta'];
-const ESTADOS = {borrador:'Borrador',pendiente:'Pendiente aprobación',aprobado:'En gira',rendido:'Rendición enviada',cerrado:'Cerrado'};
+const ESTADOS = {borrador:'Borrador',pendiente:'Pendiente aprobación',aprobado:'En gira',rendido:'Rendición enviada',observado:'Con observaciones',cerrado:'Cerrado',denegado:'Denegado'};
 
-let CFG = {viaticos:60000,hospedaje:100000,diasLimite:5,passAdmin:'admin1234'};
+let CFG = {viaticos:60000,hospedaje:100000,diasLimite:5,passTesorer:'tesorer2024'};
 let solicitudes = [];
 let currentSol = null;
 let currentStep = 1;
 let gastoRows = [];
 let filterSeg = 'todos';
+let filterDash = {desde:'',hasta:'',usuario:''};
+let ROL = null; // 'vendedor' | 'tesorero'
+let obsTarget = null;
+let denegarTarget = null;
+let dashChart = null;
 
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
 
-async function api(params) {
-  const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
-  const res = await fetch(url);
-  return res.json();
+// ══════════════════════════════════════════════
+//  API (JSONP para evitar CORS)
+// ══════════════════════════════════════════════
+function api(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+    window[cbName] = (data) => {
+      delete window[cbName];
+      document.getElementById(cbName) && document.getElementById(cbName).remove();
+      if (data && data.error) reject(new Error(data.error));
+      else resolve(data);
+    };
+    params.callback = cbName;
+    const url = AS_URL + '?' + new URLSearchParams(params).toString();
+    const s = document.createElement('script');
+    s.id = cbName;
+    s.src = url;
+    s.onerror = () => { delete window[cbName]; reject(new Error('Error de red')); };
+    document.head.appendChild(s);
+    setTimeout(() => { delete window[cbName]; s.remove(); reject(new Error('Timeout')); }, 20000);
+  });
 }
 
+// ══════════════════════════════════════════════
+//  LOGIN / ROL
+// ══════════════════════════════════════════════
+function showLoginTesorero() {
+  document.getElementById('tes-login-form').style.display = 'block';
+  document.getElementById('tes-pass').focus();
+}
+function loginVendedor() {
+  ROL = 'vendedor';
+  initApp();
+}
+function loginTesorero() {
+  const p = document.getElementById('tes-pass').value;
+  if (p === CFG.passTesorer) { ROL = 'tesorero'; initApp(); }
+  else { document.getElementById('tes-err').textContent = 'Clave incorrecta'; }
+}
+function logout() {
+  ROL = null; solicitudes = []; currentSol = null; gastoRows = [];
+  document.getElementById('main-app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('tes-login-form').style.display = 'none';
+  document.getElementById('tes-pass').value = '';
+  document.getElementById('tes-err').textContent = '';
+}
+
+function initApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+
+  // Configurar UI según rol
+  const isT = ROL === 'tesorero';
+  document.getElementById('role-pill').textContent = isT ? 'Tesorero' : 'Vendedor';
+  document.getElementById('role-pill').style.background = isT ? 'var(--in-bg)' : 'var(--ok-bg)';
+  document.getElementById('role-pill').style.color = isT ? 'var(--in-t)' : 'var(--ok-t)';
+  document.getElementById('btn-cfg').style.display = isT ? '' : 'none';
+  document.getElementById('btn-nueva').style.display = isT ? 'none' : '';
+  document.getElementById('t-tesoreria').style.display = isT ? '' : 'none';
+  // Vendedor no ve tab nueva/rendicion directamente (accede por botones)
+  document.getElementById('t-nueva').style.display = 'none';
+  document.getElementById('t-rendicion').style.display = 'none';
+
+  cargarDatos();
+}
+
+// ══════════════════════════════════════════════
+//  CARGA DE DATOS
+// ══════════════════════════════════════════════
 async function cargarDatos() {
-  document.getElementById('panel-solicitudes').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:3rem;color:var(--text2)"><div style="width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--text2);border-radius:50%;animation:spin .7s linear infinite"></div> Cargando datos...</div>';
-  const style = document.createElement('style');
-  style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
-  document.head.appendChild(style);
+  document.getElementById('panel-solicitudes').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:3rem;color:var(--text2)"><div class="spin"></div> Cargando datos...</div>';
   try {
     const [sols, cfgData] = await Promise.all([
       api({action:'getSolicitudes'}),
       api({action:'getConfig'})
     ]);
-    solicitudes = Array.isArray(sols) ? sols.map(s => ({
-      id: s.ID, status: s.Status || 'borrador',
-      solicitante: s.Solicitante || '', jefe: s.Jefe || '',
-      destino: s.Destino || '', fechaSalida: s.FechaSalida || '',
-      fechaLlegada: s.FechaLlegada || '', dias: parseInt(s.Dias)||0,
-      viaticos: parseFloat(s.Viaticos)||0, hospedaje: parseFloat(s.Hospedaje)||0,
-      reserva: parseFloat(s.Reserva)||0, transporte: s.Transporte || '',
-      checks: Array.isArray(s.Checks) ? s.Checks : [],
-      gastos: []
-    })) : [];
+    solicitudes = Array.isArray(sols) ? sols.map(parseSol) : [];
     if (cfgData && !cfgData.error) {
-      CFG.viaticos   = parseFloat(cfgData.viaticos)  || 60000;
-      CFG.hospedaje  = parseFloat(cfgData.hospedaje) || 100000;
-      CFG.diasLimite = parseInt(cfgData.diasLimite)  || 5;
-      CFG.passAdmin  = cfgData.passAdmin              || 'admin1234';
+      CFG.viaticos     = parseFloat(cfgData.viaticos)    || 60000;
+      CFG.hospedaje    = parseFloat(cfgData.hospedaje)   || 100000;
+      CFG.diasLimite   = parseInt(cfgData.diasLimite)    || 5;
+      CFG.passTesorer  = cfgData.passTesorer             || 'tesorer2024';
     }
-    for (const s of solicitudes.filter(x => ['aprobado','rendido','cerrado'].includes(x.status))) {
+    // Cargar gastos para las que corresponde
+    for (const s of solicitudes.filter(x => ['aprobado','rendido','observado','cerrado'].includes(x.status))) {
       try {
-        const g = await api({action:'getGastos', id: s.id});
-        s.gastos = Array.isArray(g) ? g.map(row => ({
-          tipo: row.tipo, rubro: parseInt(row.rubro)||172,
-          detalle: row.detalle, importe: parseFloat(row.importe)||0
-        })) : [];
-      } catch(e) { s.gastos = []; }
+        const g = await api({action:'getGastos', id:s.id});
+        s.gastos = Array.isArray(g) ? g.map(r=>({tipo:r.tipo,rubro:parseInt(r.rubro)||172,detalle:r.detalle,importe:parseFloat(r.importe)||0})) : [];
+      } catch { s.gastos = []; }
+    }
+    // Verificar si llega con ?id= en la URL para ir directo
+    const params = new URLSearchParams(window.location.search);
+    const deepId = params.get('id');
+    if (deepId) {
+      const idx = solicitudes.findIndex(s => s.id === deepId);
+      if (idx >= 0) {
+        if (ROL === 'tesorero') { showTab('tesoreria'); }
+        else { irRendicion(idx); }
+      }
     }
   } catch(e) {
-    showToast('Error al conectar. Verificá la conexión.', 'danger');
+    showToast('Error al conectar con la base de datos: ' + e.message, 'er');
   }
   updateBadges();
   renderSolicitudes();
-  setTimeout(checkVencimientos, 800);
+  setTimeout(checkVencimientos, 700);
 }
 
+function parseSol(s) {
+  return {
+    id: s.ID || s.id || '',
+    status: s.Status || s.status || 'borrador',
+    solicitante: s.Solicitante || '',
+    email: s.EmailSolicitante || '',
+    jefe: s.Jefe || '',
+    destino: s.Destino || '',
+    fechaSalida: s.FechaSalida || '',
+    fechaLlegada: s.FechaLlegada || '',
+    dias: parseInt(s.Dias)||0,
+    viaticos: parseFloat(s.Viaticos)||0,
+    hospedaje: parseFloat(s.Hospedaje)||0,
+    reserva: parseFloat(s.Reserva)||0,
+    transporte: s.Transporte || '',
+    checks: Array.isArray(s.Checks) ? s.Checks : [],
+    observacion: s.Observacion || '',
+    gastos: []
+  };
+}
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
 function fmt(n){return '$'+Math.round(n||0).toLocaleString('es-AR')}
-
-function diasDesde(fecha) {
-  if (!fecha) return null;
-  const d = new Date(fecha); d.setHours(0,0,0,0);
-  return Math.floor((TODAY - d) / 86400000);
-}
-
-function estaVencida(s) {
-  if (s.status !== 'aprobado') return false;
-  const d = diasDesde(s.fechaLlegada);
-  return d !== null && d > CFG.diasLimite;
-}
-
-function diasRestantes(s) {
-  if (s.status !== 'aprobado' || !s.fechaLlegada) return null;
-  return CFG.diasLimite - (diasDesde(s.fechaLlegada) || 0);
-}
+function diasDesde(f){if(!f)return null;const d=new Date(f);d.setHours(0,0,0,0);return Math.floor((TODAY-d)/86400000)}
+function estaVencida(s){if(s.status!=='aprobado')return false;const d=diasDesde(s.fechaLlegada);return d!==null&&d>CFG.diasLimite}
+function diasRestantes(s){if(s.status!=='aprobado'||!s.fechaLlegada)return null;return CFG.diasLimite-(diasDesde(s.fechaLlegada)||0)}
+function total(s){return (s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0)}
+function gastado(s){return (s.gastos||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0)}
 
 function updateBadges() {
-  const tes = solicitudes.filter(s => s.status==='pendiente'||s.status==='rendido').length;
-  const seg = solicitudes.filter(s => estaVencida(s)).length;
-  const bt = document.getElementById('badge-tes');
-  const bs = document.getElementById('badge-seg');
-  bt.textContent = tes; bt.style.display = tes ? '' : 'none';
-  bs.textContent = seg; bs.style.display = seg ? '' : 'none';
+  const tes = solicitudes.filter(s=>s.status==='pendiente'||s.status==='rendido').length;
+  const seg = solicitudes.filter(s=>estaVencida(s)).length;
+  const bt=document.getElementById('badge-tes');
+  const bs=document.getElementById('badge-seg');
+  bt.textContent=tes; bt.style.display=tes?'':'none';
+  bs.textContent=seg; bs.style.display=seg?'':'none';
 }
 
-function openOverlay(id) { document.getElementById(id).classList.add('open'); }
-function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+function openOv(id){document.getElementById(id).classList.add('open')}
+function closeOv(id){document.getElementById(id).classList.remove('open')}
 
-let toastTimer;
-function showToast(msg, type='info') {
-  const t = document.getElementById('toast');
-  const map = {
-    success:['var(--success-bg)','var(--success-text)','var(--success-border)','ti-check'],
-    warning:['var(--warning-bg)','var(--warning-text)','var(--warning-border)','ti-alert-triangle'],
-    danger: ['var(--danger-bg)', 'var(--danger-text)', 'var(--danger-border)', 'ti-alert-circle'],
-    info:   ['var(--info-bg)',   'var(--info-text)',   'var(--info-border)',   'ti-info-circle'],
-  };
-  const [bg,c,b,ic] = map[type]||map.info;
-  t.style.background=bg; t.style.color=c; t.style.borderColor=b; t.style.opacity='1';
-  t.innerHTML = `<i class="ti ${ic}"></i>${msg}`;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.style.opacity='0', 3500);
+let toastT;
+function showToast(msg,type='in'){
+  const t=document.getElementById('toast');
+  const m={ok:['var(--ok-bg)','var(--ok-t)','var(--ok-b)','ti-check'],
+            wa:['var(--wa-bg)','var(--wa-t)','var(--wa-b)','ti-alert-triangle'],
+            er:['var(--er-bg)','var(--er-t)','var(--er-b)','ti-alert-circle'],
+            in:['var(--in-bg)','var(--in-t)','var(--in-b)','ti-info-circle']};
+  const [bg,c,b,ic]=m[type]||m.in;
+  t.style.background=bg;t.style.color=c;t.style.borderColor=b;t.style.opacity='1';
+  t.innerHTML=`<i class="ti ${ic}"></i>${msg}`;
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.style.opacity='0',3800);
 }
 
+// ══════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════
 function showTab(name) {
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('panel-'+name).classList.add('active');
-  document.getElementById('t-'+name).classList.add('active');
-  if (name==='solicitudes') renderSolicitudes();
-  if (name==='seguimiento') renderSeguimiento();
-  if (name==='tesoreria')   renderTesoreria();
-  if (name==='rendicion')   renderRendicion();
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('panel-'+name).classList.add('on');
+  const tb=document.getElementById('t-'+name);
+  if(tb)tb.classList.add('on');
+  if(name==='solicitudes') renderSolicitudes();
+  if(name==='seguimiento') renderSeguimiento();
+  if(name==='tesoreria')   renderTesoreria();
+  if(name==='rendicion')   renderRendicion();
+  if(name==='dashboard')   renderDashboard();
 }
 
-function checkVencimientos() {
-  const vencidas = solicitudes.filter(s=>estaVencida(s));
-  if (!vencidas.length) return;
-  document.getElementById('alerta-dias').textContent = CFG.diasLimite;
-  document.getElementById('alerta-lista').innerHTML = vencidas.map(s=>{
-    const dias = diasDesde(s.fechaLlegada);
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:0.5px solid var(--danger-border);border-radius:var(--radius);margin-bottom:8px;background:var(--bg)">
+// ══════════════════════════════════════════════
+//  ALERTA VENCIMIENTO
+// ══════════════════════════════════════════════
+function checkVencimientos(){
+  const venc=solicitudes.filter(s=>estaVencida(s));
+  if(!venc.length)return;
+  document.getElementById('alerta-dias').textContent=CFG.diasLimite;
+  document.getElementById('alerta-lista').innerHTML=venc.map(s=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:0.5px solid var(--er-b);border-radius:var(--r);margin-bottom:8px;background:var(--bg)">
       <div>
         <div style="font-weight:500;font-size:13px">${s.destino}</div>
-        <div style="font-size:12px;color:var(--text2)">${s.solicitante} · Regresó el ${s.fechaLlegada}</div>
+        <div style="font-size:12px;color:var(--text2)">${s.solicitante} · <span class="idchip">${s.id}</span> · Regresó el ${s.fechaLlegada}</div>
       </div>
-      <div style="font-weight:500;font-size:13px;color:var(--danger-text)">${dias} días</div>
-    </div>`;
-  }).join('');
-  openOverlay('ov-alerta');
+      <div style="font-weight:500;font-size:13px;color:var(--er-t)">${diasDesde(s.fechaLlegada)} días</div>
+    </div>`).join('');
+  openOv('ov-alerta');
 }
 
-function renderSolicitudes() {
-  const el = document.getElementById('panel-solicitudes');
-  if (!solicitudes.length) {
-    el.innerHTML = `<div class="card" style="text-align:center;padding:3rem">
+// ══════════════════════════════════════════════
+//  PANEL SOLICITUDES
+// ══════════════════════════════════════════════
+function renderSolicitudes(){
+  const el=document.getElementById('panel-solicitudes');
+  // Vendedor solo ve sus propias; tesorero ve todas
+  let lista = ROL==='vendedor'
+    ? solicitudes.filter(s=>s.status!=='cerrado'&&s.status!=='denegado')
+    : solicitudes;
+
+  if(!lista.length){
+    el.innerHTML=`<div class="card" style="text-align:center;padding:3rem">
       <i class="ti ti-route" style="font-size:48px;color:var(--text2)"></i>
-      <p style="margin-top:1rem;color:var(--text2)">No hay giras registradas.</p>
-      <button class="btn btn-primary" style="margin-top:1rem" onclick="nuevaSolicitud()"><i class="ti ti-plus"></i> Nueva gira</button>
-    </div>`; return;
+      <p style="margin-top:1rem;color:var(--text2)">${ROL==='vendedor'?'No tenés giras activas.':'No hay giras registradas.'}</p>
+      ${ROL==='vendedor'?`<button class="btn pr" style="margin-top:1rem" onclick="nuevaSolicitud()"><i class="ti ti-plus"></i> Nueva gira</button>`:''}
+    </div>`;return;
   }
-  el.innerHTML = solicitudes.map((s,i)=>{
-    const total = (s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0);
-    const gastado = (s.gastos||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
-    const venc = estaVencida(s);
-    const dr = diasRestantes(s);
-    return `<div class="card${venc?' danger-card':''}" style="margin-bottom:1rem">
+  el.innerHTML=lista.map((s,i)=>{
+    const idx=solicitudes.indexOf(s);
+    const tot=total(s), gas=gastado(s);
+    const venc=estaVencida(s), dr=diasRestantes(s);
+    return `<div class="card${venc?' er':s.status==='observado'?' wa':''}" style="margin-bottom:1rem">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.75rem">
         <div>
-          <div style="font-weight:500;font-size:15px;margin-bottom:3px">${s.destino||'Sin destino'}</div>
-          <div style="font-size:12px;color:var(--text2)">${s.solicitante||'—'} · ${s.fechaSalida||'?'} → ${s.fechaLlegada||'?'} · ${s.dias||0} días · <i class="ti ti-car" style="font-size:12px"></i> ${s.transporte||'—'}</div>
+          <div style="font-weight:500;font-size:15px;margin-bottom:4px">${s.destino||'Sin destino'}</div>
+          <div style="font-size:12px;color:var(--text2);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+            <span>${s.solicitante||'—'}</span>
+            <span class="idchip">${s.id}</span>
+            <span>${s.fechaSalida||'?'} → ${s.fechaLlegada||'?'} · ${s.dias||0} días</span>
+            <span><i class="ti ti-car" style="font-size:12px"></i> ${s.transporte||'—'}</span>
+          </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span class="sbadge s-${venc?'vencido':s.status}">${venc?'<i class="ti ti-alert-triangle"></i> Vencida':ESTADOS[s.status]||s.status}</span>
-          ${s.status==='borrador'?`<button class="btn btn-info" onclick="editarSol(${i})"><i class="ti ti-edit"></i> Editar</button>`:''}
-          ${s.status==='aprobado'?`<button class="btn btn-primary" onclick="irRendicion(${i})"><i class="ti ti-receipt"></i> Rendir</button>`:''}
-          ${s.status==='rendido'||s.status==='cerrado'?`<button class="btn" onclick="irRendicion(${i})"><i class="ti ti-eye"></i> Ver</button>`:''}
-          ${s.status!=='borrador'?`<button class="btn" onclick="verSeguimientoSol(${i})" title="Ver circuito"><i class="ti ti-chart-gantt"></i></button>`:''}
+          <span class="sb s-${venc?'vencido':s.status}">${venc?'<i class="ti ti-alert-triangle"></i> Vencida':ESTADOS[s.status]||s.status}</span>
+          ${ROL==='vendedor'&&s.status==='aprobado'?`<button class="btn pr" onclick="irRendicion(${idx})"><i class="ti ti-receipt"></i> Cargar gastos</button>`:''}
+          ${ROL==='vendedor'&&s.status==='observado'?`<button class="btn wa" onclick="irRendicion(${idx})"><i class="ti ti-edit"></i> Corregir rendición</button>`:''}
+          ${ROL==='vendedor'&&(s.status==='rendido'||s.status==='cerrado')?`<button class="btn" onclick="irRendicion(${idx})"><i class="ti ti-eye"></i> Ver</button>`:''}
+          ${ROL==='tesorero'?`<button class="btn" onclick="irRendicion(${idx})"><i class="ti ti-eye"></i> Ver</button>`:''}
+          <button class="btn" onclick="verSeguimientoSol(${idx})" title="Ver circuito"><i class="ti ti-chart-gantt"></i></button>
         </div>
       </div>
-      ${venc?`<div style="font-size:12px;font-weight:500;color:var(--danger-text);margin-bottom:.75rem"><i class="ti ti-clock"></i> ${diasDesde(s.fechaLlegada)} días desde el regreso — pendiente de rendición</div>`:''}
-      ${s.status==='aprobado'&&dr!==null&&!venc?`<div style="font-size:12px;color:var(--warning-text);margin-bottom:.75rem"><i class="ti ti-clock"></i> ${dr>0?`${dr} día${dr!==1?'s':''} para rendir`:'Vence hoy'}</div>`:''}
+      ${s.status==='observado'?`<div style="font-size:12px;color:var(--wa-t);background:var(--wa-bg);padding:8px 12px;border-radius:var(--r);margin-bottom:.75rem"><i class="ti ti-message-circle"></i> <strong>Observación del tesorero:</strong> ${s.observacion}</div>`:''}
+      ${venc?`<div style="font-size:12px;font-weight:500;color:var(--er-t);margin-bottom:.75rem"><i class="ti ti-clock"></i> ${diasDesde(s.fechaLlegada)} días desde el regreso — pendiente de rendición</div>`:''}
+      ${s.status==='aprobado'&&dr!==null&&!venc?`<div style="font-size:12px;color:var(--wa-t);margin-bottom:.75rem"><i class="ti ti-clock"></i> ${dr>0?`${dr} día${dr!==1?'s':''} para rendir`:'Vence hoy'}</div>`:''}
       <div style="display:flex;gap:1.5rem;font-size:13px;flex-wrap:wrap">
-        <span><i class="ti ti-coin"></i> Entregado: <strong>${fmt(total)}</strong></span>
-        ${s.status!=='borrador'&&s.status!=='pendiente'?`<span><i class="ti ti-receipt"></i> Gastado: <strong>${fmt(gastado)}</strong></span>`:''}
+        <span><i class="ti ti-coin"></i> Entregado: <strong>${fmt(tot)}</strong></span>
+        ${!['borrador','pendiente'].includes(s.status)?`<span><i class="ti ti-receipt"></i> Gastado: <strong>${fmt(gas)}</strong></span>`:''}
+        ${s.email?`<span style="color:var(--text3)"><i class="ti ti-mail" style="font-size:12px"></i> ${s.email}</span>`:''}
       </div>
     </div>`;
   }).join('');
   updateBadges();
 }
 
-function renderSeguimiento() {
-  const el = document.getElementById('panel-seguimiento');
-  const todo = solicitudes.filter(s=>s.status!=='borrador');
-  const groups = {
-    todos: todo,
-    activas: todo.filter(s=>s.status==='pendiente'||s.status==='aprobado'),
-    vencidas: todo.filter(s=>estaVencida(s)),
-    rendidas: todo.filter(s=>s.status==='rendido'),
-    cerradas: todo.filter(s=>s.status==='cerrado')
+// ══════════════════════════════════════════════
+//  PANEL SEGUIMIENTO
+// ══════════════════════════════════════════════
+function renderSeguimiento(){
+  const el=document.getElementById('panel-seguimiento');
+  const todo=solicitudes.filter(s=>s.status!=='borrador');
+  const groups={
+    todos:todo,
+    activas:todo.filter(s=>s.status==='pendiente'||s.status==='aprobado'),
+    vencidas:todo.filter(s=>estaVencida(s)),
+    observadas:todo.filter(s=>s.status==='observado'),
+    rendidas:todo.filter(s=>s.status==='rendido'),
+    cerradas:todo.filter(s=>s.status==='cerrado')
   };
-  const filtered = groups[filterSeg]||todo;
-  el.innerHTML = `
-    <div class="filter-bar">
-      ${Object.entries({todos:'Todas',activas:'En curso',vencidas:'Vencidas',rendidas:'Rendidas',cerradas:'Cerradas'}).map(([k,l])=>
-        `<button class="filter-btn${filterSeg===k?' active':''}" onclick="filterSeg='${k}';renderSeguimiento()">
+  const filtered=groups[filterSeg]||todo;
+  el.innerHTML=`
+    <div class="fbar">
+      ${Object.entries({todos:'Todas',activas:'En curso',vencidas:'Vencidas',observadas:'Observadas',rendidas:'Rendidas',cerradas:'Cerradas'}).map(([k,l])=>
+        `<button class="fbtn${filterSeg===k?' on':''}" onclick="filterSeg='${k}';renderSeguimiento()">
           ${k==='vencidas'&&groups.vencidas.length?`<i class="ti ti-alert-triangle"></i> ${l} (${groups.vencidas.length})`:l}
         </button>`).join('')}
     </div>
     ${!filtered.length?'<div class="card" style="text-align:center;padding:2rem"><p style="color:var(--text2)">No hay giras en esta categoría.</p></div>':''}
-    ${filtered.map(s=>renderCardSeg(s,solicitudes.indexOf(s))).join('')}
+    ${filtered.map(s=>cardSeguimiento(s,solicitudes.indexOf(s))).join('')}
   `;
 }
 
-function renderCardSeg(s, idx) {
-  const total = (s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0);
-  const gastado = (s.gastos||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
-  const pct = total>0?Math.min(100,Math.round(gastado/total*100)):0;
-  const venc = estaVencida(s);
-  const dr = diasRestantes(s);
-  const dias = diasDesde(s.fechaLlegada);
-  const steps = [
-    {label:'Solicitud creada',      sub:s.fechaSalida?`Salida: ${s.fechaSalida}`:'',                                         done:true,  active:false, danger:false},
-    {label:'Aprobación tesorero',   sub:s.status==='pendiente'?'Esperando aprobación':'Aprobado',                            done:s.status!=='pendiente'&&s.status!=='borrador', active:s.status==='pendiente', danger:false},
-    {label:'Fondos entregados',     sub:total?fmt(total):'—',                                                                done:['aprobado','rendido','cerrado'].includes(s.status), active:false, danger:false},
-    {label:'Rendición del usuario', sub:s.status==='aprobado'?(venc?`${dias} días sin rendir`:dr!==null?`${dr>0?dr+' días para rendir':'Vence hoy'}`:'En curso'):['rendido','cerrado'].includes(s.status)?`${(s.gastos||[]).length} comprobantes · ${fmt(gastado)}`:'Pendiente',
-                                                                                                                             done:['rendido','cerrado'].includes(s.status), active:s.status==='aprobado'&&!venc, danger:venc&&s.status==='aprobado'},
-    {label:'Cierre por tesorero',   sub:s.status==='cerrado'?'Archivado':'Pendiente revisión',                              done:s.status==='cerrado', active:s.status==='rendido', danger:false},
+function cardSeguimiento(s,idx){
+  const tot=total(s), gas=gastado(s);
+  const pct=tot>0?Math.min(100,Math.round(gas/tot*100)):0;
+  const venc=estaVencida(s), dr=diasRestantes(s), dias=diasDesde(s.fechaLlegada);
+  const steps=[
+    {l:'Solicitud creada',     sub:s.fechaSalida?`Salida: ${s.fechaSalida}`:'',                               done:true,  act:false,  err:false, wa:false},
+    {l:'Aprobación tesorero',  sub:s.status==='pendiente'?'Esperando aprobación':s.status==='denegado'?'Denegada':'Aprobado', done:!['pendiente','borrador','denegado'].includes(s.status),act:s.status==='pendiente',err:s.status==='denegado',wa:false},
+    {l:'Fondos entregados',    sub:tot?fmt(tot):'—',                                                          done:['aprobado','rendido','observado','cerrado'].includes(s.status),act:false,err:false,wa:false},
+    {l:'Rendición del usuario',sub:s.status==='aprobado'?(venc?`${dias} días sin rendir`:dr!==null?`${dr>0?dr+' días para rendir':'Vence hoy'}`:'En curso'):s.status==='observado'?'Devuelta con observaciones':['rendido','cerrado'].includes(s.status)?`${(s.gastos||[]).length} comprobantes · ${fmt(gas)}`:'Pendiente',
+                                                                                                              done:['rendido','cerrado'].includes(s.status),act:s.status==='aprobado'&&!venc,err:venc&&s.status==='aprobado',wa:s.status==='observado'},
+    {l:'Cierre por tesorero',  sub:s.status==='cerrado'?'Archivado':'Pendiente revisión',                     done:s.status==='cerrado',act:s.status==='rendido',err:false,wa:false},
   ];
-  return `<div class="card${venc?' danger-card':''}" style="margin-bottom:1rem">
+  return `<div class="card${venc?' er':s.status==='observado'?' wa':''}" style="margin-bottom:1rem">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:1rem">
       <div>
-        <div style="font-weight:500;font-size:15px;margin-bottom:3px">${s.destino||'—'}</div>
-        <div style="font-size:12px;color:var(--text2)">${s.solicitante} · ${s.fechaSalida||'?'} → ${s.fechaLlegada||'?'}</div>
+        <div style="font-weight:500;font-size:15px;margin-bottom:4px">${s.destino||'—'}</div>
+        <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <span>${s.solicitante}</span>
+          <span class="idchip">${s.id}</span>
+          <span>${s.fechaSalida||'?'} → ${s.fechaLlegada||'?'}</span>
+        </div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span class="sbadge s-${venc?'vencido':s.status}">${venc?'<i class="ti ti-alert-triangle"></i> Vencida':ESTADOS[s.status]||s.status}</span>
-        ${s.status==='aprobado'?`<button class="btn btn-info" style="padding:5px 12px;font-size:12px" onclick="irRendicion(${idx})"><i class="ti ti-receipt"></i> Ver rendición</button>`:''}
-        ${s.status==='rendido'||s.status==='cerrado'?`<button class="btn" style="padding:5px 12px;font-size:12px" onclick="irRendicion(${idx})"><i class="ti ti-eye"></i> Ver</button>`:''}
+        <span class="sb s-${venc?'vencido':s.status}">${venc?'<i class="ti ti-alert-triangle"></i> Vencida':ESTADOS[s.status]||s.status}</span>
+        ${['aprobado','rendido','observado','cerrado'].includes(s.status)?`<button class="btn in" style="padding:5px 12px;font-size:12px" onclick="irRendicion(${idx})"><i class="ti ti-eye"></i> Ver rendición</button>`:''}
       </div>
     </div>
-    <div class="timeline">
+    <div class="tl">
       ${steps.map((st,si)=>`
-        <div class="tl-step ${st.done?'tl-done':st.danger?'tl-danger':st.active?'tl-active':'tl-pending'}">
-          <div class="tl-dot">
-            <div class="tl-circle">${st.done?'<i class="ti ti-check"></i>':st.danger?'<i class="ti ti-alert-triangle"></i>':si+1}</div>
-            ${si<steps.length-1?'<div class="tl-line"></div>':''}
+        <div class="tls ${st.done?'tl-done':st.err?'tl-danger':st.wa?'tl-warn':st.act?'tl-active':'tl-pending'}">
+          <div class="tld">
+            <div class="tlc">${st.done?'<i class="ti ti-check"></i>':st.err?'<i class="ti ti-x"></i>':st.wa?'<i class="ti ti-alert-triangle"></i>':si+1}</div>
+            ${si<steps.length-1?'<div class="tll"></div>':''}
           </div>
-          <div class="tl-content">
-            <div class="tl-title">${st.label}</div>
-            <div class="tl-sub">${st.sub}</div>
-          </div>
+          <div class="tlco"><div class="tlt">${st.l}</div><div class="tlsu">${st.sub}</div></div>
         </div>`).join('')}
     </div>
-    ${['aprobado','rendido','cerrado'].includes(s.status)?`
-      <div class="divider"></div>
+    ${['aprobado','rendido','observado','cerrado'].includes(s.status)?`
+      <div class="div"></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <div style="font-size:12px;color:var(--text2)">Avance de gastos</div>
-        <div style="font-size:12px;font-weight:500">${fmt(gastado)} / ${fmt(total)} (${pct}%)</div>
+        <div style="font-size:12px;font-weight:500">${fmt(gas)} / ${fmt(tot)} (${pct}%)</div>
       </div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--${pct>=100?'danger':pct>=70?'warning':'success'}-text)"></div></div>
+      <div class="pbar2"><div class="pfill" style="width:${pct}%;background:var(--${pct>=100?'er':pct>=70?'wa':'ok'}-t)"></div></div>
     `:''}
   </div>`;
 }
 
-function verSeguimientoSol(idx) {
-  filterSeg = 'todos';
+function verSeguimientoSol(idx){
+  filterSeg='todos';
   showTab('seguimiento');
-  const el = document.getElementById('panel-seguimiento');
-  el.innerHTML = `<button class="btn" onclick="renderSeguimiento()" style="margin-bottom:1rem"><i class="ti ti-arrow-left"></i> Volver</button>
-    ${renderCardSeg(solicitudes[idx],idx)}`;
+  const el=document.getElementById('panel-seguimiento');
+  el.innerHTML=`<button class="btn" onclick="renderSeguimiento()" style="margin-bottom:1rem"><i class="ti ti-arrow-left"></i> Volver</button>
+    ${cardSeguimiento(solicitudes[idx],idx)}`;
 }
 
-function nuevaSolicitud() {
-  currentSol = {id:Date.now().toString(),status:'borrador',solicitante:'',jefe:'',destino:'',fechaSalida:'',fechaLlegada:'',dias:0,viaticos:0,hospedaje:0,reserva:0,transporte:TRANSPORTES[0],checks:[],gastos:[]};
+// ══════════════════════════════════════════════
+//  NUEVA SOLICITUD — FORMULARIO 4 PASOS
+// ══════════════════════════════════════════════
+function nuevaSolicitud(){
+  currentSol={id:'',status:'borrador',solicitante:'',email:'',jefe:'',destino:'',fechaSalida:'',fechaLlegada:'',dias:0,viaticos:0,hospedaje:0,reserva:0,transporte:TRANSPORTES[0],checks:[],gastos:[]};
   currentStep=1; gastoRows=[];
+  document.getElementById('t-nueva').style.display='';
   showTab('nueva');
   renderStep();
 }
-
-function editarSol(i) {
-  currentSol = JSON.parse(JSON.stringify(solicitudes[i]));
+function editarSol(i){
+  currentSol=JSON.parse(JSON.stringify(solicitudes[i]));
   solicitudes.splice(i,1);
   currentStep=1; gastoRows=currentSol.gastos||[];
+  document.getElementById('t-nueva').style.display='';
   showTab('nueva');
   renderStep();
 }
 
-function renderStep() {
-  const pb = document.getElementById('paso-bar');
-  const labels = ['Datos','Fondos','Transporte','Confirmar'];
-  pb.innerHTML = labels.map((l,i)=>{
-    const n=i+1,done=n<currentStep,active=n===currentStep;
-    return `<div class="paso">
-      <div class="paso-num${done?' done':active?' active':''}">${done?'<i class="ti ti-check"></i>':n}</div>
-      <div class="paso-label${active?' active':''}">${l}</div>
-    </div>${i<labels.length-1?'<div class="paso-sep"></div>':''}`;
+function renderStep(){
+  const pb=document.getElementById('paso-bar');
+  const labels=['Datos','Fondos','Transporte','Confirmar'];
+  pb.innerHTML=labels.map((l,i)=>{
+    const n=i+1,done=n<currentStep,act=n===currentStep;
+    return `<div class="paso"><div class="pn${done?' done':act?' act':''}">${done?'<i class="ti ti-check"></i>':n}</div><div class="pl${act?' act':''}">${l}</div></div>${i<labels.length-1?'<div class="psep"></div>':''}`;
   }).join('');
-  const sc = document.getElementById('step-content');
-  if (currentStep===1) {
-    sc.innerHTML = `<div class="card"><div class="card-title">Datos generales</div>
-      <div class="form-grid">
-        <div class="form-group"><label>Solicitante</label><input id="f-sol" value="${currentSol.solicitante}" placeholder="Nombre del vendedor"></div>
-        <div class="form-group"><label>Autorizante</label><input id="f-jefe" value="${currentSol.jefe}" placeholder="Nombre del autorizante"></div>
-        <div class="form-group full"><label>Destino / Motivo</label><input id="f-dest" value="${currentSol.destino}" placeholder="Ej: Mendoza — reunión clientes zona cuyo"></div>
-        <div class="form-group"><label>Fecha de salida</label><input type="date" id="f-sal" value="${currentSol.fechaSalida}" onchange="calcDias()"></div>
-        <div class="form-group"><label>Fecha de regreso</label><input type="date" id="f-lleg" value="${currentSol.fechaLlegada}" onchange="calcDias()"></div>
+  const sc=document.getElementById('step-content');
+  if(currentStep===1){
+    sc.innerHTML=`<div class="card"><div class="ctitle">Datos generales</div>
+      <div class="fg">
+        <div class="fi"><label>Nombre del solicitante</label><input id="f-sol" value="${currentSol.solicitante}" placeholder="Nombre completo"></div>
+        <div class="fi"><label>Email del solicitante</label><input type="email" id="f-email" value="${currentSol.email}" placeholder="correo@cuencadelsur.com"></div>
+        <div class="fi"><label>Autorizante / Jefe de área</label><input id="f-jefe" value="${currentSol.jefe}" placeholder="Nombre del autorizante"></div>
+        <div class="fi"></div>
+        <div class="fi full"><label>Destino / Motivo del viaje</label><input id="f-dest" value="${currentSol.destino}" placeholder="Ej: Mendoza — reunión clientes zona cuyo"></div>
+        <div class="fi"><label>Fecha de salida</label><input type="date" id="f-sal" value="${currentSol.fechaSalida}" onchange="calcDias()"></div>
+        <div class="fi"><label>Fecha de regreso</label><input type="date" id="f-lleg" value="${currentSol.fechaLlegada}" onchange="calcDias()"></div>
       </div>
       <div style="margin-top:.75rem;font-size:13px;color:var(--text2)" id="dias-info">${currentSol.dias?`<strong>${currentSol.dias} días</strong>`:'Seleccioná las fechas.'}</div>
     </div>
-    <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="nextStep()">Siguiente <i class="ti ti-arrow-right"></i></button></div>`;
-  } else if (currentStep===2) {
+    <div style="display:flex;justify-content:flex-end"><button class="btn pr" onclick="nextStep()">Siguiente <i class="ti ti-arrow-right"></i></button></div>`;
+  } else if(currentStep===2){
     const d=currentSol.dias||1;
     const v=currentSol.viaticos||(CFG.viaticos*d);
     const h=currentSol.hospedaje||(CFG.hospedaje*d);
     const r=currentSol.reserva||0;
-    sc.innerHTML = `<div class="card"><div class="card-title">Fondos solicitados</div>
-      <div style="font-size:12px;color:var(--info-text);background:var(--info-bg);border:0.5px solid var(--info-border);border-radius:var(--radius);padding:8px 12px;margin-bottom:1rem">
+    sc.innerHTML=`<div class="card"><div class="ctitle">Fondos solicitados</div>
+      <div style="font-size:12px;color:var(--in-t);background:var(--in-bg);border:0.5px solid var(--in-b);border-radius:var(--r);padding:8px 12px;margin-bottom:1rem">
         <i class="ti ti-info-circle"></i> Tarifas: Viáticos ${fmt(CFG.viaticos)}/día · Hospedaje ${fmt(CFG.hospedaje)}/día
       </div>
-      <div class="metric-row">
-        <div class="metric"><div class="mlabel">Duración</div><div class="mval">${d}</div><div class="msub">días</div></div>
-        <div class="metric"><div class="mlabel">Viáticos calculados</div><div class="mval">${fmt(v)}</div></div>
-        <div class="metric"><div class="mlabel">Hospedaje calculado</div><div class="mval">${fmt(h)}</div></div>
+      <div class="mrow">
+        <div class="met"><div class="ml">Duración</div><div class="mv">${d}</div><div class="ms">días</div></div>
+        <div class="met"><div class="ml">Viáticos calculados</div><div class="mv">${fmt(v)}</div></div>
+        <div class="met"><div class="ml">Hospedaje calculado</div><div class="mv">${fmt(h)}</div></div>
       </div>
-      <div class="form-grid">
-        <div class="form-group"><label>Viáticos ($) — editable</label><input type="number" id="f-viat" value="${v}" oninput="updTotal()"></div>
-        <div class="form-group"><label>Hospedaje ($) — editable</label><input type="number" id="f-hosp" value="${h}" oninput="updTotal()"></div>
-        <div class="form-group"><label>Fondo reserva ($) — manual</label><input type="number" id="f-res" value="${r}" placeholder="Redondeo / imprevisto" oninput="updTotal()"></div>
-        <div class="metric" style="display:flex;flex-direction:column;justify-content:center">
-          <div class="mlabel">Total a entregar</div><div class="mval" id="m-total">${fmt(v+h+r)}</div>
+      <div class="fg">
+        <div class="fi"><label>Viáticos ($) — editable</label><input type="number" id="f-viat" value="${v}" oninput="updT()"></div>
+        <div class="fi"><label>Hospedaje ($) — editable</label><input type="number" id="f-hosp" value="${h}" oninput="updT()"></div>
+        <div class="fi"><label>Fondo reserva ($) — manual</label><input type="number" id="f-res" value="${r}" placeholder="Redondeo / imprevisto" oninput="updT()"></div>
+        <div class="met" style="display:flex;flex-direction:column;justify-content:center">
+          <div class="ml">Total a entregar</div><div class="mv" id="m-tot">${fmt(v+h+r)}</div>
         </div>
       </div></div>
       <div style="display:flex;justify-content:space-between">
         <button class="btn" onclick="prevStep()"><i class="ti ti-arrow-left"></i> Atrás</button>
-        <button class="btn btn-primary" onclick="nextStep()">Siguiente <i class="ti ti-arrow-right"></i></button>
+        <button class="btn pr" onclick="nextStep()">Siguiente <i class="ti ti-arrow-right"></i></button>
       </div>`;
-  } else if (currentStep===3) {
-    sc.innerHTML = `<div class="card"><div class="card-title">Transporte</div>
-      <div class="form-group" style="margin-bottom:1.25rem"><label>Tipo de transporte</label>
+  } else if(currentStep===3){
+    sc.innerHTML=`<div class="card"><div class="ctitle">Transporte</div>
+      <div class="fi" style="margin-bottom:1.25rem"><label>Tipo de transporte</label>
         <select id="f-trans" onchange="toggleChecks()">${TRANSPORTES.map(t=>`<option${currentSol.transporte===t?' selected':''}>${t}</option>`).join('')}</select>
       </div>
       <div id="checks-container"></div></div>
       <div style="display:flex;justify-content:space-between">
         <button class="btn" onclick="prevStep()"><i class="ti ti-arrow-left"></i> Atrás</button>
-        <button class="btn btn-primary" onclick="nextStep()">Siguiente <i class="ti ti-arrow-right"></i></button>
+        <button class="btn pr" onclick="nextStep()">Siguiente <i class="ti ti-arrow-right"></i></button>
       </div>`;
     toggleChecks();
-  } else if (currentStep===4) {
-    const total=(currentSol.viaticos||0)+(currentSol.hospedaje||0)+(currentSol.reserva||0);
-    const ok=currentSol.solicitante&&currentSol.destino;
-    sc.innerHTML = `<div class="card"><div class="card-title">Confirmación</div>
-      <div class="resumen-row"><span style="color:var(--text2)">Solicitante</span><strong>${currentSol.solicitante||'—'}</strong></div>
-      <div class="resumen-row"><span style="color:var(--text2)">Autorizante</span><strong>${currentSol.jefe||'—'}</strong></div>
-      <div class="resumen-row"><span style="color:var(--text2)">Destino</span><strong>${currentSol.destino||'—'}</strong></div>
-      <div class="resumen-row"><span style="color:var(--text2)">Período</span><strong>${currentSol.fechaSalida} → ${currentSol.fechaLlegada} (${currentSol.dias} días)</strong></div>
-      <div class="resumen-row"><span style="color:var(--text2)">Viáticos</span><strong>${fmt(currentSol.viaticos)}</strong></div>
-      <div class="resumen-row"><span style="color:var(--text2)">Hospedaje</span><strong>${fmt(currentSol.hospedaje)}</strong></div>
-      <div class="resumen-row"><span style="color:var(--text2)">Reserva</span><strong>${fmt(currentSol.reserva)}</strong></div>
-      <div class="resumen-row resumen-total"><span>Total a recibir</span><span>${fmt(total)}</span></div>
-      <div class="resumen-row"><span style="color:var(--text2)">Transporte</span><strong>${currentSol.transporte}</strong></div>
-      ${currentSol.checks&&currentSol.checks.length?`<div class="resumen-row"><span style="color:var(--text2)">Verificaciones</span><strong style="color:var(--success-text)">${currentSol.checks.length}/${CHECKS_VEH.length} ítems OK</strong></div>`:''}
+  } else if(currentStep===4){
+    const tot=(currentSol.viaticos||0)+(currentSol.hospedaje||0)+(currentSol.reserva||0);
+    const ok=currentSol.solicitante&&currentSol.destino&&currentSol.email;
+    sc.innerHTML=`<div class="card"><div class="ctitle">Confirmación</div>
+      <div class="rr"><span style="color:var(--text2)">ID solicitud</span><span class="idchip">Se asignará al enviar</span></div>
+      <div class="rr"><span style="color:var(--text2)">Solicitante</span><strong>${currentSol.solicitante||'—'}</strong></div>
+      <div class="rr"><span style="color:var(--text2)">Email</span><strong>${currentSol.email||'—'}</strong></div>
+      <div class="rr"><span style="color:var(--text2)">Autorizante</span><strong>${currentSol.jefe||'—'}</strong></div>
+      <div class="rr"><span style="color:var(--text2)">Destino</span><strong>${currentSol.destino||'—'}</strong></div>
+      <div class="rr"><span style="color:var(--text2)">Período</span><strong>${currentSol.fechaSalida} → ${currentSol.fechaLlegada} (${currentSol.dias} días)</strong></div>
+      <div class="rr"><span style="color:var(--text2)">Viáticos</span><strong>${fmt(currentSol.viaticos)}</strong></div>
+      <div class="rr"><span style="color:var(--text2)">Hospedaje</span><strong>${fmt(currentSol.hospedaje)}</strong></div>
+      <div class="rr"><span style="color:var(--text2)">Reserva</span><strong>${fmt(currentSol.reserva)}</strong></div>
+      <div class="rr rrt"><span>Total a recibir</span><span>${fmt(tot)}</span></div>
+      <div class="rr"><span style="color:var(--text2)">Transporte</span><strong>${currentSol.transporte}</strong></div>
+      ${currentSol.checks&&currentSol.checks.length?`<div class="rr"><span style="color:var(--text2)">Verificaciones</span><strong style="color:var(--ok-t)">${currentSol.checks.length}/${CHECKS_VEH.length} ítems OK</strong></div>`:''}
     </div>
-    ${!ok?`<div style="font-size:13px;color:var(--danger-text);background:var(--danger-bg);border:0.5px solid var(--danger-border);border-radius:var(--radius);padding:8px 12px;margin-bottom:1rem"><i class="ti ti-alert-triangle"></i> Completá el solicitante y destino.</div>`:''}
+    ${!ok?`<div style="font-size:13px;color:var(--er-t);background:var(--er-bg);border:0.5px solid var(--er-b);border-radius:var(--r);padding:8px 12px;margin-bottom:1rem"><i class="ti ti-alert-triangle"></i> Completá nombre, email y destino.</div>`:''}
     <div style="display:flex;justify-content:space-between">
       <button class="btn" onclick="prevStep()"><i class="ti ti-arrow-left"></i> Atrás</button>
-      <button class="btn btn-primary" onclick="enviarSolicitud()" ${!ok?'disabled':''}>
+      <button class="btn pr" onclick="enviarSolicitud()" ${!ok?'disabled':''}>
         <i class="ti ti-send"></i> Enviar al tesorero
       </button>
     </div>`;
   }
 }
 
-function calcDias() {
+function calcDias(){
   const s=document.getElementById('f-sal').value;
   const l=document.getElementById('f-lleg').value;
-  if (s&&l) {
-    const d=Math.max(1,Math.round((new Date(l)-new Date(s))/86400000)+1);
-    document.getElementById('dias-info').innerHTML=`<strong>${d} días</strong> de gira`;
-    currentSol.diasTemp=d;
-  }
+  if(s&&l){const d=Math.max(1,Math.round((new Date(l)-new Date(s))/86400000)+1);document.getElementById('dias-info').innerHTML=`<strong>${d} días</strong> de gira`;currentSol.diasTemp=d;}
 }
-function updTotal() {
+function updT(){
   const v=parseFloat(document.getElementById('f-viat').value)||0;
   const h=parseFloat(document.getElementById('f-hosp').value)||0;
   const r=parseFloat(document.getElementById('f-res').value)||0;
-  document.getElementById('m-total').textContent=fmt(v+h+r);
+  document.getElementById('m-tot').textContent=fmt(v+h+r);
 }
-function toggleChecks() {
+function toggleChecks(){
   const trans=document.getElementById('f-trans').value;
-  const isVeh=trans==='Vehículo empresa'||trans==='Vehículo propio';
+  const isV=trans==='Vehículo empresa'||trans==='Vehículo propio';
   const el=document.getElementById('checks-container');
-  if (!isVeh){el.innerHTML=`<p style="font-size:13px;color:var(--text2);padding:8px 0"><i class="ti ti-info-circle"></i> Sin verificaciones requeridas para este transporte.</p>`;return;}
+  if(!isV){el.innerHTML=`<p style="font-size:13px;color:var(--text2);padding:8px 0"><i class="ti ti-info-circle"></i> Sin verificaciones requeridas.</p>`;return;}
   const saved=currentSol.checks||[];
-  el.innerHTML=`<div class="card-title">Verificación del vehículo</div><div class="check-list" style="margin-top:.5rem">
-    ${CHECKS_VEH.map((c,i)=>`<label class="check-item${saved.includes(c)?' checked':''}" id="ci-${i}">
+  el.innerHTML=`<div class="ctitle">Verificación del vehículo</div><div class="cklist" style="margin-top:.5rem">
+    ${CHECKS_VEH.map((c,i)=>`<label class="ckitem${saved.includes(c)?' on':''}" id="ci-${i}">
       <input type="checkbox" ${saved.includes(c)?'checked':''} onchange="toggleCheck(this,'${c}',${i})"><span>${c}</span>
     </label>`).join('')}</div>`;
 }
-function toggleCheck(el,val,i) {
-  if (!currentSol.checks) currentSol.checks=[];
-  if (el.checked){if (!currentSol.checks.includes(val))currentSol.checks.push(val);}
+function toggleCheck(el,val,i){
+  if(!currentSol.checks)currentSol.checks=[];
+  if(el.checked){if(!currentSol.checks.includes(val))currentSol.checks.push(val);}
   else{currentSol.checks=currentSol.checks.filter(x=>x!==val);}
-  document.getElementById('ci-'+i).classList.toggle('checked',el.checked);
+  document.getElementById('ci-'+i).classList.toggle('on',el.checked);
 }
-function nextStep() {
-  if (currentStep===1){
+function nextStep(){
+  if(currentStep===1){
     currentSol.solicitante=document.getElementById('f-sol').value.trim();
+    currentSol.email=document.getElementById('f-email').value.trim();
     currentSol.jefe=document.getElementById('f-jefe').value.trim();
     currentSol.destino=document.getElementById('f-dest').value.trim();
     currentSol.fechaSalida=document.getElementById('f-sal').value;
     currentSol.fechaLlegada=document.getElementById('f-lleg').value;
     const fs=currentSol.fechaSalida,fl=currentSol.fechaLlegada;
     currentSol.dias=fs&&fl?Math.max(1,Math.round((new Date(fl)-new Date(fs))/86400000)+1):1;
-  } else if (currentStep===2){
+  } else if(currentStep===2){
     currentSol.viaticos=parseFloat(document.getElementById('f-viat').value)||0;
     currentSol.hospedaje=parseFloat(document.getElementById('f-hosp').value)||0;
     currentSol.reserva=parseFloat(document.getElementById('f-res').value)||0;
-  } else if (currentStep===3){
+  } else if(currentStep===3){
     currentSol.transporte=document.getElementById('f-trans').value;
   }
-  if (currentStep<4) currentStep++;
+  if(currentStep<4)currentStep++;
   renderStep();
 }
 function prevStep(){if(currentStep>1)currentStep--;renderStep();}
 
-async function enviarSolicitud() {
+async function enviarSolicitud(){
   currentSol.status='pendiente';
   const btn=event.currentTarget;
-  btn.disabled=true; btn.innerHTML='<i class="ti ti-loader"></i> Enviando...';
+  btn.disabled=true;btn.innerHTML='<div class="spin"></div> Enviando...';
   try {
-    await api({
-      action:'saveSolicitud', id:currentSol.id,
-      solicitante:currentSol.solicitante, jefe:currentSol.jefe,
-      destino:currentSol.destino, fechaSalida:currentSol.fechaSalida,
-      fechaLlegada:currentSol.fechaLlegada, dias:currentSol.dias,
-      viaticos:currentSol.viaticos, hospedaje:currentSol.hospedaje,
-      reserva:currentSol.reserva, transporte:currentSol.transporte,
+    const tot=(currentSol.viaticos||0)+(currentSol.hospedaje||0)+(currentSol.reserva||0);
+    const res=await api({
+      action:'saveSolicitud',
+      solicitante:currentSol.solicitante, emailSolicitante:currentSol.email,
+      jefe:currentSol.jefe, destino:currentSol.destino,
+      fechaSalida:currentSol.fechaSalida, fechaLlegada:currentSol.fechaLlegada,
+      dias:currentSol.dias, viaticos:currentSol.viaticos,
+      hospedaje:currentSol.hospedaje, reserva:currentSol.reserva,
+      transporte:currentSol.transporte,
       checks:JSON.stringify(currentSol.checks||[]), status:'pendiente'
     });
+    currentSol.id = res.id || res.ID || '';
+    // Enviar mail al tesorero
+    await api({
+      action:'sendMail', tipo:'solicitud_nueva',
+      id:currentSol.id, solicitante:currentSol.solicitante,
+      emailSolicitante:currentSol.email, destino:currentSol.destino,
+      fechaSalida:currentSol.fechaSalida, fechaLlegada:currentSol.fechaLlegada,
+      dias:currentSol.dias, viaticos:currentSol.viaticos,
+      hospedaje:currentSol.hospedaje, reserva:currentSol.reserva,
+      total:tot, transporte:currentSol.transporte
+    });
     solicitudes.push(currentSol);
+    document.getElementById('t-nueva').style.display='none';
     updateBadges(); showTab('solicitudes');
-    showToast('Solicitud enviada al tesorero','success');
-  } catch(e) {
-    showToast('Error al guardar. Verificá la conexión.','danger');
-    btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Enviar al tesorero';
+    showToast('Solicitud enviada. El tesorero recibió un mail.','ok');
+  } catch(e){
+    showToast('Error: '+e.message,'er');
+    btn.disabled=false;btn.innerHTML='<i class="ti ti-send"></i> Enviar al tesorero';
   }
 }
 
-function irRendicion(idx) {
+// ══════════════════════════════════════════════
+//  RENDICIÓN
+// ══════════════════════════════════════════════
+function irRendicion(idx){
   currentSol=solicitudes[idx];
   gastoRows=currentSol.gastos?JSON.parse(JSON.stringify(currentSol.gastos)):[];
+  document.getElementById('t-rendicion').style.display='';
   showTab('rendicion');
 }
 
-function renderRendicion() {
+function renderRendicion(){
   const el=document.getElementById('panel-rendicion');
-  if (!currentSol){
-    el.innerHTML=`<div class="card" style="text-align:center;padding:3rem"><p style="color:var(--text2)">Seleccioná una gira desde Solicitudes.</p></div>`;return;
-  }
-  const total=(currentSol.viaticos||0)+(currentSol.hospedaje||0)+(currentSol.reserva||0);
-  const gastado=(gastoRows||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
-  const saldo=total-gastado;
+  if(!currentSol){el.innerHTML=`<div class="card" style="text-align:center;padding:3rem"><p style="color:var(--text2)">Seleccioná una gira desde Solicitudes.</p></div>`;return;}
+  const tot=total(currentSol), gas=gastado(currentSol.gastos?currentSol:Object.assign({},currentSol,{gastos:gastoRows}));
+  // recalcular con gastoRows actuales
+  const gasAct=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
+  const saldo=tot-gasAct;
   const ro=currentSol.status==='rendido'||currentSol.status==='cerrado';
   const byTipo={};
   gastoRows.forEach(g=>{byTipo[g.tipo]=(byTipo[g.tipo]||0)+(parseFloat(g.importe)||0);});
   el.innerHTML=`
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:1rem">
-        <div>
-          <div style="font-weight:500;font-size:15px">${currentSol.destino}</div>
-          <div style="font-size:12px;color:var(--text2)">${currentSol.solicitante} · ${currentSol.fechaSalida} → ${currentSol.fechaLlegada}</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
+      <button class="btn" onclick="showTab('solicitudes');document.getElementById('t-rendicion').style.display='none'"><i class="ti ti-arrow-left"></i></button>
+      <div>
+        <div style="font-weight:500;font-size:15px">${currentSol.destino}</div>
+        <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:center">
+          <span>${currentSol.solicitante}</span>
+          <span class="idchip">${currentSol.id}</span>
+          <span class="sb s-${currentSol.status}">${ESTADOS[currentSol.status]||currentSol.status}</span>
         </div>
-        <span class="sbadge s-${currentSol.status}">${ESTADOS[currentSol.status]||currentSol.status}</span>
       </div>
-      <div class="metric-row">
-        <div class="metric"><div class="mlabel">Fondos recibidos</div><div class="mval">${fmt(total)}</div></div>
-        <div class="metric"><div class="mlabel">Gastado</div><div class="mval" id="rm-g">${fmt(gastado)}</div></div>
-        <div class="metric"><div class="mlabel">${saldo>=0?'A reintegrar':'A recibir'}</div>
-          <div class="mval" id="rm-s" style="color:var(--${saldo>=0?'warning':'success'}-text)">${fmt(Math.abs(saldo))}</div></div>
+    </div>
+    ${currentSol.status==='observado'?`<div style="font-size:13px;color:var(--wa-t);background:var(--wa-bg);border:0.5px solid var(--wa-b);border-radius:var(--r);padding:10px 14px;margin-bottom:1rem"><i class="ti ti-message-circle"></i> <strong>Observación del tesorero:</strong> ${currentSol.observacion}</div>`:''}
+    <div class="card">
+      <div class="mrow">
+        <div class="met"><div class="ml">Fondos recibidos</div><div class="mv">${fmt(tot)}</div></div>
+        <div class="met"><div class="ml">Gastado</div><div class="mv" id="rm-g">${fmt(gasAct)}</div></div>
+        <div class="met"><div class="ml">${saldo>=0?'A reintegrar':'A recibir'}</div>
+          <div class="mv" id="rm-s" style="color:var(--${saldo>=0?'wa':'ok'}-t)">${fmt(Math.abs(saldo))}</div></div>
       </div>
     </div>
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-        <div class="card-title" style="margin-bottom:0">Comprobantes</div>
-        ${!ro?`<div style="display:flex;gap:8px">
+        <div class="ctitle" style="margin-bottom:0">Comprobantes</div>
+        ${!ro&&(ROL==='vendedor'||currentSol.status==='observado')?`<div style="display:flex;gap:8px">
           <button class="btn" onclick="simScan()"><i class="ti ti-camera"></i> Escanear</button>
-          <button class="btn btn-info" onclick="addGasto()"><i class="ti ti-plus"></i> Agregar</button>
+          <button class="btn in" onclick="addGasto()"><i class="ti ti-plus"></i> Agregar</button>
         </div>`:''}
       </div>
       <div id="gt"></div>
     </div>
     <div class="card">
-      <div class="card-title">Resumen por tipo de comprobante</div>
-      <div id="rcomp">${renderResumenComp(byTipo,gastado,saldo)}</div>
+      <div class="ctitle">Resumen por tipo de comprobante</div>
+      <div id="rcomp">${renderResumen(byTipo,gasAct,saldo)}</div>
     </div>
-    ${!ro?`<div style="display:flex;justify-content:flex-end">
-      <button class="btn btn-primary" onclick="enviarRendicion()"><i class="ti ti-send"></i> Enviar rendición al tesorero</button>
-    </div>`:`<div style="font-size:13px;color:var(--success-text);background:var(--success-bg);border:0.5px solid var(--success-border);border-radius:var(--radius);padding:10px 14px">
-      <i class="ti ti-check"></i> Rendición ${currentSol.status==='cerrado'?'cerrada y archivada':'enviada — pendiente de revisión'}.
-    </div>`}
+    ${!ro&&ROL==='vendedor'?`<div style="display:flex;justify-content:flex-end">
+      <button class="btn pr" onclick="enviarRendicion()"><i class="ti ti-send"></i> Enviar rendición al tesorero</button>
+    </div>`:''}
+    ${currentSol.status==='observado'&&ROL==='vendedor'?`<div style="display:flex;justify-content:flex-end">
+      <button class="btn pr" onclick="reenviarRendicion()"><i class="ti ti-send"></i> Reenviar rendición corregida</button>
+    </div>`:''}
+    ${ro?`<div style="font-size:13px;color:var(--ok-t);background:var(--ok-bg);border:0.5px solid var(--ok-b);border-radius:var(--r);padding:10px 14px">
+      <i class="ti ti-check"></i> Rendición ${currentSol.status==='cerrado'?'cerrada y archivada':'enviada — pendiente de revisión del tesorero'}.
+    </div>`:''}
   `;
   renderGastoTable();
 }
 
-function renderResumenComp(byTipo,gastado,saldo) {
-  if (!Object.keys(byTipo).length) return '<p style="font-size:13px;color:var(--text2)">Sin gastos cargados.</p>';
-  return Object.entries(byTipo).map(([t,v])=>`<div class="resumen-row"><span style="color:var(--text2)">${t}</span><strong>${fmt(v)}</strong></div>`).join('')
-    +`<div class="resumen-row resumen-total"><span>Total gastado</span><span>${fmt(gastado)}</span></div>
-    <div class="resumen-row"><span style="color:var(--text2)">${saldo>=0?'A reintegrar al tesorero':'El tesorero debe abonar'}</span>
-    <span style="font-weight:500;color:var(--${saldo>=0?'warning':'success'}-text)">${fmt(Math.abs(saldo))}</span></div>`;
+function renderResumen(byTipo,gasAct,saldo){
+  if(!Object.keys(byTipo).length)return'<p style="font-size:13px;color:var(--text2)">Sin gastos cargados.</p>';
+  return Object.entries(byTipo).map(([t,v])=>`<div class="rr"><span style="color:var(--text2)">${t}</span><strong>${fmt(v)}</strong></div>`).join('')
+    +`<div class="rr rrt"><span>Total gastado</span><span>${fmt(gasAct)}</span></div>
+    <div class="rr"><span style="color:var(--text2)">${saldo>=0?'A reintegrar al tesorero':'El tesorero debe abonar'}</span>
+    <span style="font-weight:500;color:var(--${saldo>=0?'wa':'ok'}-t)">${fmt(Math.abs(saldo))}</span></div>`;
 }
 
 function addGasto(){gastoRows.push({tipo:'Factura B',rubro:172,detalle:'',importe:0});renderGastoTable();}
 function removeGasto(i){gastoRows.splice(i,1);renderGastoTable();}
 
-function renderGastoTable() {
+function renderGastoTable(){
   const el=document.getElementById('gt');
+  if(!el)return;
   const ro=currentSol.status==='rendido'||currentSol.status==='cerrado';
-  if (!gastoRows.length){el.innerHTML=`<p style="font-size:13px;color:var(--text2);text-align:center;padding:1rem">Sin comprobantes.</p>`;updRendTotals();return;}
-  if (ro){
-    el.innerHTML=`<table class="gastos"><colgroup><col style="width:26%"><col style="width:30%"><col style="width:28%"><col style="width:16%"></colgroup>
+  if(!gastoRows.length){el.innerHTML=`<p style="font-size:13px;color:var(--text2);text-align:center;padding:1rem">Sin comprobantes cargados.</p>`;updR();return;}
+  if(ro){
+    el.innerHTML=`<table class="gt"><colgroup><col style="width:25%"><col style="width:30%"><col style="width:28%"><col style="width:17%"></colgroup>
       <thead><tr><th>Tipo</th><th>Rubro</th><th>Detalle</th><th style="text-align:right">Importe</th></tr></thead>
       <tbody>${gastoRows.map(g=>`<tr><td>${g.tipo}</td><td style="font-size:12px;color:var(--text2)">${RUBROS.find(r=>r.cod===g.rubro)?.desc||g.rubro}</td><td>${g.detalle}</td><td style="text-align:right">${fmt(g.importe)}</td></tr>`).join('')}</tbody>
     </table>`;
   } else {
-    el.innerHTML=`<table class="gastos"><colgroup><col style="width:21%"><col style="width:27%"><col style="width:24%"><col style="width:16%"><col style="width:12%"></colgroup>
+    el.innerHTML=`<table class="gt"><colgroup><col style="width:20%"><col style="width:27%"><col style="width:23%"><col style="width:16%"><col style="width:14%"></colgroup>
       <thead><tr><th>Tipo</th><th>Rubro</th><th>Detalle</th><th>Importe</th><th></th></tr></thead>
       <tbody>${gastoRows.map((g,i)=>`<tr>
-        <td><select style="font-size:12px;padding:3px 5px" onchange="gastoRows[${i}].tipo=this.value;updRendTotals()">${TIPOS_COMP.map(t=>`<option${g.tipo===t?' selected':''}>${t}</option>`).join('')}</select></td>
-        <td><select style="font-size:12px;padding:3px 5px" onchange="gastoRows[${i}].rubro=parseInt(this.value);updRendTotals()">${RUBROS.map(r=>`<option value="${r.cod}"${g.rubro===r.cod?' selected':''}>${r.desc}</option>`).join('')}</select></td>
+        <td><select style="font-size:12px;padding:3px 5px" onchange="gastoRows[${i}].tipo=this.value;updR()">${TIPOS.map(t=>`<option${g.tipo===t?' selected':''}>${t}</option>`).join('')}</select></td>
+        <td><select style="font-size:12px;padding:3px 5px" onchange="gastoRows[${i}].rubro=parseInt(this.value);updR()">${RUBROS.map(r=>`<option value="${r.cod}"${g.rubro===r.cod?' selected':''}>${r.desc}</option>`).join('')}</select></td>
         <td><input style="font-size:12px;padding:3px 6px" value="${g.detalle}" placeholder="Descripción" oninput="gastoRows[${i}].detalle=this.value"></td>
-        <td><input type="number" style="font-size:12px;padding:3px 6px" value="${g.importe||''}" placeholder="0" oninput="gastoRows[${i}].importe=parseFloat(this.value)||0;updRendTotals()"></td>
-        <td><button class="btn btn-danger" style="padding:3px 8px" onclick="removeGasto(${i})" aria-label="Eliminar"><i class="ti ti-trash"></i></button></td>
+        <td><input type="number" style="font-size:12px;padding:3px 6px" value="${g.importe||''}" placeholder="0" oninput="gastoRows[${i}].importe=parseFloat(this.value)||0;updR()"></td>
+        <td><button class="btn er" style="padding:3px 8px" onclick="removeGasto(${i})"><i class="ti ti-trash"></i></button></td>
       </tr>`).join('')}</tbody>
     </table>`;
   }
-  updRendTotals();
+  updR();
 }
-
-function updRendTotals() {
-  const total=(currentSol.viaticos||0)+(currentSol.hospedaje||0)+(currentSol.reserva||0);
-  const gastado=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
-  const saldo=total-gastado;
+function updR(){
+  const tot=total(currentSol);
+  const gasAct=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
+  const saldo=tot-gasAct;
   const eg=document.getElementById('rm-g');const es=document.getElementById('rm-s');
-  if (eg) eg.textContent=fmt(gastado);
-  if (es){es.textContent=fmt(Math.abs(saldo));es.style.color=`var(--${saldo>=0?'warning':'success'}-text)`;}
+  if(eg)eg.textContent=fmt(gasAct);
+  if(es){es.textContent=fmt(Math.abs(saldo));es.style.color=`var(--${saldo>=0?'wa':'ok'}-t)`;}
   const byTipo={};gastoRows.forEach(g=>{byTipo[g.tipo]=(byTipo[g.tipo]||0)+(parseFloat(g.importe)||0);});
   const rc=document.getElementById('rcomp');
-  if (rc) rc.innerHTML=renderResumenComp(byTipo,gastado,saldo);
+  if(rc)rc.innerHTML=renderResumen(byTipo,gasAct,saldo);
 }
-
-function simScan() {
-  showToast('Escaneando comprobante...','info');
-  setTimeout(()=>{gastoRows.push({tipo:'Ticket / Factura C',rubro:172,detalle:'Almuerzo en ruta',importe:8500});renderGastoTable();showToast('Comprobante cargado','success');},1000);
+function simScan(){
+  showToast('Escaneando comprobante...','in');
+  setTimeout(()=>{gastoRows.push({tipo:'Ticket / Factura C',rubro:172,detalle:'Almuerzo en ruta',importe:8500});renderGastoTable();showToast('Comprobante cargado','ok');},1000);
 }
-
-async function enviarRendicion() {
-  if (!gastoRows.length){showToast('Cargá al menos un comprobante','warning');return;}
+async function enviarRendicion(){
+  if(!gastoRows.length){showToast('Cargá al menos un comprobante','wa');return;}
+  const tot=total(currentSol);
+  const gasAct=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
+  const saldo=tot-gasAct;
   try {
     await api({action:'saveGastos',id:currentSol.id,gastos:JSON.stringify(gastoRows),usuario:currentSol.solicitante});
     await api({action:'updateStatus',id:currentSol.id,status:'rendido',usuario:currentSol.solicitante});
+    await api({action:'sendMail',tipo:'rendicion_enviada',id:currentSol.id,
+      solicitante:currentSol.solicitante,emailSolicitante:currentSol.email,
+      destino:currentSol.destino,total:tot,gastado:gasAct,saldo:saldo});
     currentSol.gastos=JSON.parse(JSON.stringify(gastoRows));
     currentSol.status='rendido';
     updateBadges();renderRendicion();
-    showToast('Rendición enviada al tesorero','success');
-  } catch(e){showToast('Error al guardar. Verificá la conexión.','danger');}
+    showToast('Rendición enviada. El tesorero recibió un mail.','ok');
+  } catch(e){showToast('Error: '+e.message,'er');}
+}
+async function reenviarRendicion(){
+  if(!gastoRows.length){showToast('Cargá al menos un comprobante','wa');return;}
+  const tot=total(currentSol);
+  const gasAct=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
+  const saldo=tot-gasAct;
+  try {
+    await api({action:'saveGastos',id:currentSol.id,gastos:JSON.stringify(gastoRows),usuario:currentSol.solicitante});
+    await api({action:'updateStatus',id:currentSol.id,status:'rendido',usuario:currentSol.solicitante});
+    await api({action:'sendMail',tipo:'rendicion_enviada',id:currentSol.id,
+      solicitante:currentSol.solicitante,emailSolicitante:currentSol.email,
+      destino:currentSol.destino,total:tot,gastado:gasAct,saldo:saldo});
+    currentSol.gastos=JSON.parse(JSON.stringify(gastoRows));
+    currentSol.status='rendido';
+    currentSol.observacion='';
+    updateBadges();renderRendicion();
+    showToast('Rendición corregida enviada al tesorero','ok');
+  } catch(e){showToast('Error: '+e.message,'er');}
 }
 
-function renderTesoreria() {
+// ══════════════════════════════════════════════
+//  TESORERÍA
+// ══════════════════════════════════════════════
+function renderTesoreria(){
   updateBadges();
   const el=document.getElementById('panel-tesoreria');
   const pend=solicitudes.filter(s=>s.status==='pendiente');
   const rend=solicitudes.filter(s=>s.status==='rendido');
   const cerr=solicitudes.filter(s=>s.status==='cerrado');
   el.innerHTML=`
-    ${pend.length?`<div class="card-title" style="margin-bottom:.75rem">Solicitudes pendientes de aprobación</div>
-    ${pend.map(s=>{const idx=solicitudes.indexOf(s);const total=(s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0);
+    ${pend.length?`<div class="ctitle" style="margin-bottom:.75rem">Solicitudes pendientes de aprobación</div>
+    ${pend.map(s=>{const idx=solicitudes.indexOf(s);const tot=total(s);
       return `<div class="card" style="margin-bottom:1rem">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
-          <div><div style="font-weight:500;font-size:15px">${s.destino}</div>
-          <div style="font-size:12px;color:var(--text2)">${s.solicitante} · ${s.dias} días · ${s.transporte}</div></div>
-          <div style="font-size:18px;font-weight:500">${fmt(total)}</div>
-        </div><div class="divider"></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-success" onclick="aprobar(${idx})"><i class="ti ti-check"></i> Aprobar y entregar fondos</button>
-          <button class="btn btn-danger" onclick="rechazar(${idx})"><i class="ti ti-x"></i> Rechazar</button>
+          <div>
+            <div style="font-weight:500;font-size:15px;margin-bottom:3px">${s.destino}</div>
+            <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span>${s.solicitante}</span><span class="idchip">${s.id}</span>
+              <span>${s.dias} días · ${s.transporte}</span>
+              ${s.email?`<span><i class="ti ti-mail" style="font-size:12px"></i> ${s.email}</span>`:''}
+            </div>
+          </div>
+          <div style="font-size:18px;font-weight:500">${fmt(tot)}</div>
+        </div>
+        <div class="div"></div>
+        <div style="font-size:13px;margin-bottom:.75rem">
+          <div class="rr"><span style="color:var(--text2)">Viáticos</span><span>${fmt(s.viaticos)}</span></div>
+          <div class="rr"><span style="color:var(--text2)">Hospedaje</span><span>${fmt(s.hospedaje)}</span></div>
+          <div class="rr"><span style="color:var(--text2)">Reserva</span><span>${fmt(s.reserva)}</span></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ok" onclick="aprobar(${idx})"><i class="ti ti-check"></i> Aprobar y entregar fondos</button>
+          <button class="btn er" onclick="showDenegar(${idx})"><i class="ti ti-x"></i> Denegar</button>
         </div>
       </div>`;}).join('')}`:''}
-    ${rend.length?`<div class="card-title" style="margin:.5rem 0 .75rem">Rendiciones a revisar</div>
-    ${rend.map(s=>{const idx=solicitudes.indexOf(s);const total=(s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0);const gastado=(s.gastos||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0);const saldo=total-gastado;
+
+    ${rend.length?`<div class="ctitle" style="margin:1rem 0 .75rem">Rendiciones a revisar</div>
+    ${rend.map(s=>{const idx=solicitudes.indexOf(s);const tot=total(s);const gas=gastado(s);const saldo=tot-gas;
       return `<div class="card" style="margin-bottom:1rem">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.75rem">
-          <div><div style="font-weight:500;font-size:15px">${s.destino}</div>
-          <div style="font-size:12px;color:var(--text2)">${s.solicitante} · ${s.fechaSalida} → ${s.fechaLlegada}</div></div>
-          <button class="btn btn-info" style="font-size:12px;padding:5px 12px" onclick="irRendicion(${idx})"><i class="ti ti-eye"></i> Ver detalle</button>
+          <div>
+            <div style="font-weight:500;font-size:15px;margin-bottom:3px">${s.destino}</div>
+            <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <span>${s.solicitante}</span><span class="idchip">${s.id}</span>
+              <span>${s.fechaSalida} → ${s.fechaLlegada}</span>
+            </div>
+          </div>
+          <button class="btn in" style="font-size:12px;padding:5px 12px" onclick="irRendicion(${idx})"><i class="ti ti-eye"></i> Ver detalle</button>
         </div>
         <div style="display:flex;gap:1.5rem;font-size:13px;flex-wrap:wrap;margin-bottom:.75rem">
-          <span>Entregado: <strong>${fmt(total)}</strong></span>
-          <span>Gastado: <strong>${fmt(gastado)}</strong></span>
-          <span style="font-weight:500;color:var(--${saldo>=0?'warning':'success'}-text)">${saldo>=0?'Reintegra':'Recibe'}: ${fmt(Math.abs(saldo))}</span>
+          <span>Entregado: <strong>${fmt(tot)}</strong></span>
+          <span>Gastado: <strong>${fmt(gas)}</strong></span>
+          <span style="font-weight:500;color:var(--${saldo>=0?'wa':'ok'}-t)">${saldo>=0?'Reintegra':'Recibe'}: ${fmt(Math.abs(saldo))}</span>
         </div>
-        <button class="btn btn-success" onclick="cerrar(${idx})"><i class="ti ti-check"></i> Confirmar y cerrar</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ok" onclick="cerrar(${idx})"><i class="ti ti-check"></i> Aprobar y cerrar</button>
+          <button class="btn wa" onclick="showObservacion(${idx})"><i class="ti ti-message-circle"></i> Observar y devolver</button>
+        </div>
       </div>`;}).join('')}`:''}
-    ${cerr.length?`<div class="card-title" style="margin:.5rem 0 .75rem">Historial</div>
-    ${cerr.map(s=>{const total=(s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0);const gastado=(s.gastos||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
-      return `<div class="card" style="margin-bottom:.75rem;opacity:.75">
+
+    ${cerr.length?`<div class="ctitle" style="margin:1rem 0 .75rem">Historial cerrado</div>
+    ${cerr.map(s=>{const tot=total(s);const gas=gastado(s);
+      return `<div class="card" style="margin-bottom:.75rem;opacity:.8">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
           <div><div style="font-weight:500">${s.destino}</div>
-          <div style="font-size:12px;color:var(--text2)">${s.solicitante} · ${s.fechaSalida} → ${s.fechaLlegada}</div></div>
+          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span>${s.solicitante}</span><span class="idchip">${s.id}</span><span>${s.fechaSalida} → ${s.fechaLlegada}</span>
+          </div></div>
           <div style="display:flex;align-items:center;gap:10px">
-            <span style="font-size:13px">${fmt(gastado)} de ${fmt(total)}</span>
-            <span class="sbadge s-cerrado"><i class="ti ti-check"></i> Cerrado</span>
+            <span style="font-size:13px">${fmt(gas)} de ${fmt(tot)}</span>
+            <span class="sb s-cerrado"><i class="ti ti-check"></i> Cerrado</span>
           </div>
         </div>
       </div>`;}).join('')}`:''}
+
     ${!pend.length&&!rend.length&&!cerr.length?`<div class="card" style="text-align:center;padding:3rem">
       <i class="ti ti-building-bank" style="font-size:48px;color:var(--text2)"></i>
       <p style="margin-top:1rem;color:var(--text2)">Sin movimientos pendientes.</p>
@@ -816,57 +1076,198 @@ function renderTesoreria() {
   `;
 }
 
-async function aprobar(i) {
+async function aprobar(i){
+  const s=solicitudes[i]; const tot=total(s);
   try {
-    await api({action:'updateStatus',id:solicitudes[i].id,status:'aprobado',usuario:'Tesorero'});
-    solicitudes[i].status='aprobado'; updateBadges(); renderTesoreria();
-    showToast('Fondos aprobados','success');
-  } catch(e){showToast('Error al guardar','danger');}
-}
-async function rechazar(i) {
-  try {
-    await api({action:'updateStatus',id:solicitudes[i].id,status:'rechazado',usuario:'Tesorero'});
-    solicitudes.splice(i,1); updateBadges(); renderTesoreria();
-    showToast('Solicitud rechazada','warning');
-  } catch(e){showToast('Error al guardar','danger');}
-}
-async function cerrar(i) {
-  try {
-    await api({action:'updateStatus',id:solicitudes[i].id,status:'cerrado',usuario:'Tesorero'});
-    solicitudes[i].status='cerrado'; updateBadges(); renderTesoreria();
-    showToast('Rendición cerrada','success');
-  } catch(e){showToast('Error al guardar','danger');}
+    await api({action:'updateStatus',id:s.id,status:'aprobado',usuario:'Tesorero'});
+    await api({action:'sendMail',tipo:'fondos_aprobados',id:s.id,
+      solicitante:s.solicitante,emailSolicitante:s.email,
+      destino:s.destino,fechaSalida:s.fechaSalida,fechaLlegada:s.fechaLlegada,total:tot});
+    solicitudes[i].status='aprobado';
+    updateBadges();renderTesoreria();
+    showToast('Fondos aprobados. El vendedor recibió un mail.','ok');
+  } catch(e){showToast('Error: '+e.message,'er');}
 }
 
-function checkCfgPass() {
-  const p=document.getElementById('cfg-pass').value;
-  if (p===CFG.passAdmin){
-    document.getElementById('cfg-locked').style.display='none';
-    document.getElementById('cfg-unlocked').style.display='block';
-    document.getElementById('cfg-viat').value=CFG.viaticos;
-    document.getElementById('cfg-hosp').value=CFG.hospedaje;
-    document.getElementById('cfg-dias').value=CFG.diasLimite;
-  } else {document.getElementById('cfg-err').textContent='Clave incorrecta';}
+function showDenegar(i){denegarTarget=i;document.getElementById('denegar-texto').value='';openOv('ov-denegar');}
+async function confirmarDenegar(){
+  const i=denegarTarget; const s=solicitudes[i];
+  const obs=document.getElementById('denegar-texto').value.trim();
+  closeOv('ov-denegar');
+  try {
+    await api({action:'updateStatus',id:s.id,status:'denegado',usuario:'Tesorero',observacion:obs});
+    await api({action:'sendMail',tipo:'fondos_denegados',id:s.id,
+      solicitante:s.solicitante,emailSolicitante:s.email,
+      destino:s.destino,observacion:obs});
+    solicitudes[i].status='denegado';
+    updateBadges();renderTesoreria();
+    showToast('Solicitud denegada. El vendedor fue notificado.','wa');
+  } catch(e){showToast('Error: '+e.message,'er');}
 }
-async function guardarConfig() {
+
+function showObservacion(i){obsTarget=i;document.getElementById('obs-texto').value='';openOv('ov-obs');}
+async function confirmarObservacion(){
+  const i=obsTarget; const s=solicitudes[i];
+  const obs=document.getElementById('obs-texto').value.trim();
+  if(!obs){showToast('Escribí la observación antes de enviar','wa');return;}
+  closeOv('ov-obs');
+  try {
+    await api({action:'updateStatus',id:s.id,status:'observado',usuario:'Tesorero',observacion:obs});
+    await api({action:'sendMail',tipo:'rendicion_observada',id:s.id,
+      solicitante:s.solicitante,emailSolicitante:s.email,
+      destino:s.destino,observacion:obs});
+    solicitudes[i].status='observado';
+    solicitudes[i].observacion=obs;
+    updateBadges();renderTesoreria();
+    showToast('Rendición devuelta. El vendedor recibió la observación.','wa');
+  } catch(e){showToast('Error: '+e.message,'er');}
+}
+
+async function cerrar(i){
+  const s=solicitudes[i];
+  try {
+    await api({action:'updateStatus',id:s.id,status:'cerrado',usuario:'Tesorero'});
+    solicitudes[i].status='cerrado';
+    updateBadges();renderTesoreria();
+    showToast('Rendición cerrada y archivada','ok');
+  } catch(e){showToast('Error: '+e.message,'er');}
+}
+
+// DASHBOARD
+function renderDashboard(){
+  const el=document.getElementById('panel-dashboard');
+  const conGastos=solicitudes.filter(s=>['rendido','observado','cerrado'].includes(s.status)&&s.gastos&&s.gastos.length);
+  const usuarios=[...new Set(solicitudes.map(s=>s.solicitante).filter(Boolean))].sort();
+  let filtered=conGastos.filter(s=>{
+    if(filterDash.usuario&&s.solicitante!==filterDash.usuario)return false;
+    if(filterDash.desde&&s.fechaSalida<filterDash.desde)return false;
+    if(filterDash.hasta&&s.fechaSalida>filterDash.hasta)return false;
+    return true;
+  });
+  const totalEntregado=filtered.reduce((a,s)=>a+total(s),0);
+  const totalGastado=filtered.reduce((a,s)=>a+gastado(s),0);
+  const totalSaldo=totalEntregado-totalGastado;
+  const porRubro={};
+  filtered.forEach(s=>{(s.gastos||[]).forEach(g=>{const rDesc=RUBROS.find(r=>r.cod===g.rubro)?.desc||'Otros';porRubro[rDesc]=(porRubro[rDesc]||0)+(parseFloat(g.importe)||0);});});
+  const rubroEntries=Object.entries(porRubro).sort((a,b)=>b[1]-a[1]);
+  const totalRubros=rubroEntries.reduce((a,r)=>a+r[1],0);
+  const porTipo={};
+  filtered.forEach(s=>{(s.gastos||[]).forEach(g=>{porTipo[g.tipo]=(porTipo[g.tipo]||0)+(parseFloat(g.importe)||0);});});
+
+  el.innerHTML=`
+    <div class="card">
+      <div class="ctitle">Filtros</div>
+      <div class="fg3">
+        <div class="fi"><label>Desde (fecha salida)</label><input type="date" id="dash-desde" value="${filterDash.desde}" onchange="filterDash.desde=this.value;renderDashboard()"></div>
+        <div class="fi"><label>Hasta (fecha salida)</label><input type="date" id="dash-hasta" value="${filterDash.hasta}" onchange="filterDash.hasta=this.value;renderDashboard()"></div>
+        <div class="fi"><label>Vendedor</label>
+          <select id="dash-usr" onchange="filterDash.usuario=this.value;renderDashboard()">
+            <option value="">Todos</option>
+            ${usuarios.map(u=>`<option${filterDash.usuario===u?' selected':''}>${u}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      ${filterDash.desde||filterDash.hasta||filterDash.usuario?`<button class="btn" style="margin-top:.5rem" onclick="filterDash={desde:'',hasta:'',usuario:''};renderDashboard()"><i class="ti ti-x"></i> Limpiar filtros</button>`:''}
+    </div>
+    <div class="mrow4">
+      <div class="met"><div class="ml">Giras analizadas</div><div class="mv">${filtered.length}</div></div>
+      <div class="met"><div class="ml">Total entregado</div><div class="mv" style="font-size:16px">${fmt(totalEntregado)}</div></div>
+      <div class="met"><div class="ml">Total gastado</div><div class="mv" style="font-size:16px">${fmt(totalGastado)}</div></div>
+      <div class="met"><div class="ml">${totalSaldo>=0?'Saldo a reintegrar':'Saldo a devolver'}</div><div class="mv" style="font-size:16px;color:var(--${totalSaldo>=0?'wa':'ok'}-t)">${fmt(Math.abs(totalSaldo))}</div></div>
+    </div>
+    ${!filtered.length?`<div class="card" style="text-align:center;padding:2rem"><p style="color:var(--text2)">No hay rendiciones en el período seleccionado.</p></div>`:`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+      <div class="card"><div class="ctitle">Gastos por rubro</div><canvas id="chart-rubro" height="220"></canvas></div>
+      <div class="card"><div class="ctitle">Por tipo de comprobante</div><canvas id="chart-tipo" height="220"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Detalle por rubro</div>
+      ${rubroEntries.map(([r,v])=>{const pct=totalRubros>0?Math.round(v/totalRubros*100):0;
+        return `<div class="rr"><span style="color:var(--text2);font-size:13px">${r}</span>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:100px;height:4px;background:var(--bg2);border-radius:999px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--in-t);border-radius:999px"></div></div>
+            <span style="font-size:12px;color:var(--text2);min-width:30px;text-align:right">${pct}%</span>
+            <strong style="min-width:88px;text-align:right">${fmt(v)}</strong>
+          </div></div>`;}).join('')}
+      <div class="rr rrt"><span>Total</span><span>${fmt(totalRubros)}</span></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Giras incluidas — clic para ver rendición</div>
+      ${filtered.map(s=>{const tot=total(s),gas=gastado(s),idx=solicitudes.indexOf(s);const pct=tot>0?Math.min(100,Math.round(gas/tot*100)):0;
+        return `<div style="padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer" onclick="irRendicion(${idx})">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span style="font-weight:500">${s.destino}</span>
+              <span class="idchip">${s.id}</span>
+              <span style="font-size:12px;color:var(--text2)">${s.solicitante} · ${s.fechaSalida} → ${s.fechaLlegada}</span>
+            </div>
+            <div style="display:flex;gap:12px;align-items:center">
+              <span style="font-size:13px;color:var(--text2)">${fmt(gas)} / ${fmt(tot)}</span>
+              <span class="sb s-${s.status}" style="font-size:11px">${ESTADOS[s.status]||s.status}</span>
+              <i class="ti ti-arrow-right" style="color:var(--text3)"></i>
+            </div>
+          </div>
+          <div class="pbar2"><div class="pfill" style="width:${pct}%;background:var(--${pct>=100?'er':pct>=70?'wa':'ok'}-t)"></div></div>
+        </div>`;}).join('')}
+    </div>`}
+  `;
+  if(!filtered.length)return;
+  const PALETTE=['#378add','#1d9e75','#d85a30','#ba7517','#534ab7','#993556','#639922','#e24b4a','#185fa5','#0f6e56'];
+  setTimeout(()=>{
+    const ctxR=document.getElementById('chart-rubro');
+    const ctxT=document.getElementById('chart-tipo');
+    if(!ctxR||!ctxT)return;
+    if(dashChart&&dashChart.length)dashChart.forEach(c=>c.destroy());
+    dashChart=[];
+    dashChart.push(new Chart(ctxR,{type:'doughnut',
+      data:{labels:rubroEntries.map(([r])=>r),datasets:[{data:rubroEntries.map(([,v])=>Math.round(v)),backgroundColor:PALETTE,borderWidth:2,borderColor:'transparent'}]},
+      options:{plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10}}},cutout:'60%'}}));
+    const tipoEntries=Object.entries(porTipo).sort((a,b)=>b[1]-a[1]);
+    dashChart.push(new Chart(ctxT,{type:'bar',
+      data:{labels:tipoEntries.map(([t])=>t),datasets:[{data:tipoEntries.map(([,v])=>Math.round(v)),backgroundColor:PALETTE,borderRadius:4}]},
+      options:{plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'$'+v.toLocaleString('es-AR'),font:{size:10}}},x:{ticks:{font:{size:10}}}}}}));
+  },100);
+}
+
+// CONFIG
+async function guardarConfig(){
   const params={action:'saveConfig',
     viaticos:document.getElementById('cfg-viat').value,
     hospedaje:document.getElementById('cfg-hosp').value,
     diasLimite:document.getElementById('cfg-dias').value};
   const np=document.getElementById('cfg-newpass').value.trim();
-  if (np) params.passAdmin=np;
+  if(np)params.passTesorer=np;
   try {
     await api(params);
     CFG.viaticos=parseFloat(params.viaticos)||60000;
     CFG.hospedaje=parseFloat(params.hospedaje)||100000;
     CFG.diasLimite=parseInt(params.diasLimite)||5;
-    if (np) CFG.passAdmin=np;
-    closeOverlay('ov-config');
-    showToast('Configuración guardada','success');
-  } catch(e){showToast('Error al guardar configuración','danger');}
+    if(np)CFG.passTesorer=np;
+    closeOv('ov-cfg');showToast('Configuración guardada','ok');
+  } catch(e){showToast('Error: '+e.message,'er');}
 }
+function openCfg(){
+  document.getElementById('cfg-viat').value=CFG.viaticos;
+  document.getElementById('cfg-hosp').value=CFG.hospedaje;
+  document.getElementById('cfg-dias').value=CFG.diasLimite;
+  document.getElementById('cfg-newpass').value='';
+  openOv('ov-cfg');
+}
+document.getElementById('btn-cfg').onclick=openCfg;
 
-cargarDatos();
+// INIT — deep link desde mail
+const urlP=new URLSearchParams(window.location.search);
+if(urlP.get('rol')==='tesorero'){
+  ROL='tesorero';
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  initApp();
+} else if(urlP.get('rol')==='vendedor'){
+  ROL='vendedor';
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  initApp();
+}
 </script>
 </body>
 </html>
