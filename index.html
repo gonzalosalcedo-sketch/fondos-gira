@@ -6,7 +6,6 @@
 <title>Fondos de Gira</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css">
 <style>
-/* ── RESET Y BASE ─────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#ffffff;--bg2:#f5f5f4;--bg3:#efede6;
@@ -29,30 +28,22 @@
 }}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--text);background:var(--bg3);min-height:100vh}
 .app{max-width:920px;margin:0 auto;padding:1.5rem}
-
-/* ── LAYOUT ───────────────────────────────────────────── */
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px}
 .tab-bar{display:flex;gap:4px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:4px;margin-bottom:1.5rem;flex-wrap:wrap}
 .tab{flex:1;min-width:90px;padding:8px 10px;border:none;background:transparent;border-radius:var(--radius);cursor:pointer;font-size:13px;color:var(--text2);display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;font-family:inherit}
 .tab.active{background:var(--bg);color:var(--text);border:0.5px solid var(--border);font-weight:500}
 .tab:hover:not(.active){background:var(--bg);color:var(--text)}
 .panel{display:none}.panel.active{display:block}
-
-/* ── CARDS ────────────────────────────────────────────── */
 .card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem}
 .card.danger-card{border-color:var(--danger-border);background:var(--danger-bg)}
 .card-title{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.06em}
 .divider{height:0.5px;background:var(--border);margin:1rem 0}
-
-/* ── FORMS ────────────────────────────────────────────── */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .form-group{display:flex;flex-direction:column;gap:4px}
 .form-group.full{grid-column:1/-1}
 label{font-size:12px;color:var(--text2)}
 input,select,textarea{width:100%;padding:8px 10px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;transition:border-color .15s}
 input:focus,select:focus{outline:none;border-color:var(--border2)}
-
-/* ── BUTTONS ──────────────────────────────────────────── */
 .btn{padding:8px 16px;border:0.5px solid var(--border2);border-radius:var(--radius);cursor:pointer;font-size:13px;font-family:inherit;display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--text);transition:all .15s}
 .btn:hover{background:var(--bg2)}.btn:active{transform:scale(.98)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -61,8 +52,6 @@ input:focus,select:focus{outline:none;border-color:var(--border2)}
 .btn-danger{color:var(--danger-text);border-color:var(--danger-border)}.btn-danger:hover{background:var(--danger-bg)}
 .btn-info{color:var(--info-text);border-color:var(--info-border)}.btn-info:hover{background:var(--info-bg)}
 .btn-warning{color:var(--warning-text);border-color:var(--warning-border)}.btn-warning:hover{background:var(--warning-bg)}
-
-/* ── BADGES ───────────────────────────────────────────── */
 .sbadge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
 .s-borrador{background:var(--bg2);color:var(--text2)}
 .s-pendiente{background:var(--warning-bg);color:var(--warning-text)}
@@ -72,15 +61,11 @@ input:focus,select:focus{outline:none;border-color:var(--border2)}
 .s-vencido{background:var(--danger-bg);color:var(--danger-text)}
 .nbadge{background:var(--danger-bg);color:var(--danger-text);border-radius:999px;font-size:11px;padding:1px 7px;font-weight:500}
 .wbadge{background:var(--warning-bg);color:var(--warning-text);border-radius:999px;font-size:11px;padding:1px 7px;font-weight:500}
-
-/* ── MÉTRICAS ─────────────────────────────────────────── */
 .metric-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem}
 .metric{background:var(--bg2);border-radius:var(--radius);padding:12px 14px}
 .metric .mlabel{font-size:11px;color:var(--text2);margin-bottom:4px}
 .metric .mval{font-size:20px;font-weight:500}
 .metric .msub{font-size:11px;color:var(--text2);margin-top:2px}
-
-/* ── TIMELINE ─────────────────────────────────────────── */
 .timeline{display:flex;flex-direction:column}
 .tl-step{display:flex;gap:12px;padding:8px 0}
 .tl-dot{display:flex;flex-direction:column;align-items:center}
@@ -94,19 +79,13 @@ input:focus,select:focus{outline:none;border-color:var(--border2)}
 .tl-active .tl-circle{background:var(--text);color:var(--bg);border-color:var(--text)}
 .tl-pending .tl-circle{background:var(--bg2);color:var(--text2)}
 .tl-danger .tl-circle{background:var(--danger-bg);color:var(--danger-text);border-color:var(--danger-border)}
-
-/* ── TABLA GASTOS ─────────────────────────────────────── */
 table.gastos{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
 table.gastos th{text-align:left;padding:8px;font-size:11px;font-weight:500;color:var(--text2);border-bottom:0.5px solid var(--border)}
 table.gastos td{padding:7px 8px;border-bottom:0.5px solid var(--border);vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
 table.gastos tr:last-child td{border-bottom:none}
-
-/* ── RESUMEN ROWS ─────────────────────────────────────── */
 .resumen-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--border)}
 .resumen-row:last-child{border-bottom:none}
 .resumen-total{font-weight:500;font-size:15px}
-
-/* ── PASOS ────────────────────────────────────────────── */
 .paso-bar{display:flex;align-items:center;margin-bottom:1.5rem;overflow-x:auto}
 .paso{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .paso-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);flex-shrink:0}
@@ -115,47 +94,28 @@ table.gastos tr:last-child td{border-bottom:none}
 .paso-label{font-size:12px;color:var(--text2)}
 .paso-label.active{color:var(--text);font-weight:500}
 .paso-sep{width:28px;height:0.5px;background:var(--border);margin:0 4px;flex-shrink:0}
-
-/* ── CHECKS ───────────────────────────────────────────── */
 .check-list{display:flex;flex-direction:column;gap:8px}
 .check-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border:0.5px solid var(--border);border-radius:var(--radius);cursor:pointer;user-select:none;transition:all .15s}
 .check-item:hover{background:var(--bg2)}
 .check-item.checked{border-color:var(--success-border);background:var(--success-bg)}
 .check-item.checked span{color:var(--success-text)}
 .check-item input[type=checkbox]{width:16px;height:16px;cursor:pointer}
-
-/* ── FILTROS ──────────────────────────────────────────── */
 .filter-bar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
 .filter-btn{padding:5px 14px;border:0.5px solid var(--border);border-radius:999px;font-size:12px;cursor:pointer;background:transparent;color:var(--text2);font-family:inherit;transition:all .15s}
 .filter-btn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
-
-/* ── PROGRESS ─────────────────────────────────────────── */
 .progress-bar{height:4px;background:var(--bg2);border-radius:999px;overflow:hidden;margin-top:6px}
 .progress-fill{height:100%;border-radius:999px;transition:width .3s}
-
-/* ── OVERLAYS (sin position:fixed — min-height trick) ─── */
 .overlay-wrap{display:none;min-height:480px;background:rgba(0,0,0,.5);align-items:center;justify-content:center;margin:-1.5rem;padding:2rem}
 .overlay-wrap.open{display:flex}
 .overlay-box{background:var(--bg);border-radius:var(--radius-lg);border:0.5px solid var(--border);padding:1.5rem;width:440px;max-width:100%}
 .alert-box{border:2px solid var(--danger-border)}
-
-/* ── UPLOAD ───────────────────────────────────────────── */
-.upload-area{border:1.5px dashed var(--border2);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:1rem}
-.upload-area:hover{background:var(--bg2)}
-
-/* ── LOADING ──────────────────────────────────────────── */
-.loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:3rem;color:var(--text2)}
-.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--text2);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── TOAST ────────────────────────────────────────────── */
 #toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:10px 16px;border-radius:var(--radius);font-size:13px;display:flex;align-items:center;gap:8px;z-index:9999;max-width:300px;border:0.5px solid;opacity:0;transition:opacity .3s;pointer-events:none}
 </style>
 </head>
 <body>
 <div class="app" id="app">
 
-<!-- ── OVERLAY ALERTA VENCIMIENTO ────────────────── -->
+<!-- OVERLAY ALERTA VENCIMIENTO -->
 <div class="overlay-wrap" id="ov-alerta" role="alertdialog">
   <div class="overlay-box alert-box">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
@@ -173,7 +133,7 @@ table.gastos tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- ── OVERLAY CONFIGURACIÓN ─────────────────────── -->
+<!-- OVERLAY CONFIGURACION -->
 <div class="overlay-wrap" id="ov-config" role="dialog">
   <div class="overlay-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
@@ -203,7 +163,7 @@ table.gastos tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- ── HEADER ─────────────────────────────────────── -->
+<!-- HEADER -->
 <div class="header">
   <div style="display:flex;align-items:center;gap:10px">
     <i class="ti ti-route" style="font-size:22px"></i>
@@ -215,7 +175,7 @@ table.gastos tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- ── TAB BAR ────────────────────────────────────── -->
+<!-- TAB BAR -->
 <div class="tab-bar" role="tablist">
   <button class="tab active" id="t-solicitudes" onclick="showTab('solicitudes')"><i class="ti ti-list"></i> Solicitudes</button>
   <button class="tab" id="t-seguimiento" onclick="showTab('seguimiento')"><i class="ti ti-chart-gantt"></i> Seguimiento <span class="wbadge" id="badge-seg" style="display:none">0</span></button>
@@ -224,10 +184,10 @@ table.gastos tr:last-child td{border-bottom:none}
   <button class="tab" id="t-tesoreria" onclick="showTab('tesoreria')"><i class="ti ti-building-bank"></i> Tesorería <span class="nbadge" id="badge-tes" style="display:none">0</span></button>
 </div>
 
-<!-- ── PANELES ────────────────────────────────────── -->
+<!-- PANELES -->
 <div id="panel-solicitudes" class="panel active"></div>
 <div id="panel-seguimiento" class="panel"></div>
-<div id="panel-nueva" class="panel"></div>
+<div id="panel-nueva" class="panel"><div class="paso-bar" id="paso-bar"></div><div id="step-content"></div></div>
 <div id="panel-rendicion" class="panel"></div>
 <div id="panel-tesoreria" class="panel"></div>
 
@@ -235,14 +195,8 @@ table.gastos tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-// ══════════════════════════════════════════════════
-//  CONFIGURACIÓN — REEMPLAZAR ESTOS DOS VALORES
-// ══════════════════════════════════════════════════
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyPTb41zE1Cr90JsAvpDCGrXD9OJ7Ybsmew-VCYFML9dAwS1SM9YZETZ44S68QExQumxg/exec';
 
-// ══════════════════════════════════════════════════
-//  DATOS GLOBALES
-// ══════════════════════════════════════════════════
 const RUBROS = [
   {cod:170,desc:'Pasajes y Movilidad'},{cod:172,desc:'Viáticos y Refrigerios'},
   {cod:174,desc:'Alojamiento'},{cod:138,desc:'Combustible Rodados'},
@@ -258,7 +212,7 @@ const TRANSPORTES = ['Vehículo empresa','Vehículo propio','Colectivo','Avión'
 const CHECKS_VEH = ['Seguro vigente','RTO al día','Autorización de manejo','Estado general del vehículo OK','Tarjeta YPF en ruta'];
 const ESTADOS = {borrador:'Borrador',pendiente:'Pendiente aprobación',aprobado:'En gira',rendido:'Rendición enviada',cerrado:'Cerrado'};
 
-let CFG = {viaticos:60000, hospedaje:100000, diasLimite:5, passAdmin:'admin1234'};
+let CFG = {viaticos:60000,hospedaje:100000,diasLimite:5,passAdmin:'admin1234'};
 let solicitudes = [];
 let currentSol = null;
 let currentStep = 1;
@@ -267,9 +221,6 @@ let filterSeg = 'todos';
 
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
 
-// ══════════════════════════════════════════════════
-//  API — LLAMADAS AL APPS SCRIPT
-// ══════════════════════════════════════════════════
 async function api(params) {
   const url = APPS_SCRIPT_URL + '?' + new URLSearchParams(params).toString();
   const res = await fetch(url);
@@ -277,46 +228,48 @@ async function api(params) {
 }
 
 async function cargarDatos() {
+  document.getElementById('panel-solicitudes').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:3rem;color:var(--text2)"><div style="width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--text2);border-radius:50%;animation:spin .7s linear infinite"></div> Cargando datos...</div>';
+  const style = document.createElement('style');
+  style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+  document.head.appendChild(style);
   try {
     const [sols, cfgData] = await Promise.all([
       api({action:'getSolicitudes'}),
       api({action:'getConfig'})
     ]);
     solicitudes = Array.isArray(sols) ? sols.map(s => ({
-      id: s.ID, status: s.Status, solicitante: s.Solicitante,
-      jefe: s.Jefe, destino: s.Destino,
-      fechaSalida: s.FechaSalida, fechaLlegada: s.FechaLlegada,
-      dias: parseInt(s.Dias)||0, viaticos: parseFloat(s.Viaticos)||0,
-      hospedaje: parseFloat(s.Hospedaje)||0, reserva: parseFloat(s.Reserva)||0,
-      transporte: s.Transporte, checks: Array.isArray(s.Checks)?s.Checks:[],
+      id: s.ID, status: s.Status || 'borrador',
+      solicitante: s.Solicitante || '', jefe: s.Jefe || '',
+      destino: s.Destino || '', fechaSalida: s.FechaSalida || '',
+      fechaLlegada: s.FechaLlegada || '', dias: parseInt(s.Dias)||0,
+      viaticos: parseFloat(s.Viaticos)||0, hospedaje: parseFloat(s.Hospedaje)||0,
+      reserva: parseFloat(s.Reserva)||0, transporte: s.Transporte || '',
+      checks: Array.isArray(s.Checks) ? s.Checks : [],
       gastos: []
     })) : [];
     if (cfgData && !cfgData.error) {
-      CFG.viaticos    = parseFloat(cfgData.viaticos)   || 60000;
-      CFG.hospedaje   = parseFloat(cfgData.hospedaje)  || 100000;
-      CFG.diasLimite  = parseInt(cfgData.diasLimite)   || 5;
-      CFG.passAdmin   = cfgData.passAdmin               || 'admin1234';
+      CFG.viaticos   = parseFloat(cfgData.viaticos)  || 60000;
+      CFG.hospedaje  = parseFloat(cfgData.hospedaje) || 100000;
+      CFG.diasLimite = parseInt(cfgData.diasLimite)  || 5;
+      CFG.passAdmin  = cfgData.passAdmin              || 'admin1234';
     }
-    // Cargar gastos de cada solicitud activa/rendida
-    for (const s of solicitudes.filter(x => x.status !== 'borrador' && x.status !== 'pendiente')) {
-      const g = await api({action:'getGastos', id: s.id});
-      s.gastos = Array.isArray(g) ? g.map(row => ({
-        tipo: row.tipo, rubro: parseInt(row.rubro)||172,
-        detalle: row.detalle, importe: parseFloat(row.importe)||0
-      })) : [];
+    for (const s of solicitudes.filter(x => ['aprobado','rendido','cerrado'].includes(x.status))) {
+      try {
+        const g = await api({action:'getGastos', id: s.id});
+        s.gastos = Array.isArray(g) ? g.map(row => ({
+          tipo: row.tipo, rubro: parseInt(row.rubro)||172,
+          detalle: row.detalle, importe: parseFloat(row.importe)||0
+        })) : [];
+      } catch(e) { s.gastos = []; }
     }
   } catch(e) {
-    console.error('Error cargando datos:', e);
-    showToast('Error al conectar con la base de datos', 'danger');
+    showToast('Error al conectar. Verificá la conexión.', 'danger');
   }
   updateBadges();
   renderSolicitudes();
-  setTimeout(checkVencimientos, 600);
+  setTimeout(checkVencimientos, 800);
 }
 
-// ══════════════════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════════════════
 function fmt(n){return '$'+Math.round(n||0).toLocaleString('es-AR')}
 
 function diasDesde(fecha) {
@@ -337,7 +290,7 @@ function diasRestantes(s) {
 }
 
 function updateBadges() {
-  const tes = solicitudes.filter(s => s.status==='pendiente' || s.status==='rendido').length;
+  const tes = solicitudes.filter(s => s.status==='pendiente'||s.status==='rendido').length;
   const seg = solicitudes.filter(s => estaVencida(s)).length;
   const bt = document.getElementById('badge-tes');
   const bs = document.getElementById('badge-seg');
@@ -352,40 +305,34 @@ let toastTimer;
 function showToast(msg, type='info') {
   const t = document.getElementById('toast');
   const map = {
-    success: [CFG,'var(--success-bg)','var(--success-text)','var(--success-border)','ti-check'],
-    warning: [CFG,'var(--warning-bg)','var(--warning-text)','var(--warning-border)','ti-alert-triangle'],
-    danger:  [CFG,'var(--danger-bg)', 'var(--danger-text)', 'var(--danger-border)','ti-alert-circle'],
-    info:    [CFG,'var(--info-bg)',   'var(--info-text)',   'var(--info-border)',  'ti-info-circle'],
+    success:['var(--success-bg)','var(--success-text)','var(--success-border)','ti-check'],
+    warning:['var(--warning-bg)','var(--warning-text)','var(--warning-border)','ti-alert-triangle'],
+    danger: ['var(--danger-bg)', 'var(--danger-text)', 'var(--danger-border)', 'ti-alert-circle'],
+    info:   ['var(--info-bg)',   'var(--info-text)',   'var(--info-border)',   'ti-info-circle'],
   };
-  const [,bg,c,b,ic] = map[type] || map.info;
-  t.style.cssText += `;background:${bg};color:${c};border-color:${b};opacity:1`;
+  const [bg,c,b,ic] = map[type]||map.info;
+  t.style.background=bg; t.style.color=c; t.style.borderColor=b; t.style.opacity='1';
   t.innerHTML = `<i class="ti ${ic}"></i>${msg}`;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.style.opacity = '0', 3500);
+  toastTimer = setTimeout(()=>t.style.opacity='0', 3500);
 }
 
-// ══════════════════════════════════════════════════
-//  NAVEGACIÓN DE TABS
-// ══════════════════════════════════════════════════
 function showTab(name) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  document.getElementById('t-' + name).classList.add('active');
-  if (name === 'solicitudes') renderSolicitudes();
-  if (name === 'seguimiento') renderSeguimiento();
-  if (name === 'tesoreria')   renderTesoreria();
-  if (name === 'rendicion')   renderRendicion();
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.getElementById('t-'+name).classList.add('active');
+  if (name==='solicitudes') renderSolicitudes();
+  if (name==='seguimiento') renderSeguimiento();
+  if (name==='tesoreria')   renderTesoreria();
+  if (name==='rendicion')   renderRendicion();
 }
 
-// ══════════════════════════════════════════════════
-//  ALERTA VENCIMIENTO
-// ══════════════════════════════════════════════════
 function checkVencimientos() {
-  const vencidas = solicitudes.filter(s => estaVencida(s));
+  const vencidas = solicitudes.filter(s=>estaVencida(s));
   if (!vencidas.length) return;
   document.getElementById('alerta-dias').textContent = CFG.diasLimite;
-  document.getElementById('alerta-lista').innerHTML = vencidas.map(s => {
+  document.getElementById('alerta-lista').innerHTML = vencidas.map(s=>{
     const dias = diasDesde(s.fechaLlegada);
     return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:0.5px solid var(--danger-border);border-radius:var(--radius);margin-bottom:8px;background:var(--bg)">
       <div>
@@ -398,9 +345,6 @@ function checkVencimientos() {
   openOverlay('ov-alerta');
 }
 
-// ══════════════════════════════════════════════════
-//  PANEL SOLICITUDES
-// ══════════════════════════════════════════════════
 function renderSolicitudes() {
   const el = document.getElementById('panel-solicitudes');
   if (!solicitudes.length) {
@@ -410,7 +354,7 @@ function renderSolicitudes() {
       <button class="btn btn-primary" style="margin-top:1rem" onclick="nuevaSolicitud()"><i class="ti ti-plus"></i> Nueva gira</button>
     </div>`; return;
   }
-  el.innerHTML = solicitudes.map((s, i) => {
+  el.innerHTML = solicitudes.map((s,i)=>{
     const total = (s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0);
     const gastado = (s.gastos||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
     const venc = estaVencida(s);
@@ -440,49 +384,44 @@ function renderSolicitudes() {
   updateBadges();
 }
 
-// ══════════════════════════════════════════════════
-//  PANEL SEGUIMIENTO
-// ══════════════════════════════════════════════════
 function renderSeguimiento() {
   const el = document.getElementById('panel-seguimiento');
-  const todo = solicitudes.filter(s => s.status !== 'borrador');
+  const todo = solicitudes.filter(s=>s.status!=='borrador');
   const groups = {
     todos: todo,
-    activas: todo.filter(s => s.status==='pendiente'||s.status==='aprobado'),
-    vencidas: todo.filter(s => estaVencida(s)),
-    rendidas: todo.filter(s => s.status==='rendido'),
-    cerradas: todo.filter(s => s.status==='cerrado')
+    activas: todo.filter(s=>s.status==='pendiente'||s.status==='aprobado'),
+    vencidas: todo.filter(s=>estaVencida(s)),
+    rendidas: todo.filter(s=>s.status==='rendido'),
+    cerradas: todo.filter(s=>s.status==='cerrado')
   };
-  const filtered = groups[filterSeg] || todo;
+  const filtered = groups[filterSeg]||todo;
   el.innerHTML = `
     <div class="filter-bar">
-      ${Object.entries({todos:'Todas',activas:'En curso',vencidas:'Vencidas',rendidas:'Rendidas',cerradas:'Cerradas'}).map(([k,l]) =>
+      ${Object.entries({todos:'Todas',activas:'En curso',vencidas:'Vencidas',rendidas:'Rendidas',cerradas:'Cerradas'}).map(([k,l])=>
         `<button class="filter-btn${filterSeg===k?' active':''}" onclick="filterSeg='${k}';renderSeguimiento()">
           ${k==='vencidas'&&groups.vencidas.length?`<i class="ti ti-alert-triangle"></i> ${l} (${groups.vencidas.length})`:l}
         </button>`).join('')}
     </div>
-    ${!filtered.length ? '<div class="card" style="text-align:center;padding:2rem"><p style="color:var(--text2)">No hay giras en esta categoría.</p></div>' : ''}
-    ${filtered.map(s => renderCardSeguimiento(s, solicitudes.indexOf(s))).join('')}
+    ${!filtered.length?'<div class="card" style="text-align:center;padding:2rem"><p style="color:var(--text2)">No hay giras en esta categoría.</p></div>':''}
+    ${filtered.map(s=>renderCardSeg(s,solicitudes.indexOf(s))).join('')}
   `;
 }
 
-function renderCardSeguimiento(s, idx) {
+function renderCardSeg(s, idx) {
   const total = (s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0);
   const gastado = (s.gastos||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
-  const pct = total>0 ? Math.min(100, Math.round(gastado/total*100)) : 0;
+  const pct = total>0?Math.min(100,Math.round(gastado/total*100)):0;
   const venc = estaVencida(s);
   const dr = diasRestantes(s);
   const dias = diasDesde(s.fechaLlegada);
-
   const steps = [
-    {label:'Solicitud creada',       sub:s.fechaSalida?`Salida: ${s.fechaSalida}`:'',             done:true,   active:false, danger:false},
-    {label:'Aprobación tesorero',    sub:s.status==='pendiente'?'Esperando aprobación':'Aprobado', done:s.status!=='pendiente'&&s.status!=='borrador', active:s.status==='pendiente', danger:false},
-    {label:'Fondos entregados',      sub:total?fmt(total):'—',                                    done:['aprobado','rendido','cerrado'].includes(s.status), active:false, danger:false},
-    {label:'Rendición del usuario',  sub:s.status==='aprobado'?(venc?`${dias} días sin rendir`:dr!==null?`${dr>0?dr+' días para rendir':'Vence hoy'}`:'En curso'):s.status==='rendido'||s.status==='cerrado'?`${(s.gastos||[]).length} comprobantes · ${fmt(gastado)}`:'Pendiente',
-                                                                                                   done:['rendido','cerrado'].includes(s.status), active:s.status==='aprobado'&&!venc, danger:venc&&s.status==='aprobado'},
-    {label:'Cierre por tesorero',    sub:s.status==='cerrado'?'Archivado':'Pendiente revisión',   done:s.status==='cerrado', active:s.status==='rendido', danger:false},
+    {label:'Solicitud creada',      sub:s.fechaSalida?`Salida: ${s.fechaSalida}`:'',                                         done:true,  active:false, danger:false},
+    {label:'Aprobación tesorero',   sub:s.status==='pendiente'?'Esperando aprobación':'Aprobado',                            done:s.status!=='pendiente'&&s.status!=='borrador', active:s.status==='pendiente', danger:false},
+    {label:'Fondos entregados',     sub:total?fmt(total):'—',                                                                done:['aprobado','rendido','cerrado'].includes(s.status), active:false, danger:false},
+    {label:'Rendición del usuario', sub:s.status==='aprobado'?(venc?`${dias} días sin rendir`:dr!==null?`${dr>0?dr+' días para rendir':'Vence hoy'}`:'En curso'):['rendido','cerrado'].includes(s.status)?`${(s.gastos||[]).length} comprobantes · ${fmt(gastado)}`:'Pendiente',
+                                                                                                                             done:['rendido','cerrado'].includes(s.status), active:s.status==='aprobado'&&!venc, danger:venc&&s.status==='aprobado'},
+    {label:'Cierre por tesorero',   sub:s.status==='cerrado'?'Archivado':'Pendiente revisión',                              done:s.status==='cerrado', active:s.status==='rendido', danger:false},
   ];
-
   return `<div class="card${venc?' danger-card':''}" style="margin-bottom:1rem">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:1rem">
       <div>
@@ -496,11 +435,11 @@ function renderCardSeguimiento(s, idx) {
       </div>
     </div>
     <div class="timeline">
-      ${steps.map((st, si) => `
+      ${steps.map((st,si)=>`
         <div class="tl-step ${st.done?'tl-done':st.danger?'tl-danger':st.active?'tl-active':'tl-pending'}">
           <div class="tl-dot">
             <div class="tl-circle">${st.done?'<i class="ti ti-check"></i>':st.danger?'<i class="ti ti-alert-triangle"></i>':si+1}</div>
-            ${si < steps.length-1 ? '<div class="tl-line"></div>' : ''}
+            ${si<steps.length-1?'<div class="tl-line"></div>':''}
           </div>
           <div class="tl-content">
             <div class="tl-title">${st.label}</div>
@@ -508,14 +447,14 @@ function renderCardSeguimiento(s, idx) {
           </div>
         </div>`).join('')}
     </div>
-    ${['aprobado','rendido','cerrado'].includes(s.status) ? `
+    ${['aprobado','rendido','cerrado'].includes(s.status)?`
       <div class="divider"></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <div style="font-size:12px;color:var(--text2)">Avance de gastos</div>
         <div style="font-size:12px;font-weight:500">${fmt(gastado)} / ${fmt(total)} (${pct}%)</div>
       </div>
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--${pct>=100?'danger':pct>=70?'warning':'success'}-text)"></div></div>
-    ` : ''}
+    `:''}
   </div>`;
 }
 
@@ -524,23 +463,20 @@ function verSeguimientoSol(idx) {
   showTab('seguimiento');
   const el = document.getElementById('panel-seguimiento');
   el.innerHTML = `<button class="btn" onclick="renderSeguimiento()" style="margin-bottom:1rem"><i class="ti ti-arrow-left"></i> Volver</button>
-    ${renderCardSeguimiento(solicitudes[idx], idx)}`;
+    ${renderCardSeg(solicitudes[idx],idx)}`;
 }
 
-// ══════════════════════════════════════════════════
-//  PANEL NUEVA SOLICITUD — 4 PASOS
-// ══════════════════════════════════════════════════
 function nuevaSolicitud() {
-  currentSol = {id: Date.now().toString(), status:'borrador', solicitante:'', jefe:'', destino:'', fechaSalida:'', fechaLlegada:'', dias:0, viaticos:0, hospedaje:0, reserva:0, transporte:TRANSPORTES[0], checks:[], gastos:[]};
-  currentStep = 1; gastoRows = [];
+  currentSol = {id:Date.now().toString(),status:'borrador',solicitante:'',jefe:'',destino:'',fechaSalida:'',fechaLlegada:'',dias:0,viaticos:0,hospedaje:0,reserva:0,transporte:TRANSPORTES[0],checks:[],gastos:[]};
+  currentStep=1; gastoRows=[];
   showTab('nueva');
   renderStep();
 }
 
 function editarSol(i) {
   currentSol = JSON.parse(JSON.stringify(solicitudes[i]));
-  solicitudes.splice(i, 1);
-  currentStep = 1; gastoRows = currentSol.gastos || [];
+  solicitudes.splice(i,1);
+  currentStep=1; gastoRows=currentSol.gastos||[];
   showTab('nueva');
   renderStep();
 }
@@ -548,20 +484,15 @@ function editarSol(i) {
 function renderStep() {
   const pb = document.getElementById('paso-bar');
   const labels = ['Datos','Fondos','Transporte','Confirmar'];
-  pb.innerHTML = labels.map((l, i) => {
-    const n = i+1, done = n < currentStep, active = n === currentStep;
+  pb.innerHTML = labels.map((l,i)=>{
+    const n=i+1,done=n<currentStep,active=n===currentStep;
     return `<div class="paso">
       <div class="paso-num${done?' done':active?' active':''}">${done?'<i class="ti ti-check"></i>':n}</div>
       <div class="paso-label${active?' active':''}">${l}</div>
     </div>${i<labels.length-1?'<div class="paso-sep"></div>':''}`;
   }).join('');
-
-  const el = document.getElementById('step-content');
-  if (!el) { document.getElementById('panel-nueva').innerHTML = '<div id="paso-bar" class="paso-bar"></div><div id="step-content"></div>'; }
-
   const sc = document.getElementById('step-content');
-
-  if (currentStep === 1) {
+  if (currentStep===1) {
     sc.innerHTML = `<div class="card"><div class="card-title">Datos generales</div>
       <div class="form-grid">
         <div class="form-group"><label>Solicitante</label><input id="f-sol" value="${currentSol.solicitante}" placeholder="Nombre del vendedor"></div>
@@ -573,13 +504,11 @@ function renderStep() {
       <div style="margin-top:.75rem;font-size:13px;color:var(--text2)" id="dias-info">${currentSol.dias?`<strong>${currentSol.dias} días</strong>`:'Seleccioná las fechas.'}</div>
     </div>
     <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" onclick="nextStep()">Siguiente <i class="ti ti-arrow-right"></i></button></div>`;
-  }
-
-  else if (currentStep === 2) {
-    const d = currentSol.dias || 1;
-    const v = currentSol.viaticos || (CFG.viaticos * d);
-    const h = currentSol.hospedaje || (CFG.hospedaje * d);
-    const r = currentSol.reserva || 0;
+  } else if (currentStep===2) {
+    const d=currentSol.dias||1;
+    const v=currentSol.viaticos||(CFG.viaticos*d);
+    const h=currentSol.hospedaje||(CFG.hospedaje*d);
+    const r=currentSol.reserva||0;
     sc.innerHTML = `<div class="card"><div class="card-title">Fondos solicitados</div>
       <div style="font-size:12px;color:var(--info-text);background:var(--info-bg);border:0.5px solid var(--info-border);border-radius:var(--radius);padding:8px 12px;margin-bottom:1rem">
         <i class="ti ti-info-circle"></i> Tarifas: Viáticos ${fmt(CFG.viaticos)}/día · Hospedaje ${fmt(CFG.hospedaje)}/día
@@ -601,9 +530,7 @@ function renderStep() {
         <button class="btn" onclick="prevStep()"><i class="ti ti-arrow-left"></i> Atrás</button>
         <button class="btn btn-primary" onclick="nextStep()">Siguiente <i class="ti ti-arrow-right"></i></button>
       </div>`;
-  }
-
-  else if (currentStep === 3) {
+  } else if (currentStep===3) {
     sc.innerHTML = `<div class="card"><div class="card-title">Transporte</div>
       <div class="form-group" style="margin-bottom:1.25rem"><label>Tipo de transporte</label>
         <select id="f-trans" onchange="toggleChecks()">${TRANSPORTES.map(t=>`<option${currentSol.transporte===t?' selected':''}>${t}</option>`).join('')}</select>
@@ -614,11 +541,9 @@ function renderStep() {
         <button class="btn btn-primary" onclick="nextStep()">Siguiente <i class="ti ti-arrow-right"></i></button>
       </div>`;
     toggleChecks();
-  }
-
-  else if (currentStep === 4) {
-    const total = (currentSol.viaticos||0)+(currentSol.hospedaje||0)+(currentSol.reserva||0);
-    const ok = currentSol.solicitante && currentSol.destino;
+  } else if (currentStep===4) {
+    const total=(currentSol.viaticos||0)+(currentSol.hospedaje||0)+(currentSol.reserva||0);
+    const ok=currentSol.solicitante&&currentSol.destino;
     sc.innerHTML = `<div class="card"><div class="card-title">Confirmación</div>
       <div class="resumen-row"><span style="color:var(--text2)">Solicitante</span><strong>${currentSol.solicitante||'—'}</strong></div>
       <div class="resumen-row"><span style="color:var(--text2)">Autorizante</span><strong>${currentSol.jefe||'—'}</strong></div>
@@ -642,116 +567,99 @@ function renderStep() {
 }
 
 function calcDias() {
-  const s = document.getElementById('f-sal').value;
-  const l = document.getElementById('f-lleg').value;
-  if (s && l) {
-    const d = Math.max(1, Math.round((new Date(l)-new Date(s))/86400000)+1);
-    document.getElementById('dias-info').innerHTML = `<strong>${d} días</strong> de gira`;
-    currentSol.diasTemp = d;
+  const s=document.getElementById('f-sal').value;
+  const l=document.getElementById('f-lleg').value;
+  if (s&&l) {
+    const d=Math.max(1,Math.round((new Date(l)-new Date(s))/86400000)+1);
+    document.getElementById('dias-info').innerHTML=`<strong>${d} días</strong> de gira`;
+    currentSol.diasTemp=d;
   }
 }
-
 function updTotal() {
-  const v = parseFloat(document.getElementById('f-viat').value)||0;
-  const h = parseFloat(document.getElementById('f-hosp').value)||0;
-  const r = parseFloat(document.getElementById('f-res').value)||0;
-  document.getElementById('m-total').textContent = fmt(v+h+r);
+  const v=parseFloat(document.getElementById('f-viat').value)||0;
+  const h=parseFloat(document.getElementById('f-hosp').value)||0;
+  const r=parseFloat(document.getElementById('f-res').value)||0;
+  document.getElementById('m-total').textContent=fmt(v+h+r);
 }
-
 function toggleChecks() {
-  const trans = document.getElementById('f-trans').value;
-  const isVeh = trans==='Vehículo empresa' || trans==='Vehículo propio';
-  const el = document.getElementById('checks-container');
-  if (!isVeh) { el.innerHTML = `<p style="font-size:13px;color:var(--text2);padding:8px 0"><i class="ti ti-info-circle"></i> Sin verificaciones requeridas para este transporte.</p>`; return; }
-  const saved = currentSol.checks || [];
-  el.innerHTML = `<div class="card-title">Verificación del vehículo</div><div class="check-list" style="margin-top:.5rem">
-    ${CHECKS_VEH.map((c, i) => `<label class="check-item${saved.includes(c)?' checked':''}" id="ci-${i}">
+  const trans=document.getElementById('f-trans').value;
+  const isVeh=trans==='Vehículo empresa'||trans==='Vehículo propio';
+  const el=document.getElementById('checks-container');
+  if (!isVeh){el.innerHTML=`<p style="font-size:13px;color:var(--text2);padding:8px 0"><i class="ti ti-info-circle"></i> Sin verificaciones requeridas para este transporte.</p>`;return;}
+  const saved=currentSol.checks||[];
+  el.innerHTML=`<div class="card-title">Verificación del vehículo</div><div class="check-list" style="margin-top:.5rem">
+    ${CHECKS_VEH.map((c,i)=>`<label class="check-item${saved.includes(c)?' checked':''}" id="ci-${i}">
       <input type="checkbox" ${saved.includes(c)?'checked':''} onchange="toggleCheck(this,'${c}',${i})"><span>${c}</span>
     </label>`).join('')}</div>`;
 }
-
-function toggleCheck(el, val, i) {
-  if (!currentSol.checks) currentSol.checks = [];
-  if (el.checked) { if (!currentSol.checks.includes(val)) currentSol.checks.push(val); }
-  else { currentSol.checks = currentSol.checks.filter(x => x !== val); }
-  document.getElementById('ci-'+i).classList.toggle('checked', el.checked);
+function toggleCheck(el,val,i) {
+  if (!currentSol.checks) currentSol.checks=[];
+  if (el.checked){if (!currentSol.checks.includes(val))currentSol.checks.push(val);}
+  else{currentSol.checks=currentSol.checks.filter(x=>x!==val);}
+  document.getElementById('ci-'+i).classList.toggle('checked',el.checked);
 }
-
 function nextStep() {
-  if (currentStep === 1) {
-    currentSol.solicitante = document.getElementById('f-sol').value.trim();
-    currentSol.jefe        = document.getElementById('f-jefe').value.trim();
-    currentSol.destino     = document.getElementById('f-dest').value.trim();
-    currentSol.fechaSalida = document.getElementById('f-sal').value;
-    currentSol.fechaLlegada= document.getElementById('f-lleg').value;
-    const fs = currentSol.fechaSalida, fl = currentSol.fechaLlegada;
-    currentSol.dias = fs&&fl ? Math.max(1, Math.round((new Date(fl)-new Date(fs))/86400000)+1) : 1;
-  } else if (currentStep === 2) {
-    currentSol.viaticos  = parseFloat(document.getElementById('f-viat').value)||0;
-    currentSol.hospedaje = parseFloat(document.getElementById('f-hosp').value)||0;
-    currentSol.reserva   = parseFloat(document.getElementById('f-res').value)||0;
-  } else if (currentStep === 3) {
-    currentSol.transporte = document.getElementById('f-trans').value;
+  if (currentStep===1){
+    currentSol.solicitante=document.getElementById('f-sol').value.trim();
+    currentSol.jefe=document.getElementById('f-jefe').value.trim();
+    currentSol.destino=document.getElementById('f-dest').value.trim();
+    currentSol.fechaSalida=document.getElementById('f-sal').value;
+    currentSol.fechaLlegada=document.getElementById('f-lleg').value;
+    const fs=currentSol.fechaSalida,fl=currentSol.fechaLlegada;
+    currentSol.dias=fs&&fl?Math.max(1,Math.round((new Date(fl)-new Date(fs))/86400000)+1):1;
+  } else if (currentStep===2){
+    currentSol.viaticos=parseFloat(document.getElementById('f-viat').value)||0;
+    currentSol.hospedaje=parseFloat(document.getElementById('f-hosp').value)||0;
+    currentSol.reserva=parseFloat(document.getElementById('f-res').value)||0;
+  } else if (currentStep===3){
+    currentSol.transporte=document.getElementById('f-trans').value;
   }
-  if (currentStep < 4) currentStep++;
+  if (currentStep<4) currentStep++;
   renderStep();
 }
-
-function prevStep() { if (currentStep > 1) currentStep--; renderStep(); }
+function prevStep(){if(currentStep>1)currentStep--;renderStep();}
 
 async function enviarSolicitud() {
-  currentSol.status = 'pendiente';
-  const btn = event.currentTarget;
-  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> Enviando...';
+  currentSol.status='pendiente';
+  const btn=event.currentTarget;
+  btn.disabled=true; btn.innerHTML='<i class="ti ti-loader"></i> Enviando...';
   try {
     await api({
-      action: 'saveSolicitud',
-      id: currentSol.id,
-      solicitante: currentSol.solicitante,
-      jefe: currentSol.jefe,
-      destino: currentSol.destino,
-      fechaSalida: currentSol.fechaSalida,
-      fechaLlegada: currentSol.fechaLlegada,
-      dias: currentSol.dias,
-      viaticos: currentSol.viaticos,
-      hospedaje: currentSol.hospedaje,
-      reserva: currentSol.reserva,
-      transporte: currentSol.transporte,
-      checks: JSON.stringify(currentSol.checks||[]),
-      status: 'pendiente'
+      action:'saveSolicitud', id:currentSol.id,
+      solicitante:currentSol.solicitante, jefe:currentSol.jefe,
+      destino:currentSol.destino, fechaSalida:currentSol.fechaSalida,
+      fechaLlegada:currentSol.fechaLlegada, dias:currentSol.dias,
+      viaticos:currentSol.viaticos, hospedaje:currentSol.hospedaje,
+      reserva:currentSol.reserva, transporte:currentSol.transporte,
+      checks:JSON.stringify(currentSol.checks||[]), status:'pendiente'
     });
     solicitudes.push(currentSol);
-    updateBadges();
-    showTab('solicitudes');
-    showToast('Solicitud enviada al tesorero', 'success');
+    updateBadges(); showTab('solicitudes');
+    showToast('Solicitud enviada al tesorero','success');
   } catch(e) {
-    showToast('Error al guardar. Verificá la conexión.', 'danger');
-    btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Enviar al tesorero';
+    showToast('Error al guardar. Verificá la conexión.','danger');
+    btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Enviar al tesorero';
   }
 }
 
-// ══════════════════════════════════════════════════
-//  PANEL RENDICIÓN
-// ══════════════════════════════════════════════════
 function irRendicion(idx) {
-  currentSol = solicitudes[idx];
-  gastoRows = currentSol.gastos ? JSON.parse(JSON.stringify(currentSol.gastos)) : [];
+  currentSol=solicitudes[idx];
+  gastoRows=currentSol.gastos?JSON.parse(JSON.stringify(currentSol.gastos)):[];
   showTab('rendicion');
 }
 
 function renderRendicion() {
-  const el = document.getElementById('panel-rendicion');
-  if (!currentSol) {
-    el.innerHTML = `<div class="card" style="text-align:center;padding:3rem"><p style="color:var(--text2)">Seleccioná una gira desde Solicitudes.</p></div>`; return;
+  const el=document.getElementById('panel-rendicion');
+  if (!currentSol){
+    el.innerHTML=`<div class="card" style="text-align:center;padding:3rem"><p style="color:var(--text2)">Seleccioná una gira desde Solicitudes.</p></div>`;return;
   }
-  const total = (currentSol.viaticos||0)+(currentSol.hospedaje||0)+(currentSol.reserva||0);
-  const gastado = (gastoRows||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
-  const saldo = total - gastado;
-  const ro = currentSol.status==='rendido' || currentSol.status==='cerrado';
-  const byTipo = {};
-  gastoRows.forEach(g => { byTipo[g.tipo] = (byTipo[g.tipo]||0) + (parseFloat(g.importe)||0); });
-
-  el.innerHTML = `
+  const total=(currentSol.viaticos||0)+(currentSol.hospedaje||0)+(currentSol.reserva||0);
+  const gastado=(gastoRows||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
+  const saldo=total-gastado;
+  const ro=currentSol.status==='rendido'||currentSol.status==='cerrado';
+  const byTipo={};
+  gastoRows.forEach(g=>{byTipo[g.tipo]=(byTipo[g.tipo]||0)+(parseFloat(g.importe)||0);});
+  el.innerHTML=`
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:1rem">
         <div>
@@ -767,7 +675,6 @@ function renderRendicion() {
           <div class="mval" id="rm-s" style="color:var(--${saldo>=0?'warning':'success'}-text)">${fmt(Math.abs(saldo))}</div></div>
       </div>
     </div>
-
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
         <div class="card-title" style="margin-bottom:0">Comprobantes</div>
@@ -778,43 +685,41 @@ function renderRendicion() {
       </div>
       <div id="gt"></div>
     </div>
-
     <div class="card">
       <div class="card-title">Resumen por tipo de comprobante</div>
-      <div id="rcomp">${renderResumenComp(byTipo, gastado, saldo)}</div>
+      <div id="rcomp">${renderResumenComp(byTipo,gastado,saldo)}</div>
     </div>
-
-    ${!ro ? `<div style="display:flex;justify-content:flex-end">
+    ${!ro?`<div style="display:flex;justify-content:flex-end">
       <button class="btn btn-primary" onclick="enviarRendicion()"><i class="ti ti-send"></i> Enviar rendición al tesorero</button>
-    </div>` : `<div style="font-size:13px;color:var(--success-text);background:var(--success-bg);border:0.5px solid var(--success-border);border-radius:var(--radius);padding:10px 14px">
+    </div>`:`<div style="font-size:13px;color:var(--success-text);background:var(--success-bg);border:0.5px solid var(--success-border);border-radius:var(--radius);padding:10px 14px">
       <i class="ti ti-check"></i> Rendición ${currentSol.status==='cerrado'?'cerrada y archivada':'enviada — pendiente de revisión'}.
     </div>`}
   `;
   renderGastoTable();
 }
 
-function renderResumenComp(byTipo, gastado, saldo) {
+function renderResumenComp(byTipo,gastado,saldo) {
   if (!Object.keys(byTipo).length) return '<p style="font-size:13px;color:var(--text2)">Sin gastos cargados.</p>';
   return Object.entries(byTipo).map(([t,v])=>`<div class="resumen-row"><span style="color:var(--text2)">${t}</span><strong>${fmt(v)}</strong></div>`).join('')
-    + `<div class="resumen-row resumen-total"><span>Total gastado</span><span>${fmt(gastado)}</span></div>
+    +`<div class="resumen-row resumen-total"><span>Total gastado</span><span>${fmt(gastado)}</span></div>
     <div class="resumen-row"><span style="color:var(--text2)">${saldo>=0?'A reintegrar al tesorero':'El tesorero debe abonar'}</span>
     <span style="font-weight:500;color:var(--${saldo>=0?'warning':'success'}-text)">${fmt(Math.abs(saldo))}</span></div>`;
 }
 
-function addGasto() { gastoRows.push({tipo:'Factura B', rubro:172, detalle:'', importe:0}); renderGastoTable(); }
-function removeGasto(i) { gastoRows.splice(i,1); renderGastoTable(); }
+function addGasto(){gastoRows.push({tipo:'Factura B',rubro:172,detalle:'',importe:0});renderGastoTable();}
+function removeGasto(i){gastoRows.splice(i,1);renderGastoTable();}
 
 function renderGastoTable() {
-  const el = document.getElementById('gt');
-  const ro = currentSol.status==='rendido' || currentSol.status==='cerrado';
-  if (!gastoRows.length) { el.innerHTML = `<p style="font-size:13px;color:var(--text2);text-align:center;padding:1rem">Sin comprobantes.</p>`; updRendTotals(); return; }
-  if (ro) {
-    el.innerHTML = `<table class="gastos"><colgroup><col style="width:26%"><col style="width:30%"><col style="width:28%"><col style="width:16%"></colgroup>
+  const el=document.getElementById('gt');
+  const ro=currentSol.status==='rendido'||currentSol.status==='cerrado';
+  if (!gastoRows.length){el.innerHTML=`<p style="font-size:13px;color:var(--text2);text-align:center;padding:1rem">Sin comprobantes.</p>`;updRendTotals();return;}
+  if (ro){
+    el.innerHTML=`<table class="gastos"><colgroup><col style="width:26%"><col style="width:30%"><col style="width:28%"><col style="width:16%"></colgroup>
       <thead><tr><th>Tipo</th><th>Rubro</th><th>Detalle</th><th style="text-align:right">Importe</th></tr></thead>
       <tbody>${gastoRows.map(g=>`<tr><td>${g.tipo}</td><td style="font-size:12px;color:var(--text2)">${RUBROS.find(r=>r.cod===g.rubro)?.desc||g.rubro}</td><td>${g.detalle}</td><td style="text-align:right">${fmt(g.importe)}</td></tr>`).join('')}</tbody>
     </table>`;
   } else {
-    el.innerHTML = `<table class="gastos"><colgroup><col style="width:21%"><col style="width:27%"><col style="width:24%"><col style="width:16%"><col style="width:12%"></colgroup>
+    el.innerHTML=`<table class="gastos"><colgroup><col style="width:21%"><col style="width:27%"><col style="width:24%"><col style="width:16%"><col style="width:12%"></colgroup>
       <thead><tr><th>Tipo</th><th>Rubro</th><th>Detalle</th><th>Importe</th><th></th></tr></thead>
       <tbody>${gastoRows.map((g,i)=>`<tr>
         <td><select style="font-size:12px;padding:3px 5px" onchange="gastoRows[${i}].tipo=this.value;updRendTotals()">${TIPOS_COMP.map(t=>`<option${g.tipo===t?' selected':''}>${t}</option>`).join('')}</select></td>
@@ -829,47 +734,43 @@ function renderGastoTable() {
 }
 
 function updRendTotals() {
-  const total = (currentSol.viaticos||0)+(currentSol.hospedaje||0)+(currentSol.reserva||0);
-  const gastado = gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
-  const saldo = total - gastado;
-  const eg = document.getElementById('rm-g'); const es = document.getElementById('rm-s');
-  if (eg) eg.textContent = fmt(gastado);
-  if (es) { es.textContent = fmt(Math.abs(saldo)); es.style.color = `var(--${saldo>=0?'warning':'success'}-text)`; }
-  const byTipo = {}; gastoRows.forEach(g=>{byTipo[g.tipo]=(byTipo[g.tipo]||0)+(parseFloat(g.importe)||0);});
-  const rc = document.getElementById('rcomp');
-  if (rc) rc.innerHTML = renderResumenComp(byTipo, gastado, saldo);
+  const total=(currentSol.viaticos||0)+(currentSol.hospedaje||0)+(currentSol.reserva||0);
+  const gastado=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
+  const saldo=total-gastado;
+  const eg=document.getElementById('rm-g');const es=document.getElementById('rm-s');
+  if (eg) eg.textContent=fmt(gastado);
+  if (es){es.textContent=fmt(Math.abs(saldo));es.style.color=`var(--${saldo>=0?'warning':'success'}-text)`;}
+  const byTipo={};gastoRows.forEach(g=>{byTipo[g.tipo]=(byTipo[g.tipo]||0)+(parseFloat(g.importe)||0);});
+  const rc=document.getElementById('rcomp');
+  if (rc) rc.innerHTML=renderResumenComp(byTipo,gastado,saldo);
 }
 
 function simScan() {
-  showToast('Escaneando comprobante...', 'info');
-  setTimeout(() => { gastoRows.push({tipo:'Ticket / Factura C', rubro:172, detalle:'Almuerzo en ruta', importe:8500}); renderGastoTable(); showToast('Comprobante cargado', 'success'); }, 1000);
+  showToast('Escaneando comprobante...','info');
+  setTimeout(()=>{gastoRows.push({tipo:'Ticket / Factura C',rubro:172,detalle:'Almuerzo en ruta',importe:8500});renderGastoTable();showToast('Comprobante cargado','success');},1000);
 }
 
 async function enviarRendicion() {
-  if (!gastoRows.length) { showToast('Cargá al menos un comprobante', 'warning'); return; }
+  if (!gastoRows.length){showToast('Cargá al menos un comprobante','warning');return;}
   try {
-    await api({ action:'saveGastos', id:currentSol.id, gastos:JSON.stringify(gastoRows), usuario:currentSol.solicitante });
-    await api({ action:'updateStatus', id:currentSol.id, status:'rendido', usuario:currentSol.solicitante });
-    currentSol.gastos = JSON.parse(JSON.stringify(gastoRows));
-    currentSol.status = 'rendido';
-    updateBadges(); renderRendicion();
-    showToast('Rendición enviada al tesorero', 'success');
-  } catch(e) { showToast('Error al guardar. Verificá la conexión.', 'danger'); }
+    await api({action:'saveGastos',id:currentSol.id,gastos:JSON.stringify(gastoRows),usuario:currentSol.solicitante});
+    await api({action:'updateStatus',id:currentSol.id,status:'rendido',usuario:currentSol.solicitante});
+    currentSol.gastos=JSON.parse(JSON.stringify(gastoRows));
+    currentSol.status='rendido';
+    updateBadges();renderRendicion();
+    showToast('Rendición enviada al tesorero','success');
+  } catch(e){showToast('Error al guardar. Verificá la conexión.','danger');}
 }
 
-// ══════════════════════════════════════════════════
-//  PANEL TESORERÍA
-// ══════════════════════════════════════════════════
 function renderTesoreria() {
   updateBadges();
-  const el = document.getElementById('panel-tesoreria');
-  const pend = solicitudes.filter(s => s.status==='pendiente');
-  const rend = solicitudes.filter(s => s.status==='rendido');
-  const cerr = solicitudes.filter(s => s.status==='cerrado');
-
-  el.innerHTML = `
-    ${pend.length ? `<div class="card-title" style="margin-bottom:.75rem">Solicitudes pendientes de aprobación</div>
-    ${pend.map(s => { const idx=solicitudes.indexOf(s); const total=(s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0);
+  const el=document.getElementById('panel-tesoreria');
+  const pend=solicitudes.filter(s=>s.status==='pendiente');
+  const rend=solicitudes.filter(s=>s.status==='rendido');
+  const cerr=solicitudes.filter(s=>s.status==='cerrado');
+  el.innerHTML=`
+    ${pend.length?`<div class="card-title" style="margin-bottom:.75rem">Solicitudes pendientes de aprobación</div>
+    ${pend.map(s=>{const idx=solicitudes.indexOf(s);const total=(s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0);
       return `<div class="card" style="margin-bottom:1rem">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
           <div><div style="font-weight:500;font-size:15px">${s.destino}</div>
@@ -880,10 +781,9 @@ function renderTesoreria() {
           <button class="btn btn-success" onclick="aprobar(${idx})"><i class="ti ti-check"></i> Aprobar y entregar fondos</button>
           <button class="btn btn-danger" onclick="rechazar(${idx})"><i class="ti ti-x"></i> Rechazar</button>
         </div>
-      </div>`;}).join('')}` : ''}
-
-    ${rend.length ? `<div class="card-title" style="margin:.5rem 0 .75rem">Rendiciones a revisar</div>
-    ${rend.map(s => { const idx=solicitudes.indexOf(s); const total=(s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0); const gastado=(s.gastos||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0); const saldo=total-gastado;
+      </div>`;}).join('')}`:''}
+    ${rend.length?`<div class="card-title" style="margin:.5rem 0 .75rem">Rendiciones a revisar</div>
+    ${rend.map(s=>{const idx=solicitudes.indexOf(s);const total=(s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0);const gastado=(s.gastos||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0);const saldo=total-gastado;
       return `<div class="card" style="margin-bottom:1rem">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.75rem">
           <div><div style="font-weight:500;font-size:15px">${s.destino}</div>
@@ -896,10 +796,9 @@ function renderTesoreria() {
           <span style="font-weight:500;color:var(--${saldo>=0?'warning':'success'}-text)">${saldo>=0?'Reintegra':'Recibe'}: ${fmt(Math.abs(saldo))}</span>
         </div>
         <button class="btn btn-success" onclick="cerrar(${idx})"><i class="ti ti-check"></i> Confirmar y cerrar</button>
-      </div>`;}).join('')}` : ''}
-
-    ${cerr.length ? `<div class="card-title" style="margin:.5rem 0 .75rem">Historial</div>
-    ${cerr.map(s => { const total=(s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0); const gastado=(s.gastos||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
+      </div>`;}).join('')}`:''}
+    ${cerr.length?`<div class="card-title" style="margin:.5rem 0 .75rem">Historial</div>
+    ${cerr.map(s=>{const total=(s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0);const gastado=(s.gastos||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
       return `<div class="card" style="margin-bottom:.75rem;opacity:.75">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
           <div><div style="font-weight:500">${s.destino}</div>
@@ -909,82 +808,64 @@ function renderTesoreria() {
             <span class="sbadge s-cerrado"><i class="ti ti-check"></i> Cerrado</span>
           </div>
         </div>
-      </div>`;}).join('')}` : ''}
-
-    ${!pend.length&&!rend.length&&!cerr.length ? `<div class="card" style="text-align:center;padding:3rem">
+      </div>`;}).join('')}`:''}
+    ${!pend.length&&!rend.length&&!cerr.length?`<div class="card" style="text-align:center;padding:3rem">
       <i class="ti ti-building-bank" style="font-size:48px;color:var(--text2)"></i>
       <p style="margin-top:1rem;color:var(--text2)">Sin movimientos pendientes.</p>
-    </div>` : ''}
+    </div>`:''}
   `;
 }
 
 async function aprobar(i) {
   try {
-    await api({action:'updateStatus', id:solicitudes[i].id, status:'aprobado', usuario:'Tesorero'});
-    solicitudes[i].status = 'aprobado';
-    updateBadges(); renderTesoreria();
-    showToast('Fondos aprobados', 'success');
-  } catch(e) { showToast('Error al guardar', 'danger'); }
+    await api({action:'updateStatus',id:solicitudes[i].id,status:'aprobado',usuario:'Tesorero'});
+    solicitudes[i].status='aprobado'; updateBadges(); renderTesoreria();
+    showToast('Fondos aprobados','success');
+  } catch(e){showToast('Error al guardar','danger');}
 }
-
 async function rechazar(i) {
   try {
-    await api({action:'updateStatus', id:solicitudes[i].id, status:'rechazado', usuario:'Tesorero'});
-    solicitudes.splice(i, 1);
-    updateBadges(); renderTesoreria();
-    showToast('Solicitud rechazada', 'warning');
-  } catch(e) { showToast('Error al guardar', 'danger'); }
+    await api({action:'updateStatus',id:solicitudes[i].id,status:'rechazado',usuario:'Tesorero'});
+    solicitudes.splice(i,1); updateBadges(); renderTesoreria();
+    showToast('Solicitud rechazada','warning');
+  } catch(e){showToast('Error al guardar','danger');}
 }
-
 async function cerrar(i) {
   try {
-    await api({action:'updateStatus', id:solicitudes[i].id, status:'cerrado', usuario:'Tesorero'});
-    solicitudes[i].status = 'cerrado';
-    updateBadges(); renderTesoreria();
-    showToast('Rendición cerrada', 'success');
-  } catch(e) { showToast('Error al guardar', 'danger'); }
+    await api({action:'updateStatus',id:solicitudes[i].id,status:'cerrado',usuario:'Tesorero'});
+    solicitudes[i].status='cerrado'; updateBadges(); renderTesoreria();
+    showToast('Rendición cerrada','success');
+  } catch(e){showToast('Error al guardar','danger');}
 }
 
-// ══════════════════════════════════════════════════
-//  CONFIGURACIÓN
-// ══════════════════════════════════════════════════
 function checkCfgPass() {
-  const p = document.getElementById('cfg-pass').value;
-  if (p === CFG.passAdmin) {
-    document.getElementById('cfg-locked').style.display = 'none';
-    document.getElementById('cfg-unlocked').style.display = 'block';
-    document.getElementById('cfg-viat').value = CFG.viaticos;
-    document.getElementById('cfg-hosp').value = CFG.hospedaje;
-    document.getElementById('cfg-dias').value = CFG.diasLimite;
-  } else {
-    document.getElementById('cfg-err').textContent = 'Clave incorrecta';
-  }
+  const p=document.getElementById('cfg-pass').value;
+  if (p===CFG.passAdmin){
+    document.getElementById('cfg-locked').style.display='none';
+    document.getElementById('cfg-unlocked').style.display='block';
+    document.getElementById('cfg-viat').value=CFG.viaticos;
+    document.getElementById('cfg-hosp').value=CFG.hospedaje;
+    document.getElementById('cfg-dias').value=CFG.diasLimite;
+  } else {document.getElementById('cfg-err').textContent='Clave incorrecta';}
 }
-
 async function guardarConfig() {
-  const params = {
-    action: 'saveConfig',
-    viaticos:   document.getElementById('cfg-viat').value,
-    hospedaje:  document.getElementById('cfg-hosp').value,
-    diasLimite: document.getElementById('cfg-dias').value,
-  };
-  const np = document.getElementById('cfg-newpass').value.trim();
-  if (np) params.passAdmin = np;
+  const params={action:'saveConfig',
+    viaticos:document.getElementById('cfg-viat').value,
+    hospedaje:document.getElementById('cfg-hosp').value,
+    diasLimite:document.getElementById('cfg-dias').value};
+  const np=document.getElementById('cfg-newpass').value.trim();
+  if (np) params.passAdmin=np;
   try {
     await api(params);
-    CFG.viaticos   = parseFloat(params.viaticos)   || 60000;
-    CFG.hospedaje  = parseFloat(params.hospedaje)  || 100000;
-    CFG.diasLimite = parseInt(params.diasLimite)   || 5;
-    if (np) CFG.passAdmin = np;
+    CFG.viaticos=parseFloat(params.viaticos)||60000;
+    CFG.hospedaje=parseFloat(params.hospedaje)||100000;
+    CFG.diasLimite=parseInt(params.diasLimite)||5;
+    if (np) CFG.passAdmin=np;
     closeOverlay('ov-config');
-    showToast('Configuración guardada', 'success');
-  } catch(e) { showToast('Error al guardar configuración', 'danger'); }
+    showToast('Configuración guardada','success');
+  } catch(e){showToast('Error al guardar configuración','danger');}
 }
 
-// ══════════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════════
-document.getElementById('panel-nueva').innerHTML = '<div class="paso-bar" id="paso-bar"></div><div id="step-content"></div>';
 cargarDatos();
 </script>
 </body>
