@@ -260,7 +260,7 @@ table.gt tr:last-child td{border-bottom:none}
   <button class="tab" id="t-nueva" onclick="showTab('nueva')" style="display:none"><i class="ti ti-forms"></i> Formulario</button>
   <button class="tab" id="t-rendicion" onclick="showTab('rendicion')" style="display:none"><i class="ti ti-receipt"></i> Rendición</button>
   <button class="tab" id="t-tesoreria" onclick="showTab('tesoreria')" style="display:none"><i class="ti ti-building-bank"></i> Tesorería <span class="nb" id="badge-tes" style="display:none">0</span></button>
-  <button class="tab" id="t-dashboard" onclick="showTab('dashboard')"><i class="ti ti-chart-bar"></i> Dashboard</button>
+  <button class="tab" id="t-dashboard" onclick="showTab('dashboard')" style="display:none"><i class="ti ti-chart-bar"></i> Dashboard</button>
 </div>
 
 <!-- PANELS -->
@@ -279,7 +279,7 @@ table.gt tr:last-child td{border-bottom:none}
 // ══════════════════════════════════════════════
 //  CONFIG
 // ══════════════════════════════════════════════
-const AS_URL = 'https://script.google.com/macros/s/AKfycbyPTb41zE1Cr90JsAvpDCGrXD9OJ7Ybsmew-VCYFML9dAwS1SM9YZETZ44S68QExQumxg/exec';
+const AS_URL = 'https://script.google.com/macros/s/AKfycbwayq92N2sJQDZM3TX9vRDuLVfZWHu1ZQbbApCJqYDiqGQrcXlqTtprIEz2tpvK-Mpe7Q/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS = [
@@ -374,6 +374,7 @@ function initApp() {
   // Vendedor no ve tab nueva/rendicion directamente (accede por botones)
   document.getElementById('t-nueva').style.display = 'none';
   document.getElementById('t-rendicion').style.display = 'none';
+  document.getElementById('t-dashboard').style.display = isT ? '' : 'none';
 
   cargarDatos();
 }
