@@ -482,6 +482,8 @@ function showToast(msg,type='in'){
 //  TABS
 // ══════════════════════════════════════════════
 function showTab(name) {
+  // Dashboard solo para tesorero
+  if(name==='dashboard' && ROL!=='tesorero') name='solicitudes';
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   document.getElementById('panel-'+name).classList.add('on');
