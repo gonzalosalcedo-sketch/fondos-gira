@@ -1319,6 +1319,7 @@ function toggleAuthManual(val){
   document.getElementById('auth-manual-wrap').style.display=val==='__manual__'?'':'none';
 }
 
+async function confirmarSolicitarAuth(){
   const idx=authTarget;
   const s=solicitudes[idx];
   const sel=document.getElementById('auth-select');
