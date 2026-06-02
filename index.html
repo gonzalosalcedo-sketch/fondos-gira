@@ -1276,20 +1276,28 @@ async function confirmarAprobacion(){
 }
 
 // Solicitar autorización
-function showSolicitarAuth(idx){
+async function showSolicitarAuth(idx){
   authTarget=idx;
-  // Cargar autorizantes: usuarios con rol autorizante o tesorero (excluyendo al usuario actual)
-  const autorizantes=usuariosDB.filter(u=>
-    (u.Rol==='autorizante'||u.Rol==='tesorero')&&
-    u.Email&&u.Email.toLowerCase()!==USER.email.toLowerCase()&&
-    u.Activo!=='NO'
-  );
   const sel=document.getElementById('auth-select');
-  sel.innerHTML=autorizantes.length
-    ? autorizantes.map(u=>`<option value="${u.Email}">${u.Nombre} (${u.Rol})</option>`).join('')
-    : '<option value="">No hay autorizantes disponibles</option>';
+  sel.innerHTML='<option value="">Cargando...</option>';
   document.getElementById('auth-nota').value='';
   openOv('ov-auth');
+  try{
+    // Cargar siempre frescos desde el script
+    const res=await api({action:'getUsuarios'});
+    usuariosDB=Array.isArray(res)?res:[];
+    const autorizantes=usuariosDB.filter(u=>
+      (u.Rol==='autorizante'||u.Rol==='tesorero')&&
+      u.Email&&u.Email.toLowerCase()!==USER.email.toLowerCase()&&
+      u.Activo!=='NO'
+    );
+    sel.innerHTML=autorizantes.length
+      ? autorizantes.map(u=>`<option value="${u.Email}">${u.Nombre} (${u.Rol})</option>`).join('')
+      : '<option value="">No hay autorizantes disponibles</option>';
+  }catch(e){
+    sel.innerHTML='<option value="">Error al cargar usuarios</option>';
+    showToast('Error al cargar autorizantes: '+e.message,'er');
+  }
 }
 
 async function confirmarSolicitarAuth(){
