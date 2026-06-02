@@ -234,7 +234,13 @@ table.gt tr:last-child td{border-bottom:none}
     <div style="font-weight:500;font-size:15px;margin-bottom:1rem"><i class="ti ti-shield-check"></i> Solicitar autorización</div>
     <div class="fi" style="margin-bottom:1rem">
       <label>Seleccioná el autorizante</label>
-      <select id="auth-select"></select>
+      <select id="auth-select" onchange="toggleAuthManual(this.value)"></select>
+    </div>
+    <div id="auth-manual-wrap" style="display:none;margin-bottom:1rem">
+      <div class="fg" style="gap:8px">
+        <div class="fi"><label>Nombre del autorizante</label><input id="auth-nombre-manual" placeholder="Nombre completo"></div>
+        <div class="fi"><label>Email del autorizante</label><input type="email" id="auth-email-manual" placeholder="correo@empresa.com"></div>
+      </div>
     </div>
     <div class="fi" style="margin-bottom:1rem">
       <label>Nota para el autorizante (opcional)</label>
@@ -338,11 +344,11 @@ table.gt tr:last-child td{border-bottom:none}
   </div>
   <div class="hdr-right">
     <span style="font-size:12px;color:var(--text2)" id="hdr-user"></span>
-    <button class="btn" onclick="openOv('ov-clave')" title="Cambiar contraseña"><i class="ti ti-lock"></i></button>
+    <button class="btn" onclick="openOv('ov-clave')" title="Cambiar contraseña"><i class="ti ti-lock"></i> Mi clave</button>
     <button class="btn" id="btn-usuarios" style="display:none" onclick="abrirUsuarios()"><i class="ti ti-users"></i> Usuarios</button>
-    <button class="btn" id="btn-cfg" style="display:none" onclick="openCfg()"><i class="ti ti-settings"></i></button>
+    <button class="btn" id="btn-cfg" style="display:none" onclick="openCfg()"><i class="ti ti-settings"></i> Config</button>
     <button class="btn pr" id="btn-nueva" style="display:none" onclick="nuevaSolicitud()"><i class="ti ti-plus"></i> Nueva gira</button>
-    <button class="btn" onclick="logout()" title="Salir"><i class="ti ti-logout"></i></button>
+    <button class="btn" onclick="logout()"><i class="ti ti-logout"></i> Salir</button>
   </div>
 </div>
 
@@ -1281,45 +1287,64 @@ async function showSolicitarAuth(idx){
   const sel=document.getElementById('auth-select');
   sel.innerHTML='<option value="">Cargando...</option>';
   document.getElementById('auth-nota').value='';
+  document.getElementById('auth-email-manual').value='';
+  document.getElementById('auth-nombre-manual').value='';
+  document.getElementById('auth-manual-wrap').style.display='none';
   openOv('ov-auth');
   try{
-    // Cargar siempre frescos desde el script
     const res=await api({action:'getUsuarios'});
     usuariosDB=Array.isArray(res)?res:[];
-    const autorizantes=usuariosDB.filter(u=>
-      (u.Rol==='autorizante'||u.Rol==='tesorero')&&
+    // Mostrar TODOS los usuarios activos excepto el tesorero actual
+    const todos=usuariosDB.filter(u=>
       u.Email&&u.Email.toLowerCase()!==USER.email.toLowerCase()&&
       u.Activo!=='NO'
     );
-    sel.innerHTML=autorizantes.length
-      ? autorizantes.map(u=>`<option value="${u.Email}">${u.Nombre} (${u.Rol})</option>`).join('')
-      : '<option value="">No hay autorizantes disponibles</option>';
+    sel.innerHTML=`<option value="">— Seleccioná un usuario —</option>`
+      +(todos.length
+        ? todos.map(u=>`<option value="${u.Email}|${u.Nombre||u.Email}">${u.Nombre||u.Email} (${u.Rol||'vendedor'})</option>`).join('')
+        : '')
+      +'<option value="__manual__">✏️ Ingresar email manualmente...</option>';
   }catch(e){
-    sel.innerHTML='<option value="">Error al cargar usuarios</option>';
-    showToast('Error al cargar autorizantes: '+e.message,'er');
+    sel.innerHTML='<option value="__manual__">✏️ Ingresar email manualmente...</option>';
+    showToast('No se pudo cargar la lista: '+e.message,'wa');
   }
 }
 
-async function confirmarSolicitarAuth(){
+function toggleAuthManual(val){
+  document.getElementById('auth-manual-wrap').style.display=val==='__manual__'?'':'none';
+}
+
   const idx=authTarget;
   const s=solicitudes[idx];
   const sel=document.getElementById('auth-select');
-  const authEmail=sel.value;
-  const authNombre=sel.options[sel.selectedIndex]?.text||authEmail;
+  const selVal=sel.value;
   const nota=document.getElementById('auth-nota').value.trim();
-  if(!authEmail){showToast('Seleccioná un autorizante','wa');return;}
+  let authEmail='', authNombre='';
+  if(selVal==='__manual__'||selVal===''){
+    // Modo manual
+    authEmail=document.getElementById('auth-email-manual').value.trim().toLowerCase();
+    authNombre=document.getElementById('auth-nombre-manual').value.trim()||authEmail;
+    if(!authEmail){showToast('Ingresá el email del autorizante','wa');return;}
+  } else {
+    // Seleccionado de la lista — formato "email|nombre"
+    const parts=selVal.split('|');
+    authEmail=parts[0];
+    authNombre=parts[1]||sel.options[sel.selectedIndex]?.text||authEmail;
+    authNombre=authNombre.replace(/ \(.*\)$/,''); // quitar el (rol) del texto
+    if(!authEmail||authEmail==='— Seleccioná un usuario —'){showToast('Seleccioná un autorizante','wa');return;}
+  }
   closeOv('ov-auth');
   try{
     await api({action:'solicitarAutorizacion',id:s.id,
-      autorizanteEmail:authEmail,autorizanteNombre:authNombre.split(' (')[0],
+      autorizanteEmail:authEmail,autorizanteNombre:authNombre,
       nota,solicitante:s.solicitante,emailSolicitante:s.email,
       destino:s.destino,fechaSalida:s.fechaSalida,fechaLlegada:s.fechaLlegada,
       dias:s.dias,viaticos:s.viaticos,hospedaje:s.hospedaje,transporte:s.transporte});
     solicitudes[idx].status='auth_pendiente';
-    solicitudes[idx].autorizante=authNombre.split(' (')[0];
+    solicitudes[idx].autorizante=authNombre;
     solicitudes[idx].emailAutorizante=authEmail;
     updateBadges();renderTesoreria();
-    showToast('Solicitud de autorización enviada a '+authNombre.split(' (')[0],'ok');
+    showToast('Autorización enviada a '+authNombre,'ok');
   }catch(e){showToast('Error: '+e.message,'er');}
 }
 
