@@ -146,12 +146,17 @@ table.gt tr:last-child td{border-bottom:none}
 <!-- PANTALLA RESULTADO AUTORIZACIÓN (para cuando el autorizante hace clic desde el mail) -->
 <div id="auth-result-screen" style="display:none;min-height:100vh;align-items:center;justify-content:center;background:var(--bg3);padding:1rem">
   <div style="background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:2rem;width:420px;max-width:100%;text-align:center">
+    <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:1.5rem">
+      <i class="ti ti-route" style="font-size:20px;color:var(--text2)"></i>
+      <span style="font-size:16px;font-weight:500">Fondos de Gira — Cuenca del Sur</span>
+    </div>
     <div id="auth-result-icon" style="font-size:48px;margin-bottom:1rem"></div>
     <div id="auth-result-title" style="font-size:18px;font-weight:500;margin-bottom:.5rem"></div>
     <div id="auth-result-body" style="font-size:14px;color:var(--text2);margin-bottom:1.5rem"></div>
-    <a href="https://gonzalosalcedo-sketch.github.io/fondos-gira" class="btn pr" style="display:inline-flex">
-      <i class="ti ti-route"></i> Ir a la app
-    </a>
+    <button class="btn pr" style="width:100%;justify-content:center;padding:11px;margin-bottom:8px" onclick="irALogin()">
+      <i class="ti ti-login"></i> Ingresar a la app
+    </button>
+    <p style="font-size:12px;color:var(--text3)">Tu decisión ya fue registrada y el tesorero fue notificado.</p>
   </div>
 </div>
 
@@ -1569,6 +1574,13 @@ async function guardarConfig(){
 }
 
 // ── PANTALLA DE RESULTADO AUTORIZACIÓN (link desde mail) ───────
+function irALogin(){
+  // Limpiar URL de parámetros de autorización y mostrar login
+  window.history.replaceState({}, document.title, window.location.pathname);
+  document.getElementById('auth-result-screen').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+}
+
 async function procesarAuthLink(){
   const p=new URLSearchParams(window.location.search);
   const id=p.get('id'),tok=p.get('tok'),decision=p.get('decision');
@@ -1604,13 +1616,14 @@ async function procesarAuthLink(){
 // ── INIT ───────────────────────────────────────────────────────
 (async()=>{
   const p=new URLSearchParams(window.location.search);
-  // Link de autorización desde mail
+  // Link de autorización desde mail — procesar y mostrar resultado
   if(p.get('tok')&&p.get('decision')){
+    // Limpiar URL para que al recargar no vuelva a entrar acá
+    window.history.replaceState({}, document.title, window.location.pathname);
     await procesarAuthLink();
     return;
   }
-  // Cargar lista de usuarios para autorizantes (la necesitamos antes del login del tesorero)
-  // Se carga lazy cuando el tesorero abre el panel
+  // App normal — mostrar login
 })();
 </script>
 </body>
