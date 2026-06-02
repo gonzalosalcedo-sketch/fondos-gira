@@ -1582,9 +1582,7 @@ function irALogin(){
   document.getElementById('login-screen').style.display='flex';
 }
 
-async function procesarAuthLink(){
-  const p=new URLSearchParams(window.location.search);
-  const id=p.get('id'),tok=p.get('tok'),decision=p.get('decision');
+async function procesarAuthLink(id, tok, decision){
   if(!id||!tok||!decision)return false;
 
   const rs=document.getElementById('auth-result-screen');
@@ -1617,11 +1615,12 @@ async function procesarAuthLink(){
 // ── INIT ───────────────────────────────────────────────────────
 (async()=>{
   const p=new URLSearchParams(window.location.search);
-  // Link de autorización desde mail — procesar y mostrar resultado
-  if(p.get('tok')&&p.get('decision')){
-    // Limpiar URL para que al recargar no vuelva a entrar acá
+  // Link de autorización desde mail — leer params ANTES de limpiar la URL
+  const tok=p.get('tok'), decision=p.get('decision'), authId=p.get('id');
+  if(tok && decision && authId){
+    // Limpiar URL DESPUÉS de guardar los params
     window.history.replaceState({}, document.title, window.location.pathname);
-    await procesarAuthLink();
+    await procesarAuthLink(authId, tok, decision);
     return;
   }
   // App normal — mostrar login
