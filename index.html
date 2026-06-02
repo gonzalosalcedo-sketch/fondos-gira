@@ -16,6 +16,7 @@
   --wa-bg:#faeeda;--wa-t:#854f0b;--wa-b:#ba7517;
   --er-bg:#fcebeb;--er-t:#a32d2d;--er-b:#e24b4a;
   --in-bg:#e6f1fb;--in-t:#185fa5;--in-b:#378add;
+  --pu-bg:#f0eafa;--pu-t:#5b3f9e;--pu-b:#7c5cbf;
   --r:8px;--rl:12px;
 }
 @media(prefers-color-scheme:dark){:root{
@@ -26,6 +27,7 @@
   --wa-bg:#2e1f05;--wa-t:#fac775;--wa-b:#854f0b;
   --er-bg:#2e0a0a;--er-t:#f09595;--er-b:#a32d2d;
   --in-bg:#0a1e35;--in-t:#85b7eb;--in-b:#185fa5;
+  --pu-bg:#1e1535;--pu-t:#c4a8ff;--pu-b:#7c5cbf;
 }}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--text);background:var(--bg3);min-height:100vh}
 .app{max-width:960px;margin:0 auto;padding:1.5rem}
@@ -41,6 +43,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
 .card.er{border-color:var(--er-b);background:var(--er-bg)}
 .card.wa{border-color:var(--wa-b);background:var(--wa-bg)}
+.card.pu{border-color:var(--pu-b);background:var(--pu-bg)}
 .ctitle{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:1rem;text-transform:uppercase;letter-spacing:.06em}
 .div{height:0.5px;background:var(--border);margin:1rem 0}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -50,6 +53,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 label{font-size:12px;color:var(--text2)}
 input,select,textarea{width:100%;padding:8px 10px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-size:13px;font-family:inherit}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--border2)}
+input[readonly]{background:var(--bg2);color:var(--text2);cursor:default}
 .btn{padding:8px 16px;border:0.5px solid var(--border2);border-radius:var(--r);cursor:pointer;font-size:13px;font-family:inherit;display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--text);transition:all .15s}
 .btn:hover{background:var(--bg2)}.btn:active{transform:scale(.98)}.btn:disabled{opacity:.4;cursor:not-allowed}
 .btn.pr{background:var(--text);color:var(--bg);border-color:var(--text)}.btn.pr:hover{opacity:.85}
@@ -57,9 +61,12 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--border2)
 .btn.er{color:var(--er-t);border-color:var(--er-b)}.btn.er:hover{background:var(--er-bg)}
 .btn.in{color:var(--in-t);border-color:var(--in-b)}.btn.in:hover{background:var(--in-bg)}
 .btn.wa{color:var(--wa-t);border-color:var(--wa-b)}.btn.wa:hover{background:var(--wa-bg)}
+.btn.pu{color:var(--pu-t);border-color:var(--pu-b)}.btn.pu:hover{background:var(--pu-bg)}
 .sb{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:500}
 .s-borrador{background:var(--bg2);color:var(--text2)}
 .s-pendiente{background:var(--wa-bg);color:var(--wa-t)}
+.s-auth_pendiente{background:var(--pu-bg);color:var(--pu-t)}
+.s-autorizado{background:var(--ok-bg);color:var(--ok-t)}
 .s-aprobado{background:var(--in-bg);color:var(--in-t)}
 .s-rendido{background:var(--ok-bg);color:var(--ok-t)}
 .s-observado{background:var(--wa-bg);color:var(--wa-t)}
@@ -87,6 +94,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--border2)
 .tl-pending .tlc{background:var(--bg2);color:var(--text2)}
 .tl-danger .tlc{background:var(--er-bg);color:var(--er-t);border-color:var(--er-b)}
 .tl-warn .tlc{background:var(--wa-bg);color:var(--wa-t);border-color:var(--wa-b)}
+.tl-purple .tlc{background:var(--pu-bg);color:var(--pu-t);border-color:var(--pu-b)}
 table.gt{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
 table.gt th{text-align:left;padding:8px;font-size:11px;font-weight:500;color:var(--text2);border-bottom:0.5px solid var(--border)}
 table.gt td{padding:7px 8px;border-bottom:0.5px solid var(--border);vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
@@ -118,21 +126,34 @@ table.gt tr:last-child td{border-bottom:none}
 .ovbox{background:var(--bg);border-radius:var(--rl);border:0.5px solid var(--border);padding:1.5rem;width:480px;max-width:100%}
 .ovbox.er{border:2px solid var(--er-b)}
 .ovbox.wa{border:2px solid var(--wa-b)}
-/* LOGIN */
+.ovbox.pu{border:2px solid var(--pu-b)}
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg3);padding:1rem}
 .login-box{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:2rem;width:380px;max-width:100%}
 .idchip{font-family:monospace;font-size:11px;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:2px 8px;color:var(--text2)}
-/* SOL CARD clickeable */
 .sol-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1.25rem;margin-bottom:.75rem;cursor:pointer;transition:all .15s}
 .sol-card:hover{border-color:var(--border2);background:var(--bg2)}
 .sol-card.er{border-color:var(--er-b);background:var(--er-bg)}
 .sol-card.wa{border-color:var(--wa-b);background:var(--wa-bg)}
+.sol-card.pu{border-color:var(--pu-b);background:var(--pu-bg)}
+.monto-display{background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:8px 10px;font-size:13px;color:var(--text2)}
 #toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:10px 16px;border-radius:var(--r);font-size:13px;display:flex;align-items:center;gap:8px;z-index:9999;max-width:320px;border:0.5px solid;opacity:0;transition:opacity .3s;pointer-events:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--text2);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
 </style>
 </head>
 <body>
+
+<!-- PANTALLA RESULTADO AUTORIZACIÓN (para cuando el autorizante hace clic desde el mail) -->
+<div id="auth-result-screen" style="display:none;min-height:100vh;align-items:center;justify-content:center;background:var(--bg3);padding:1rem">
+  <div style="background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:2rem;width:420px;max-width:100%;text-align:center">
+    <div id="auth-result-icon" style="font-size:48px;margin-bottom:1rem"></div>
+    <div id="auth-result-title" style="font-size:18px;font-weight:500;margin-bottom:.5rem"></div>
+    <div id="auth-result-body" style="font-size:14px;color:var(--text2);margin-bottom:1.5rem"></div>
+    <a href="https://gonzalosalcedo-sketch.github.io/fondos-gira" class="btn pr" style="display:inline-flex">
+      <i class="ti ti-route"></i> Ir a la app
+    </a>
+  </div>
+</div>
 
 <!-- LOGIN -->
 <div id="login-screen" class="login-wrap">
@@ -146,17 +167,12 @@ table.gt tr:last-child td{border-bottom:none}
       <label>Email</label>
       <input type="email" id="login-email" placeholder="tu@cuencadelsur.com" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <div class="fi" style="margin-bottom:1.25rem;position:relative">
+    <div class="fi" style="margin-bottom:1.25rem">
       <label>Contraseña</label>
       <input type="password" id="login-pass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <button class="btn pr" style="width:100%;justify-content:center;padding:11px" onclick="doLogin()" id="login-btn">
-      Ingresar
-    </button>
+    <button class="btn pr" style="width:100%;justify-content:center;padding:11px" onclick="doLogin()" id="login-btn">Ingresar</button>
     <p style="font-size:12px;color:var(--er-t);margin-top:10px;min-height:16px;text-align:center" id="login-err"></p>
-    <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:.5rem">
-      Clave por defecto: <strong>cuenca2024</strong>
-    </p>
   </div>
 </div>
 
@@ -165,7 +181,7 @@ table.gt tr:last-child td{border-bottom:none}
 <div class="app">
 
 <!-- OVERLAY ALERTA VENCIMIENTO -->
-<div class="ov" id="ov-alerta" role="alertdialog">
+<div class="ov" id="ov-alerta">
   <div class="ovbox er">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
       <i class="ti ti-alert-triangle" style="font-size:22px;color:var(--er-t)"></i>
@@ -183,12 +199,12 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <!-- OVERLAY OBSERVACION -->
-<div class="ov" id="ov-obs" role="dialog">
+<div class="ov" id="ov-obs">
   <div class="ovbox wa">
     <div style="font-weight:500;font-size:15px;margin-bottom:1rem"><i class="ti ti-message-circle"></i> Devolver con observación</div>
     <div class="fi" style="margin-bottom:1rem">
       <label>Observación para el vendedor</label>
-      <textarea id="obs-texto" rows="4" placeholder="Describí qué debe corregir o justificar..."></textarea>
+      <textarea id="obs-texto" rows="4" placeholder="Describí qué debe corregir..."></textarea>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="btn" onclick="closeOv('ov-obs')">Cancelar</button>
@@ -198,11 +214,11 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <!-- OVERLAY DENEGAR -->
-<div class="ov" id="ov-denegar" role="dialog">
+<div class="ov" id="ov-denegar">
   <div class="ovbox er">
     <div style="font-weight:500;font-size:15px;margin-bottom:1rem"><i class="ti ti-x"></i> Denegar solicitud</div>
     <div class="fi" style="margin-bottom:1rem">
-      <label>Motivo de la denegación</label>
+      <label>Motivo</label>
       <textarea id="denegar-texto" rows="3" placeholder="Indicá el motivo..."></textarea>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
@@ -212,12 +228,55 @@ table.gt tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<!-- OVERLAY SOLICITAR AUTORIZACIÓN -->
+<div class="ov" id="ov-auth">
+  <div class="ovbox pu">
+    <div style="font-weight:500;font-size:15px;margin-bottom:1rem"><i class="ti ti-shield-check"></i> Solicitar autorización</div>
+    <div class="fi" style="margin-bottom:1rem">
+      <label>Seleccioná el autorizante</label>
+      <select id="auth-select"></select>
+    </div>
+    <div class="fi" style="margin-bottom:1rem">
+      <label>Nota para el autorizante (opcional)</label>
+      <textarea id="auth-nota" rows="3" placeholder="Aclaración o motivo de la consulta..."></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="closeOv('ov-auth')">Cancelar</button>
+      <button class="btn pu" onclick="confirmarSolicitarAuth()"><i class="ti ti-send"></i> Enviar para autorización</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY EDITAR FONDOS (tesorero antes de aprobar) -->
+<div class="ov" id="ov-fondos">
+  <div class="ovbox">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+      <div style="font-weight:500;font-size:15px"><i class="ti ti-coin"></i> Revisar y definir fondos</div>
+      <button class="btn" onclick="closeOv('ov-fondos')"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="fondos-sol-info" style="font-size:13px;color:var(--text2);margin-bottom:1rem"></div>
+    <div class="fg" style="margin-bottom:1rem">
+      <div class="fi"><label>Viáticos ($)</label><input type="number" id="fv-viat"></div>
+      <div class="fi"><label>Hospedaje ($)</label><input type="number" id="fv-hosp"></div>
+      <div class="fi"><label>Fondo reserva ($)</label><input type="number" id="fv-res" placeholder="Definido por el tesorero"></div>
+      <div class="met" style="display:flex;flex-direction:column;justify-content:center">
+        <div class="ml">Total a entregar</div>
+        <div class="mv" id="fv-total">$0</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="closeOv('ov-fondos')">Cancelar</button>
+      <button class="btn ok" onclick="confirmarAprobacion()"><i class="ti ti-check"></i> Aprobar y entregar fondos</button>
+    </div>
+  </div>
+</div>
+
 <!-- OVERLAY CAMBIAR CLAVE -->
-<div class="ov" id="ov-clave" role="dialog">
+<div class="ov" id="ov-clave">
   <div class="ovbox">
     <div style="font-weight:500;font-size:15px;margin-bottom:1rem"><i class="ti ti-lock"></i> Cambiar contraseña</div>
     <div class="fi" style="margin-bottom:.75rem"><label>Nueva contraseña</label><input type="password" id="clave-nueva" placeholder="Mínimo 6 caracteres"></div>
-    <div class="fi" style="margin-bottom:1rem"><label>Repetir nueva contraseña</label><input type="password" id="clave-rep" placeholder="Repetir contraseña"></div>
+    <div class="fi" style="margin-bottom:1rem"><label>Repetir contraseña</label><input type="password" id="clave-rep"></div>
     <p style="font-size:12px;color:var(--er-t);min-height:16px;margin-bottom:.75rem" id="clave-err"></p>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="btn" onclick="closeOv('ov-clave')">Cancelar</button>
@@ -226,8 +285,8 @@ table.gt tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- OVERLAY CONFIG (solo tesorero) -->
-<div class="ov" id="ov-cfg" role="dialog">
+<!-- OVERLAY CONFIG -->
+<div class="ov" id="ov-cfg">
   <div class="ovbox">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
       <div style="font-weight:500;font-size:15px"><i class="ti ti-settings"></i> Configuración</div>
@@ -243,23 +302,27 @@ table.gt tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- OVERLAY GESTIÓN USUARIOS (solo tesorero) -->
-<div class="ov" id="ov-usuarios" role="dialog">
-  <div class="ovbox" style="width:560px">
+<!-- OVERLAY GESTIÓN USUARIOS -->
+<div class="ov" id="ov-usuarios">
+  <div class="ovbox" style="width:580px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
       <div style="font-weight:500;font-size:15px"><i class="ti ti-users"></i> Gestión de usuarios</div>
       <button class="btn" onclick="closeOv('ov-usuarios')"><i class="ti ti-x"></i></button>
     </div>
-    <div id="usuarios-lista" style="margin-bottom:1rem;max-height:300px;overflow-y:auto"></div>
+    <div id="usuarios-lista" style="margin-bottom:1rem;max-height:280px;overflow-y:auto"></div>
     <div style="border-top:0.5px solid var(--border);padding-top:1rem">
       <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:.75rem">AGREGAR USUARIO</div>
       <div class="fg" style="margin-bottom:.75rem">
         <div class="fi"><label>Nombre</label><input id="nu-nombre" placeholder="Nombre completo"></div>
         <div class="fi"><label>Email</label><input type="email" id="nu-email" placeholder="correo@cuencadelsur.com"></div>
         <div class="fi"><label>Rol</label>
-          <select id="nu-rol"><option value="vendedor">Vendedor</option><option value="tesorero">Tesorero</option></select>
+          <select id="nu-rol">
+            <option value="vendedor">Vendedor</option>
+            <option value="autorizante">Autorizante</option>
+            <option value="tesorero">Tesorero</option>
+          </select>
         </div>
-        <div class="fi"><label>Clave inicial</label><input type="text" id="nu-clave" value="cuenca2024"></div>
+        <div class="fi"><label>Clave inicial</label><input type="text" id="nu-clave" placeholder="nombre2026"></div>
       </div>
       <button class="btn ok" onclick="agregarUsuario()"><i class="ti ti-plus"></i> Agregar usuario</button>
     </div>
@@ -284,8 +347,8 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <!-- TABS -->
-<div class="tabs" role="tablist" id="tab-bar">
-  <button class="tab on" id="t-solicitudes" onclick="showTab('solicitudes')"><i class="ti ti-list"></i> Mis solicitudes</button>
+<div class="tabs" role="tablist">
+  <button class="tab on" id="t-solicitudes" onclick="showTab('solicitudes')"><i class="ti ti-list"></i> Solicitudes</button>
   <button class="tab" id="t-seguimiento" onclick="showTab('seguimiento')" style="display:none"><i class="ti ti-chart-gantt"></i> Seguimiento <span class="wb" id="badge-seg" style="display:none">0</span></button>
   <button class="tab" id="t-nueva" onclick="showTab('nueva')" style="display:none"><i class="ti ti-forms"></i> Formulario</button>
   <button class="tab" id="t-rendicion" onclick="showTab('rendicion')" style="display:none"><i class="ti ti-receipt"></i> Rendición</button>
@@ -293,7 +356,6 @@ table.gt tr:last-child td{border-bottom:none}
   <button class="tab" id="t-dashboard" onclick="showTab('dashboard')" style="display:none"><i class="ti ti-chart-bar"></i> Dashboard</button>
 </div>
 
-<!-- PANELS -->
 <div id="panel-solicitudes" class="panel on"></div>
 <div id="panel-seguimiento" class="panel"></div>
 <div id="panel-nueva" class="panel"><div class="pbar" id="paso-bar"></div><div id="step-content"></div></div>
@@ -306,9 +368,8 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL = 'https://script.google.com/macros/s/AKfycbz5afFEsf7XwkiVPXDVC_SsdFD7SGWO9dCZxYwr9aCS58IOI-nFtzCqdef6rVnGoQ6WDw/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycbzFkAz_HuWVWoxmnVZ1vKsQFvIe36ksES4VGornrQ8o-TmbZiUKVJg1d8xifbM1MsiYRg/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
-const CLAVE_DEFAULT = 'cuenca2024';
 
 const RUBROS=[
   {cod:170,desc:'Pasajes y Movilidad'},{cod:172,desc:'Viáticos y Refrigerios'},
@@ -323,49 +384,49 @@ const RUBROS=[
 const TIPOS=['Factura A','Factura B','Ticket / Factura C','Recibo','Comprobante electrónico','Otro'];
 const TRANSPORTES=['Vehículo empresa','Vehículo propio','Colectivo','Avión'];
 const CHECKS_VEH=['Seguro vigente','RTO al día','Autorización de manejo','Estado general del vehículo OK','Tarjeta YPF en ruta'];
-const ESTADOS={borrador:'Borrador',pendiente:'Pendiente aprobación',aprobado:'En gira',rendido:'Rendición enviada',observado:'Con observaciones',cerrado:'Cerrado',denegado:'Denegado'};
+const ESTADOS={
+  borrador:'Borrador',
+  pendiente:'Pendiente aprobación',
+  auth_pendiente:'Esperando autorización',
+  autorizado:'Autorizado — pendiente tesorero',
+  aprobado:'En gira',
+  rendido:'Rendición enviada',
+  observado:'Con observaciones',
+  cerrado:'Cerrado',
+  denegado:'Denegado'
+};
 
 let CFG={viaticos:60000,hospedaje:100000,diasLimite:5};
-let solicitudes=[];
-let usuariosDB=[];
-let currentSol=null;
-let currentStep=1;
-let gastoRows=[];
-let filterSeg='todos';
-let filterDash={desde:'',hasta:'',usuario:''};
-let ROL=null;
-let USER=null; // {email, nombre, rol}
-let obsTarget=null;
-let denegarTarget=null;
+let solicitudes=[], usuariosDB=[];
+let currentSol=null, currentStep=1, gastoRows=[];
+let filterSeg='todos', filterDash={desde:'',hasta:'',usuario:''};
+let ROL=null, USER=null;
+let obsTarget=null, denegarTarget=null, authTarget=null, fondosTarget=null;
 let dashChart=null;
 
 const TODAY=new Date(); TODAY.setHours(0,0,0,0);
 
-// ══════════════════════════════════════════════
-//  API JSONP
-// ══════════════════════════════════════════════
+// ── API JSONP ──────────────────────────────────────────────────
 function api(params){
   return new Promise((resolve,reject)=>{
     const cb='cb_'+Date.now()+'_'+Math.floor(Math.random()*9999);
     window[cb]=(data)=>{
       delete window[cb];
       document.getElementById(cb)&&document.getElementById(cb).remove();
-      if(data&&data.error) reject(new Error(data.error));
+      if(data&&data.error)reject(new Error(data.error));
       else resolve(data);
     };
     params.callback=cb;
     const url=AS_URL+'?'+new URLSearchParams(params).toString();
     const s=document.createElement('script');
-    s.id=cb; s.src=url;
+    s.id=cb;s.src=url;
     s.onerror=()=>{delete window[cb];reject(new Error('Error de red'));};
     document.head.appendChild(s);
     setTimeout(()=>{delete window[cb];s.remove&&s.remove();reject(new Error('Timeout'));},20000);
   });
 }
 
-// ══════════════════════════════════════════════
-//  LOGIN
-// ══════════════════════════════════════════════
+// ── LOGIN ──────────────────────────────────────────────────────
 async function doLogin(){
   const email=document.getElementById('login-email').value.trim().toLowerCase();
   const pass=document.getElementById('login-pass').value;
@@ -373,24 +434,12 @@ async function doLogin(){
   const err=document.getElementById('login-err');
   err.textContent='';
   if(!email||!pass){err.textContent='Completá email y contraseña.';return;}
-  btn.disabled=true;
-  btn.innerHTML='<div class="spin"></div> Verificando...';
-  try {
-    const result=await api({action:'loginUsuario',email,clave:pass});
-    if(result.ok){
-      USER={email:result.email,nombre:result.nombre,rol:result.rol};
-      ROL=result.rol;
-      initApp();
-    } else {
-      err.textContent=result.error||'Email o contraseña incorrectos.';
-      btn.disabled=false;
-      btn.innerHTML='Ingresar';
-    }
-  } catch(e){
-    err.textContent='Error de conexión: '+e.message;
-    btn.disabled=false;
-    btn.innerHTML='Ingresar';
-  }
+  btn.disabled=true;btn.innerHTML='<div class="spin"></div> Verificando...';
+  try{
+    const r=await api({action:'loginUsuario',email,clave:pass});
+    if(r.ok){USER={email:r.email,nombre:r.nombre,rol:r.rol};ROL=r.rol;initApp();}
+    else{err.textContent=r.error||'Email o contraseña incorrectos.';btn.disabled=false;btn.innerHTML='Ingresar';}
+  }catch(e){err.textContent='Error de conexión: '+e.message;btn.disabled=false;btn.innerHTML='Ingresar';}
 }
 
 function logout(){
@@ -403,45 +452,44 @@ function logout(){
   document.getElementById('login-btn').innerHTML='Ingresar';
 }
 
-// ══════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════
+// ── INIT ───────────────────────────────────────────────────────
 function initApp(){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('main-app').style.display='block';
   const isT=ROL==='tesorero';
-  // Role pill
-  document.getElementById('role-pill').textContent=isT?'Tesorero':'Vendedor';
-  document.getElementById('role-pill').style.background=isT?'var(--in-bg)':'var(--ok-bg)';
-  document.getElementById('role-pill').style.color=isT?'var(--in-t)':'var(--ok-t)';
+  const isA=ROL==='autorizante';
+  const canSolicitar=ROL==='vendedor'||ROL==='tesorero';
+
+  const rolLabels={vendedor:'Vendedor',autorizante:'Autorizante',tesorero:'Tesorero'};
+  const rolColors={vendedor:'var(--ok-bg)|var(--ok-t)',autorizante:'var(--pu-bg)|var(--pu-t)',tesorero:'var(--in-bg)|var(--in-t)'};
+  const [rbg,rc]=(rolColors[ROL]||'var(--bg2)|var(--text2)').split('|');
+  document.getElementById('role-pill').textContent=rolLabels[ROL]||ROL;
+  document.getElementById('role-pill').style.background=rbg;
+  document.getElementById('role-pill').style.color=rc;
   document.getElementById('hdr-user').textContent=USER.nombre||USER.email;
-  // Botones header
+
   document.getElementById('btn-cfg').style.display=isT?'':'none';
   document.getElementById('btn-usuarios').style.display=isT?'':'none';
-  document.getElementById('btn-nueva').style.display=isT?'none':'';
-  // Tabs
+  document.getElementById('btn-nueva').style.display=canSolicitar?'':'none';
   document.getElementById('t-seguimiento').style.display=isT?'':'none';
   document.getElementById('t-tesoreria').style.display=isT?'':'none';
   document.getElementById('t-dashboard').style.display=isT?'':'none';
   document.getElementById('t-nueva').style.display='none';
   document.getElementById('t-rendicion').style.display='none';
+
   // Label tab solicitudes
-  document.getElementById('t-solicitudes').innerHTML=
-    '<i class="ti ti-list"></i> '+(isT?'Todas las solicitudes':'Mis solicitudes');
+  const tabLabel=isT?'Todas las solicitudes':isA?'Para autorizar':'Mis solicitudes';
+  document.getElementById('t-solicitudes').innerHTML=`<i class="ti ti-list"></i> ${tabLabel}`;
+
   cargarDatos();
 }
 
-// ══════════════════════════════════════════════
-//  CARGA DATOS
-// ══════════════════════════════════════════════
+// ── CARGA DATOS ────────────────────────────────────────────────
 async function cargarDatos(){
   document.getElementById('panel-solicitudes').innerHTML=
     '<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:3rem;color:var(--text2)"><div class="spin"></div> Cargando...</div>';
-  try {
-    const [sols,cfgData]=await Promise.all([
-      api({action:'getSolicitudes'}),
-      api({action:'getConfig'})
-    ]);
+  try{
+    const [sols,cfgData]=await Promise.all([api({action:'getSolicitudes'}),api({action:'getConfig'})]);
     solicitudes=Array.isArray(sols)?sols.map(parseSol):[];
     if(cfgData&&!cfgData.error){
       CFG.viaticos=parseFloat(cfgData.viaticos)||60000;
@@ -454,9 +502,7 @@ async function cargarDatos(){
         s.gastos=Array.isArray(g)?g.map(r=>({tipo:r.tipo,rubro:parseInt(r.rubro)||172,detalle:r.detalle,importe:parseFloat(r.importe)||0})):[];
       }catch{s.gastos=[];}
     }
-  } catch(e){
-    showToast('Error al cargar datos: '+e.message,'er');
-  }
+  }catch(e){showToast('Error al cargar: '+e.message,'er');}
   updateBadges();
   renderSolicitudes();
   setTimeout(checkVencimientos,700);
@@ -468,25 +514,29 @@ function parseSol(s){
     solicitante:s.Solicitante||'',email:s.EmailSolicitante||s.email||'',
     jefe:s.Jefe||'',destino:s.Destino||'',
     fechaSalida:s.FechaSalida||'',fechaLlegada:s.FechaLlegada||'',
-    dias:parseInt(s.Dias)||0,viaticos:parseFloat(s.Viaticos)||0,
-    hospedaje:parseFloat(s.Hospedaje)||0,reserva:parseFloat(s.Reserva)||0,
+    dias:parseInt(s.Dias)||0,
+    viaticos:parseFloat(s.Viaticos)||0,
+    hospedaje:parseFloat(s.Hospedaje)||0,
+    reserva:parseFloat(s.Reserva)||0,
     transporte:s.Transporte||'',
     checks:Array.isArray(s.Checks)?s.Checks:[],
-    observacion:s.Observacion||'',gastos:[]
+    observacion:s.Observacion||'',
+    autorizante:s.Autorizante||'',
+    emailAutorizante:s.EmailAutorizante||'',
+    gastos:[]
   };
 }
 
-// ══════════════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════════════
+// ── HELPERS ────────────────────────────────────────────────────
 function fmt(n){return'$'+Math.round(n||0).toLocaleString('es-AR')}
 function diasDesde(f){if(!f)return null;const d=new Date(f);d.setHours(0,0,0,0);return Math.floor((TODAY-d)/86400000)}
 function estaVencida(s){if(s.status!=='aprobado')return false;const d=diasDesde(s.fechaLlegada);return d!==null&&d>CFG.diasLimite}
 function diasRestantes(s){if(s.status!=='aprobado'||!s.fechaLlegada)return null;return CFG.diasLimite-(diasDesde(s.fechaLlegada)||0)}
 function total(s){return(s.viaticos||0)+(s.hospedaje||0)+(s.reserva||0)}
 function gastado(s){return(s.gastos||[]).reduce((a,g)=>a+(parseFloat(g.importe)||0),0)}
+
 function updateBadges(){
-  const tes=solicitudes.filter(s=>s.status==='pendiente'||s.status==='rendido').length;
+  const tes=solicitudes.filter(s=>s.status==='pendiente'||s.status==='rendido'||s.status==='autorizado').length;
   const seg=solicitudes.filter(s=>estaVencida(s)).length;
   const bt=document.getElementById('badge-tes');
   const bs=document.getElementById('badge-seg');
@@ -508,16 +558,15 @@ function showToast(msg,type='in'){
   clearTimeout(toastT);toastT=setTimeout(()=>t.style.opacity='0',3800);
 }
 
-// ══════════════════════════════════════════════
-//  TABS
-// ══════════════════════════════════════════════
+// ── TABS ───────────────────────────────────────────────────────
 function showTab(name){
   if(name==='dashboard'&&ROL!=='tesorero')name='solicitudes';
+  if(name==='tesoreria'&&ROL!=='tesorero')name='solicitudes';
+  if(name==='seguimiento'&&ROL!=='tesorero')name='solicitudes';
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   document.getElementById('panel-'+name).classList.add('on');
-  const tb=document.getElementById('t-'+name);
-  if(tb)tb.classList.add('on');
+  const tb=document.getElementById('t-'+name);if(tb)tb.classList.add('on');
   if(name==='solicitudes')renderSolicitudes();
   if(name==='seguimiento')renderSeguimiento();
   if(name==='tesoreria')renderTesoreria();
@@ -525,9 +574,7 @@ function showTab(name){
   if(name==='dashboard')renderDashboard();
 }
 
-// ══════════════════════════════════════════════
-//  ALERTA VENCIMIENTO
-// ══════════════════════════════════════════════
+// ── ALERTA VENCIMIENTO ─────────────────────────────────────────
 function checkVencimientos(){
   const venc=solicitudes.filter(s=>estaVencida(s));
   if(!venc.length)return;
@@ -543,98 +590,109 @@ function checkVencimientos(){
   openOv('ov-alerta');
 }
 
-// ══════════════════════════════════════════════
-//  PANEL SOLICITUDES — lista principal vendedor
-// ══════════════════════════════════════════════
+// ── PANEL SOLICITUDES ──────────────────────────────────────────
 function renderSolicitudes(){
   const el=document.getElementById('panel-solicitudes');
   const isT=ROL==='tesorero';
-  // Vendedor: solo sus solicitudes. Tesorero: todas excepto borradores ajenos
-  let lista=isT
-    ? solicitudes
-    : solicitudes.filter(s=>s.email&&s.email.toLowerCase()===USER.email.toLowerCase());
+  const isA=ROL==='autorizante';
+
+  let lista;
+  if(isT) lista=solicitudes;
+  else if(isA) lista=solicitudes.filter(s=>s.emailAutorizante&&s.emailAutorizante.toLowerCase()===USER.email.toLowerCase());
+  else lista=solicitudes.filter(s=>s.email&&s.email.toLowerCase()===USER.email.toLowerCase());
 
   if(!lista.length){
     el.innerHTML=`<div class="card" style="text-align:center;padding:3rem">
       <i class="ti ti-route" style="font-size:48px;color:var(--text2)"></i>
-      <p style="margin-top:1rem;color:var(--text2)">${isT?'No hay solicitudes registradas.':'No tenés solicitudes. Creá una nueva.'}</p>
-      ${!isT?`<button class="btn pr" style="margin-top:1rem" onclick="nuevaSolicitud()"><i class="ti ti-plus"></i> Nueva gira</button>`:''}
+      <p style="margin-top:1rem;color:var(--text2)">${isA?'No tenés solicitudes pendientes de autorización.':isT?'No hay solicitudes.':'No tenés solicitudes activas.'}</p>
+      ${!isT&&!isA?`<button class="btn pr" style="margin-top:1rem" onclick="nuevaSolicitud()"><i class="ti ti-plus"></i> Nueva gira</button>`:''}
     </div>`;return;
   }
 
-  // Ordenar: más recientes primero
   lista=[...lista].sort((a,b)=>(b.fechaSalida||'').localeCompare(a.fechaSalida||''));
 
-  el.innerHTML=`
-    ${!isT?'':''/* tesorero no necesita encabezado extra */}
-    ${lista.map(s=>{
-      const idx=solicitudes.indexOf(s);
-      const tot=total(s),gas=gastado(s);
-      const venc=estaVencida(s);
-      const dr=diasRestantes(s);
-      const pct=tot>0?Math.min(100,Math.round(gas/tot*100)):0;
-      // Acción principal según estado y rol
-      let accion='';
-      if(!isT){
-        if(s.status==='borrador') accion=`<span class="sb s-borrador">Borrador</span>`;
-        else if(s.status==='aprobado') accion=`<span class="sb s-aprobado"><i class="ti ti-pencil"></i> Cargar gastos</span>`;
-        else if(s.status==='observado') accion=`<span class="sb s-observado"><i class="ti ti-alert-triangle"></i> Corregir rendición</span>`;
-        else if(s.status==='rendido') accion=`<span class="sb s-rendido"><i class="ti ti-clock"></i> Esperando revisión</span>`;
-        else if(s.status==='cerrado') accion=`<span class="sb s-cerrado"><i class="ti ti-check"></i> Cerrada</span>`;
-        else if(s.status==='denegado') accion=`<span class="sb s-vencido"><i class="ti ti-x"></i> Denegada</span>`;
-        else if(s.status==='pendiente') accion=`<span class="sb s-pendiente"><i class="ti ti-clock"></i> Pendiente aprobación</span>`;
-      }
-      const clickable=['aprobado','rendido','observado','cerrado'].includes(s.status)||isT;
-      return `<div class="sol-card${venc?' er':s.status==='observado'?' wa':''}" onclick="${clickable?`irRendicion(${idx})`:''}" style="${clickable?'':'cursor:default'}">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.5rem">
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:500;font-size:15px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.destino||'Sin destino'}</div>
-            <div style="font-size:12px;color:var(--text2);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-              ${isT?`<span>${s.solicitante}</span>`:''}
-              <span class="idchip">${s.id}</span>
-              <span>${s.fechaSalida||'?'} → ${s.fechaLlegada||'?'} · ${s.dias||0} días</span>
-              <span><i class="ti ti-car" style="font-size:11px"></i> ${s.transporte||'—'}</span>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-            ${isT?`<span class="sb s-${venc?'vencido':s.status}">${venc?'<i class="ti ti-alert-triangle"></i> Vencida':ESTADOS[s.status]||s.status}</span>`:`${accion}`}
-            ${clickable?`<i class="ti ti-chevron-right" style="color:var(--text3)"></i>`:''}
+  el.innerHTML=lista.map(s=>{
+    const idx=solicitudes.indexOf(s);
+    const tot=total(s),gas=gastado(s);
+    const venc=estaVencida(s),dr=diasRestantes(s);
+    const pct=tot>0?Math.min(100,Math.round(gas/tot*100)):0;
+    const statusKey=venc?'vencido':s.status;
+
+    // Acción según rol y estado
+    let clickable=false, accionBadge='';
+    if(isA&&s.status==='auth_pendiente'){
+      clickable=true;
+      accionBadge=`<span class="sb s-auth_pendiente"><i class="ti ti-shield-check"></i> Requiere tu autorización</span>`;
+    } else if(isT){
+      clickable=true;
+      accionBadge=`<span class="sb s-${statusKey}">${ESTADOS[s.status]||s.status}</span>`;
+    } else {
+      // vendedor
+      if(['aprobado','rendido','observado','cerrado'].includes(s.status))clickable=true;
+      const labels={
+        borrador:`<span class="sb s-borrador">Borrador</span>`,
+        pendiente:`<span class="sb s-pendiente"><i class="ti ti-clock"></i> Pendiente aprobación</span>`,
+        auth_pendiente:`<span class="sb s-auth_pendiente"><i class="ti ti-shield-check"></i> Esperando autorización</span>`,
+        autorizado:`<span class="sb s-autorizado"><i class="ti ti-shield-check"></i> Autorizado</span>`,
+        aprobado:`<span class="sb s-aprobado"><i class="ti ti-pencil"></i> Cargar gastos</span>`,
+        observado:`<span class="sb s-observado"><i class="ti ti-alert-triangle"></i> Corregir rendición</span>`,
+        rendido:`<span class="sb s-rendido"><i class="ti ti-clock"></i> En revisión</span>`,
+        cerrado:`<span class="sb s-cerrado"><i class="ti ti-check"></i> Cerrada</span>`,
+        denegado:`<span class="sb s-vencido"><i class="ti ti-x"></i> Denegada</span>`,
+      };
+      accionBadge=labels[s.status]||`<span class="sb s-borrador">${s.status}</span>`;
+    }
+
+    const cardClass=venc?'er':s.status==='observado'?'wa':s.status==='auth_pendiente'?'pu':'';
+
+    return `<div class="sol-card${cardClass?' '+cardClass:''}" onclick="${clickable?`irRendicion(${idx})`:''}" style="${clickable?'':'cursor:default'}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.5rem">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:500;font-size:15px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.destino||'Sin destino'}</div>
+          <div style="font-size:12px;color:var(--text2);display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+            ${isT||isA?`<span>${s.solicitante}</span>`:''}
+            <span class="idchip">${s.id}</span>
+            <span>${s.fechaSalida||'?'} → ${s.fechaLlegada||'?'} · ${s.dias||0} días</span>
+            <span><i class="ti ti-car" style="font-size:11px"></i> ${s.transporte||'—'}</span>
           </div>
         </div>
-        ${s.status==='observado'?`<div style="font-size:12px;color:var(--wa-t);margin-bottom:.5rem"><i class="ti ti-message-circle"></i> ${s.observacion}</div>`:''}
-        ${venc?`<div style="font-size:12px;font-weight:500;color:var(--er-t);margin-bottom:.5rem"><i class="ti ti-clock"></i> ${diasDesde(s.fechaLlegada)} días desde el regreso</div>`:''}
-        ${s.status==='aprobado'&&dr!==null&&!venc?`<div style="font-size:12px;color:var(--wa-t);margin-bottom:.5rem"><i class="ti ti-clock"></i> ${dr>0?`${dr} día${dr!==1?'s':''} para rendir`:'Vence hoy'}</div>`:''}
-        <div style="display:flex;gap:1.5rem;font-size:13px;flex-wrap:wrap">
-          <span><i class="ti ti-coin"></i> ${fmt(tot)}</span>
-          ${!['borrador','pendiente'].includes(s.status)?`<span><i class="ti ti-receipt"></i> Gastado: ${fmt(gas)}</span>`:''}
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          ${accionBadge}
+          ${clickable?`<i class="ti ti-chevron-right" style="color:var(--text3)"></i>`:''}
         </div>
-        ${['aprobado','rendido','observado','cerrado'].includes(s.status)&&tot>0?`
-          <div class="pbar2" style="margin-top:8px"><div class="pfill" style="width:${pct}%;background:var(--${pct>=100?'er':pct>=70?'wa':'ok'}-t)"></div></div>
-        `:''}
-      </div>`;
-    }).join('')}
-  `;
+      </div>
+      ${s.status==='observado'?`<div style="font-size:12px;color:var(--wa-t);margin-bottom:.5rem"><i class="ti ti-message-circle"></i> ${s.observacion}</div>`:''}
+      ${s.status==='auth_pendiente'&&s.autorizante?`<div style="font-size:12px;color:var(--pu-t);margin-bottom:.5rem"><i class="ti ti-shield-check"></i> Enviado a: ${s.autorizante}</div>`:''}
+      ${venc?`<div style="font-size:12px;font-weight:500;color:var(--er-t);margin-bottom:.5rem"><i class="ti ti-clock"></i> ${diasDesde(s.fechaLlegada)} días desde el regreso</div>`:''}
+      ${s.status==='aprobado'&&dr!==null&&!venc?`<div style="font-size:12px;color:var(--wa-t);margin-bottom:.5rem"><i class="ti ti-clock"></i> ${dr>0?`${dr} día${dr!==1?'s':''} para rendir`:'Vence hoy'}</div>`:''}
+      <div style="display:flex;gap:1.5rem;font-size:13px;flex-wrap:wrap">
+        <span><i class="ti ti-coin"></i> ${fmt(tot)}</span>
+        ${!['borrador','pendiente','auth_pendiente','autorizado'].includes(s.status)?`<span><i class="ti ti-receipt"></i> Gastado: ${fmt(gas)}</span>`:''}
+      </div>
+      ${['aprobado','rendido','observado','cerrado'].includes(s.status)&&tot>0?`
+        <div class="pbar2" style="margin-top:8px"><div class="pfill" style="width:${pct}%;background:var(--${pct>=100?'er':pct>=70?'wa':'ok'}-t)"></div></div>
+      `:''}
+    </div>`;
+  }).join('');
   updateBadges();
 }
 
-// ══════════════════════════════════════════════
-//  PANEL SEGUIMIENTO (tesorero)
-// ══════════════════════════════════════════════
+// ── SEGUIMIENTO ────────────────────────────────────────────────
 function renderSeguimiento(){
   const el=document.getElementById('panel-seguimiento');
   const todo=solicitudes.filter(s=>s.status!=='borrador');
   const groups={
     todos:todo,
-    activas:todo.filter(s=>s.status==='pendiente'||s.status==='aprobado'),
+    activas:todo.filter(s=>['pendiente','auth_pendiente','autorizado','aprobado'].includes(s.status)),
     vencidas:todo.filter(s=>estaVencida(s)),
-    observadas:todo.filter(s=>s.status==='observado'),
-    rendidas:todo.filter(s=>s.status==='rendido'),
+    auth:todo.filter(s=>s.status==='auth_pendiente'),
+    rendidas:todo.filter(s=>s.status==='rendido'||s.status==='observado'),
     cerradas:todo.filter(s=>s.status==='cerrado')
   };
   const filtered=groups[filterSeg]||todo;
   el.innerHTML=`
     <div class="fbar">
-      ${Object.entries({todos:'Todas',activas:'En curso',vencidas:'Vencidas',observadas:'Observadas',rendidas:'Rendidas',cerradas:'Cerradas'}).map(([k,l])=>
+      ${Object.entries({todos:'Todas',activas:'En curso',vencidas:'Vencidas',auth:'Esperando autorización',rendidas:'Rendidas',cerradas:'Cerradas'}).map(([k,l])=>
         `<button class="fbtn${filterSeg===k?' on':''}" onclick="filterSeg='${k}';renderSeguimiento()">
           ${k==='vencidas'&&groups.vencidas.length?`<i class="ti ti-alert-triangle"></i> ${l} (${groups.vencidas.length})`:l}
         </button>`).join('')}
@@ -649,14 +707,27 @@ function cardSeg(s,idx){
   const pct=tot>0?Math.min(100,Math.round(gas/tot*100)):0;
   const venc=estaVencida(s),dr=diasRestantes(s),dias=diasDesde(s.fechaLlegada);
   const steps=[
-    {l:'Solicitud creada',sub:s.fechaSalida?`Salida: ${s.fechaSalida}`:'',done:true,act:false,err:false,wa:false},
-    {l:'Aprobación tesorero',sub:s.status==='pendiente'?'Esperando':'Aprobado',done:!['pendiente','borrador','denegado'].includes(s.status),act:s.status==='pendiente',err:s.status==='denegado',wa:false},
-    {l:'Fondos entregados',sub:tot?fmt(tot):'—',done:['aprobado','rendido','observado','cerrado'].includes(s.status),act:false,err:false,wa:false},
-    {l:'Rendición del usuario',sub:s.status==='aprobado'?(venc?`${dias} días sin rendir`:dr!==null?`${dr>0?dr+' días para rendir':'Vence hoy'}`:'En curso'):s.status==='observado'?'Devuelta con observaciones':['rendido','cerrado'].includes(s.status)?`${(s.gastos||[]).length} comprobantes · ${fmt(gas)}`:'Pendiente',
-      done:['rendido','cerrado'].includes(s.status),act:s.status==='aprobado'&&!venc,err:venc&&s.status==='aprobado',wa:s.status==='observado'},
-    {l:'Cierre tesorero',sub:s.status==='cerrado'?'Archivado':'Pendiente',done:s.status==='cerrado',act:s.status==='rendido',err:false,wa:false},
+    {l:'Solicitud creada',       sub:s.fechaSalida?`Salida: ${s.fechaSalida}`:'',                 done:true, act:false,err:false,wa:false,pu:false},
+    {l:'Aprobación tesorero',    sub:['pendiente','auth_pendiente','autorizado'].includes(s.status)?'Pendiente':s.status==='denegado'?'Denegada':'OK',
+                                                                                                    done:['aprobado','rendido','observado','cerrado'].includes(s.status),
+                                                                                                    act:s.status==='pendiente'||s.status==='autorizado',
+                                                                                                    err:s.status==='denegado',wa:false,pu:false},
+    {l:'Autorización externa',   sub:s.status==='auth_pendiente'?`Enviado a ${s.autorizante||'autorizante'}`:s.autorizante?`Autorizado por ${s.autorizante}`:'No requerida',
+                                                                                                    done:['aprobado','rendido','observado','cerrado','autorizado'].includes(s.status)&&!!s.autorizante,
+                                                                                                    act:false,err:false,wa:false,
+                                                                                                    pu:s.status==='auth_pendiente'},
+    {l:'Fondos entregados',      sub:tot?fmt(tot):'—',                                            done:['aprobado','rendido','observado','cerrado'].includes(s.status),act:false,err:false,wa:false,pu:false},
+    {l:'Rendición del usuario',  sub:s.status==='aprobado'?(venc?`${dias} días sin rendir`:dr!==null?`${dr>0?dr+' días para rendir':'Vence hoy'}`:'En curso'):s.status==='observado'?'Devuelta con observaciones':['rendido','cerrado'].includes(s.status)?`${(s.gastos||[]).length} comprobantes · ${fmt(gas)}`:'Pendiente',
+                                                                                                    done:['rendido','cerrado'].includes(s.status),
+                                                                                                    act:s.status==='aprobado'&&!venc,
+                                                                                                    err:venc&&s.status==='aprobado',
+                                                                                                    wa:s.status==='observado',pu:false},
+    {l:'Cierre tesorero',        sub:s.status==='cerrado'?'Archivado':'Pendiente',                done:s.status==='cerrado',act:s.status==='rendido',err:false,wa:false,pu:false},
   ];
-  return `<div class="card${venc?' er':s.status==='observado'?' wa':''}" style="margin-bottom:1rem">
+  // Si no hubo autorización, omitir ese paso del timeline
+  const visibleSteps = s.autorizante ? steps : steps.filter((_,i)=>i!==2);
+
+  return `<div class="card${venc?' er':s.status==='observado'?' wa':s.status==='auth_pendiente'?' pu':''}" style="margin-bottom:1rem">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:1rem">
       <div>
         <div style="font-weight:500;font-size:15px;margin-bottom:3px">${s.destino||'—'}</div>
@@ -671,11 +742,11 @@ function cardSeg(s,idx){
       </div>
     </div>
     <div class="tl">
-      ${steps.map((st,si)=>`
-        <div class="tls ${st.done?'tl-done':st.err?'tl-danger':st.wa?'tl-warn':st.act?'tl-active':'tl-pending'}">
+      ${visibleSteps.map((st,si)=>`
+        <div class="tls ${st.done?'tl-done':st.err?'tl-danger':st.wa?'tl-warn':st.pu?'tl-purple':st.act?'tl-active':'tl-pending'}">
           <div class="tld">
-            <div class="tlc">${st.done?'<i class="ti ti-check"></i>':st.err?'<i class="ti ti-x"></i>':st.wa?'<i class="ti ti-alert-triangle"></i>':si+1}</div>
-            ${si<steps.length-1?'<div class="tll"></div>':''}
+            <div class="tlc">${st.done?'<i class="ti ti-check"></i>':st.err?'<i class="ti ti-x"></i>':st.wa?'<i class="ti ti-alert-triangle"></i>':st.pu?'<i class="ti ti-shield-check"></i>':si+1}</div>
+            ${si<visibleSteps.length-1?'<div class="tll"></div>':''}
           </div>
           <div class="tlco"><div class="tlt">${st.l}</div><div class="tlsu">${st.sub}</div></div>
         </div>`).join('')}
@@ -691,9 +762,7 @@ function cardSeg(s,idx){
   </div>`;
 }
 
-// ══════════════════════════════════════════════
-//  NUEVA SOLICITUD
-// ══════════════════════════════════════════════
+// ── NUEVA SOLICITUD ────────────────────────────────────────────
 function nuevaSolicitud(){
   currentSol={id:'',status:'borrador',solicitante:USER.nombre||USER.email,email:USER.email,jefe:'',destino:'',fechaSalida:'',fechaLlegada:'',dias:0,viaticos:0,hospedaje:0,reserva:0,transporte:TRANSPORTES[0],checks:[],gastos:[]};
   currentStep=1;gastoRows=[];
@@ -709,6 +778,7 @@ function renderStep(){
     return `<div class="paso"><div class="pn${done?' done':act?' act':''}">${done?'<i class="ti ti-check"></i>':n}</div><div class="pl${act?' act':''}">${l}</div></div>${i<labels.length-1?'<div class="psep"></div>':''}`;
   }).join('');
   const sc=document.getElementById('step-content');
+
   if(currentStep===1){
     sc.innerHTML=`<div class="card"><div class="ctitle">Datos generales</div>
       <div class="fg">
@@ -723,33 +793,44 @@ function renderStep(){
       <div style="margin-top:.75rem;font-size:13px;color:var(--text2)" id="dias-info">${currentSol.dias?`<strong>${currentSol.dias} días</strong>`:'Seleccioná las fechas.'}</div>
     </div>
     <div style="display:flex;justify-content:flex-end"><button class="btn pr" onclick="nextStep()">Siguiente <i class="ti ti-arrow-right"></i></button></div>`;
-  } else if(currentStep===2){
+  }
+
+  else if(currentStep===2){
     const d=currentSol.dias||1;
-    const v=currentSol.viaticos||(CFG.viaticos*d);
-    const h=currentSol.hospedaje||(CFG.hospedaje*d);
-    const r=currentSol.reserva||0;
-    sc.innerHTML=`<div class="card"><div class="ctitle">Fondos solicitados</div>
+    const v=CFG.viaticos*d;
+    const h=CFG.hospedaje*d;
+    // Vendedor/autorizante: montos fijos (readonly). Tesorero: puede editar.
+    const isT=ROL==='tesorero';
+    sc.innerHTML=`<div class="card"><div class="ctitle">Fondos estimados</div>
       <div style="font-size:12px;color:var(--in-t);background:var(--in-bg);border:0.5px solid var(--in-b);border-radius:var(--r);padding:8px 12px;margin-bottom:1rem">
-        <i class="ti ti-info-circle"></i> Tarifas: Viáticos ${fmt(CFG.viaticos)}/día · Hospedaje ${fmt(CFG.hospedaje)}/día
+        <i class="ti ti-info-circle"></i> Tarifas vigentes: Viáticos ${fmt(CFG.viaticos)}/día · Hospedaje ${fmt(CFG.hospedaje)}/día
+        ${!isT?'<br><i class="ti ti-lock" style="font-size:11px"></i> Los montos son definidos por el tesorero al aprobar la solicitud.':''}
       </div>
       <div class="mrow">
         <div class="met"><div class="ml">Duración</div><div class="mv">${d}</div><div class="ms">días</div></div>
-        <div class="met"><div class="ml">Viáticos calculados</div><div class="mv">${fmt(v)}</div></div>
-        <div class="met"><div class="ml">Hospedaje calculado</div><div class="mv">${fmt(h)}</div></div>
+        <div class="met"><div class="ml">Viáticos estimados</div><div class="mv">${fmt(v)}</div></div>
+        <div class="met"><div class="ml">Hospedaje estimado</div><div class="mv">${fmt(h)}</div></div>
       </div>
+      ${isT?`
       <div class="fg">
-        <div class="fi"><label>Viáticos ($)</label><input type="number" id="f-viat" value="${v}" oninput="updT()"></div>
-        <div class="fi"><label>Hospedaje ($)</label><input type="number" id="f-hosp" value="${h}" oninput="updT()"></div>
-        <div class="fi"><label>Fondo reserva ($)</label><input type="number" id="f-res" value="${r}" placeholder="Redondeo / imprevisto" oninput="updT()"></div>
+        <div class="fi"><label>Viáticos ($) — editable</label><input type="number" id="f-viat" value="${v}" oninput="updT()"></div>
+        <div class="fi"><label>Hospedaje ($) — editable</label><input type="number" id="f-hosp" value="${h}" oninput="updT()"></div>
+        <div class="fi"><label>Fondo reserva ($)</label><input type="number" id="f-res" value="${currentSol.reserva||0}" placeholder="Definido al aprobar" oninput="updT()"></div>
         <div class="met" style="display:flex;flex-direction:column;justify-content:center">
-          <div class="ml">Total a entregar</div><div class="mv" id="m-tot">${fmt(v+h+r)}</div>
+          <div class="ml">Total</div><div class="mv" id="m-tot">${fmt(v+h+(currentSol.reserva||0))}</div>
         </div>
-      </div></div>
-      <div style="display:flex;justify-content:space-between">
-        <button class="btn" onclick="prevStep()"><i class="ti ti-arrow-left"></i> Atrás</button>
-        <button class="btn pr" onclick="nextStep()">Siguiente <i class="ti ti-arrow-right"></i></button>
-      </div>`;
-  } else if(currentStep===3){
+      </div>`:`
+      <div style="background:var(--bg2);border-radius:var(--r);padding:12px 14px;font-size:13px;color:var(--text2);margin-top:.5rem">
+        <i class="ti ti-info-circle"></i> El tesorero definirá el monto exacto a entregar (incluida la reserva) al momento de aprobar la solicitud.
+      </div>`}
+    </div>
+    <div style="display:flex;justify-content:space-between">
+      <button class="btn" onclick="prevStep()"><i class="ti ti-arrow-left"></i> Atrás</button>
+      <button class="btn pr" onclick="nextStep()">Siguiente <i class="ti ti-arrow-right"></i></button>
+    </div>`;
+  }
+
+  else if(currentStep===3){
     sc.innerHTML=`<div class="card"><div class="ctitle">Transporte</div>
       <div class="fi" style="margin-bottom:1.25rem"><label>Tipo de transporte</label>
         <select id="f-trans" onchange="toggleChecks()">${TRANSPORTES.map(t=>`<option${currentSol.transporte===t?' selected':''}>${t}</option>`).join('')}</select>
@@ -760,8 +841,13 @@ function renderStep(){
         <button class="btn pr" onclick="nextStep()">Siguiente <i class="ti ti-arrow-right"></i></button>
       </div>`;
     toggleChecks();
-  } else if(currentStep===4){
-    const tot=(currentSol.viaticos||0)+(currentSol.hospedaje||0)+(currentSol.reserva||0);
+  }
+
+  else if(currentStep===4){
+    const isT=ROL==='tesorero';
+    const v=isT?(parseFloat(document.getElementById&&document.getElementById('f-viat')?.value)||CFG.viaticos*(currentSol.dias||1)):CFG.viaticos*(currentSol.dias||1);
+    const h=isT?(parseFloat(document.getElementById&&document.getElementById('f-hosp')?.value)||CFG.hospedaje*(currentSol.dias||1)):CFG.hospedaje*(currentSol.dias||1);
+    const tot=currentSol.viaticos+currentSol.hospedaje+currentSol.reserva;
     const ok=currentSol.solicitante&&currentSol.destino&&currentSol.email;
     sc.innerHTML=`<div class="card"><div class="ctitle">Confirmación</div>
       <div class="rr"><span style="color:var(--text2)">Solicitante</span><strong>${currentSol.solicitante||'—'}</strong></div>
@@ -769,10 +855,11 @@ function renderStep(){
       <div class="rr"><span style="color:var(--text2)">Autorizante</span><strong>${currentSol.jefe||'—'}</strong></div>
       <div class="rr"><span style="color:var(--text2)">Destino</span><strong>${currentSol.destino||'—'}</strong></div>
       <div class="rr"><span style="color:var(--text2)">Período</span><strong>${currentSol.fechaSalida} → ${currentSol.fechaLlegada} (${currentSol.dias} días)</strong></div>
-      <div class="rr"><span style="color:var(--text2)">Viáticos</span><strong>${fmt(currentSol.viaticos)}</strong></div>
-      <div class="rr"><span style="color:var(--text2)">Hospedaje</span><strong>${fmt(currentSol.hospedaje)}</strong></div>
-      <div class="rr"><span style="color:var(--text2)">Reserva</span><strong>${fmt(currentSol.reserva)}</strong></div>
-      <div class="rr rrt"><span>Total a recibir</span><span>${fmt(tot)}</span></div>
+      <div class="rr"><span style="color:var(--text2)">Viáticos estimados</span><strong>${fmt(currentSol.viaticos)}</strong></div>
+      <div class="rr"><span style="color:var(--text2)">Hospedaje estimado</span><strong>${fmt(currentSol.hospedaje)}</strong></div>
+      ${isT?`<div class="rr"><span style="color:var(--text2)">Reserva</span><strong>${fmt(currentSol.reserva)}</strong></div>
+      <div class="rr rrt"><span>Total a entregar</span><span>${fmt(tot)}</span></div>`
+      :`<div class="rr"><span style="color:var(--text2)">Reserva y total final</span><span style="font-size:12px;color:var(--text2)">Los define el tesorero al aprobar</span></div>`}
       <div class="rr"><span style="color:var(--text2)">Transporte</span><strong>${currentSol.transporte}</strong></div>
       ${currentSol.checks&&currentSol.checks.length?`<div class="rr"><span style="color:var(--text2)">Verificaciones</span><strong style="color:var(--ok-t)">${currentSol.checks.length}/${CHECKS_VEH.length} OK</strong></div>`:''}
     </div>
@@ -791,10 +878,10 @@ function calcDias(){
   if(s&&l){const d=Math.max(1,Math.round((new Date(l)-new Date(s))/86400000)+1);document.getElementById('dias-info').innerHTML=`<strong>${d} días</strong>`;currentSol.diasTemp=d;}
 }
 function updT(){
-  const v=parseFloat(document.getElementById('f-viat').value)||0;
-  const h=parseFloat(document.getElementById('f-hosp').value)||0;
-  const r=parseFloat(document.getElementById('f-res').value)||0;
-  document.getElementById('m-tot').textContent=fmt(v+h+r);
+  const v=parseFloat(document.getElementById('f-viat')?.value)||0;
+  const h=parseFloat(document.getElementById('f-hosp')?.value)||0;
+  const r=parseFloat(document.getElementById('f-res')?.value)||0;
+  const el=document.getElementById('m-tot');if(el)el.textContent=fmt(v+h+r);
 }
 function toggleChecks(){
   const trans=document.getElementById('f-trans').value;
@@ -824,9 +911,17 @@ function nextStep(){
     const fs=currentSol.fechaSalida,fl=currentSol.fechaLlegada;
     currentSol.dias=fs&&fl?Math.max(1,Math.round((new Date(fl)-new Date(fs))/86400000)+1):1;
   } else if(currentStep===2){
-    currentSol.viaticos=parseFloat(document.getElementById('f-viat').value)||0;
-    currentSol.hospedaje=parseFloat(document.getElementById('f-hosp').value)||0;
-    currentSol.reserva=parseFloat(document.getElementById('f-res').value)||0;
+    const isT=ROL==='tesorero';
+    const d=currentSol.dias||1;
+    if(isT){
+      currentSol.viaticos=parseFloat(document.getElementById('f-viat')?.value)||CFG.viaticos*d;
+      currentSol.hospedaje=parseFloat(document.getElementById('f-hosp')?.value)||CFG.hospedaje*d;
+      currentSol.reserva=parseFloat(document.getElementById('f-res')?.value)||0;
+    } else {
+      currentSol.viaticos=CFG.viaticos*d;
+      currentSol.hospedaje=CFG.hospedaje*d;
+      currentSol.reserva=0;
+    }
   } else if(currentStep===3){
     currentSol.transporte=document.getElementById('f-trans').value;
   }
@@ -839,14 +934,17 @@ async function enviarSolicitud(){
   currentSol.status='pendiente';
   const btn=event.currentTarget;
   btn.disabled=true;btn.innerHTML='<div class="spin"></div> Enviando...';
-  try {
-    const tot=(currentSol.viaticos||0)+(currentSol.hospedaje||0)+(currentSol.reserva||0);
-    const res=await api({action:'saveSolicitud',solicitante:currentSol.solicitante,
-      emailSolicitante:currentSol.email,jefe:currentSol.jefe,destino:currentSol.destino,
-      fechaSalida:currentSol.fechaSalida,fechaLlegada:currentSol.fechaLlegada,dias:currentSol.dias,
-      viaticos:currentSol.viaticos,hospedaje:currentSol.hospedaje,reserva:currentSol.reserva,
-      transporte:currentSol.transporte,checks:JSON.stringify(currentSol.checks||[]),status:'pendiente'});
+  try{
+    const res=await api({action:'saveSolicitud',
+      solicitante:currentSol.solicitante,emailSolicitante:currentSol.email,
+      jefe:currentSol.jefe,destino:currentSol.destino,
+      fechaSalida:currentSol.fechaSalida,fechaLlegada:currentSol.fechaLlegada,
+      dias:currentSol.dias,viaticos:currentSol.viaticos,
+      hospedaje:currentSol.hospedaje,reserva:currentSol.reserva,
+      transporte:currentSol.transporte,
+      checks:JSON.stringify(currentSol.checks||[]),status:'pendiente'});
     currentSol.id=res.id||'';
+    const tot=total(currentSol);
     await api({action:'sendMail',tipo:'solicitud_nueva',id:currentSol.id,
       solicitante:currentSol.solicitante,emailSolicitante:currentSol.email,
       destino:currentSol.destino,fechaSalida:currentSol.fechaSalida,
@@ -857,15 +955,13 @@ async function enviarSolicitud(){
     document.getElementById('t-nueva').style.display='none';
     updateBadges();showTab('solicitudes');
     showToast('Solicitud enviada. El tesorero recibió un mail.','ok');
-  } catch(e){
+  }catch(e){
     showToast('Error: '+e.message,'er');
     btn.disabled=false;btn.innerHTML='<i class="ti ti-send"></i> Enviar al tesorero';
   }
 }
 
-// ══════════════════════════════════════════════
-//  RENDICIÓN
-// ══════════════════════════════════════════════
+// ── RENDICIÓN ──────────────────────────────────────────────────
 function irRendicion(idx){
   currentSol=solicitudes[idx];
   gastoRows=currentSol.gastos?JSON.parse(JSON.stringify(currentSol.gastos)):[];
@@ -875,14 +971,14 @@ function irRendicion(idx){
 
 function renderRendicion(){
   const el=document.getElementById('panel-rendicion');
-  if(!currentSol){el.innerHTML=`<div class="card" style="text-align:center;padding:3rem"><p style="color:var(--text2)">Seleccioná una solicitud para ver la rendición.</p></div>`;return;}
+  if(!currentSol){el.innerHTML=`<div class="card" style="text-align:center;padding:3rem"><p style="color:var(--text2)">Seleccioná una solicitud.</p></div>`;return;}
   const tot=total(currentSol);
   const gasAct=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
   const saldo=tot-gasAct;
   const isT=ROL==='tesorero';
-  const editable=!isT&&(currentSol.status==='aprobado'||currentSol.status==='observado');
-  const byTipo={};
-  gastoRows.forEach(g=>{byTipo[g.tipo]=(byTipo[g.tipo]||0)+(parseFloat(g.importe)||0);});
+  const isA=ROL==='autorizante';
+  const editable=!isT&&!isA&&(currentSol.status==='aprobado'||currentSol.status==='observado');
+  const byTipo={};gastoRows.forEach(g=>{byTipo[g.tipo]=(byTipo[g.tipo]||0)+(parseFloat(g.importe)||0);});
 
   el.innerHTML=`
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
@@ -896,7 +992,26 @@ function renderRendicion(){
         </div>
       </div>
     </div>
+
+    ${isA&&currentSol.status==='auth_pendiente'?`
+      <div class="card pu" style="margin-bottom:1rem">
+        <div style="font-weight:500;margin-bottom:.5rem"><i class="ti ti-shield-check"></i> Solicitud de autorización</div>
+        <div style="font-size:13px;margin-bottom:.75rem">
+          <div class="rr"><span style="color:var(--text2)">Solicitante</span><strong>${currentSol.solicitante}</strong></div>
+          <div class="rr"><span style="color:var(--text2)">Destino</span><strong>${currentSol.destino}</strong></div>
+          <div class="rr"><span style="color:var(--text2)">Período</span><strong>${currentSol.fechaSalida} → ${currentSol.fechaLlegada} (${currentSol.dias} días)</strong></div>
+          <div class="rr"><span style="color:var(--text2)">Viáticos estimados</span><strong>${fmt(currentSol.viaticos)}</strong></div>
+          <div class="rr"><span style="color:var(--text2)">Hospedaje estimado</span><strong>${fmt(currentSol.hospedaje)}</strong></div>
+          <div class="rr"><span style="color:var(--text2)">Transporte</span><strong>${currentSol.transporte}</strong></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn ok" onclick="autorizarDesdeApp(${solicitudes.indexOf(currentSol)})"><i class="ti ti-check"></i> Autorizar</button>
+          <button class="btn er" onclick="rechazarAuthDesdeApp(${solicitudes.indexOf(currentSol)})"><i class="ti ti-x"></i> Rechazar</button>
+        </div>
+      </div>`:''}
+
     ${currentSol.status==='observado'?`<div style="font-size:13px;color:var(--wa-t);background:var(--wa-bg);border:0.5px solid var(--wa-b);border-radius:var(--r);padding:10px 14px;margin-bottom:1rem"><i class="ti ti-message-circle"></i> <strong>Observación:</strong> ${currentSol.observacion}</div>`:''}
+
     <div class="card">
       <div class="mrow">
         <div class="met"><div class="ml">Fondos recibidos</div><div class="mv">${fmt(tot)}</div></div>
@@ -905,6 +1020,7 @@ function renderRendicion(){
           <div class="mv" id="rm-s" style="color:var(--${saldo>=0?'wa':'ok'}-t)">${fmt(Math.abs(saldo))}</div></div>
       </div>
     </div>
+
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
         <div class="ctitle" style="margin-bottom:0">Comprobantes</div>
@@ -915,23 +1031,43 @@ function renderRendicion(){
       </div>
       <div id="gt"></div>
     </div>
+
     <div class="card">
       <div class="ctitle">Resumen por tipo de comprobante</div>
       <div id="rcomp">${renderResumen(byTipo,gasAct,saldo)}</div>
     </div>
+
     ${editable?`<div style="display:flex;justify-content:flex-end">
-      <button class="btn pr" onclick="${currentSol.status==='observado'?'reenviarRendicion()':'enviarRendicion()}'}">
+      <button class="btn pr" onclick="${currentSol.status==='observado'?'reenviarRendicion()':'enviarRendicion()'}">
         <i class="ti ti-send"></i> ${currentSol.status==='observado'?'Reenviar rendición corregida':'Enviar rendición al tesorero'}
       </button>
     </div>`:''}
-    ${currentSol.status==='rendido'&&!isT?`<div style="font-size:13px;color:var(--ok-t);background:var(--ok-bg);border:0.5px solid var(--ok-b);border-radius:var(--r);padding:10px 14px">
-      <i class="ti ti-check"></i> Rendición enviada — el tesorero está revisando.
-    </div>`:''}
-    ${currentSol.status==='cerrado'?`<div style="font-size:13px;color:var(--text2);background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:10px 14px">
-      <i class="ti ti-archive"></i> Rendición cerrada y archivada.
-    </div>`:''}
+    ${currentSol.status==='rendido'&&!isT?`<div style="font-size:13px;color:var(--ok-t);background:var(--ok-bg);border:0.5px solid var(--ok-b);border-radius:var(--r);padding:10px 14px"><i class="ti ti-check"></i> Rendición enviada — el tesorero está revisando.</div>`:''}
+    ${currentSol.status==='cerrado'?`<div style="font-size:13px;color:var(--text2);background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:10px 14px"><i class="ti ti-archive"></i> Rendición cerrada y archivada.</div>`:''}
   `;
   renderGastoTable();
+}
+
+async function autorizarDesdeApp(idx){
+  const s=solicitudes[idx];
+  try{
+    await api({action:'procesarAutorizacion',id:s.id,decision:'autorizado',nota:'Autorizado desde la app',autorizanteEmail:USER.email,autorizanteNombre:USER.nombre});
+    solicitudes[idx].status='autorizado';
+    showToast('Solicitud autorizada. El tesorero fue notificado.','ok');
+    showTab('solicitudes');
+    document.getElementById('t-rendicion').style.display='none';
+  }catch(e){showToast('Error: '+e.message,'er');}
+}
+
+async function rechazarAuthDesdeApp(idx){
+  const s=solicitudes[idx];
+  try{
+    await api({action:'procesarAutorizacion',id:s.id,decision:'rechazado',nota:'Rechazado desde la app',autorizanteEmail:USER.email,autorizanteNombre:USER.nombre});
+    solicitudes[idx].status='denegado';
+    showToast('Solicitud rechazada. El tesorero fue notificado.','wa');
+    showTab('solicitudes');
+    document.getElementById('t-rendicion').style.display='none';
+  }catch(e){showToast('Error: '+e.message,'er');}
 }
 
 function renderResumen(byTipo,gasAct,saldo){
@@ -945,14 +1081,14 @@ function addGasto(){gastoRows.push({tipo:'Factura B',rubro:172,detalle:'',import
 function removeGasto(i){gastoRows.splice(i,1);renderGastoTable();}
 function renderGastoTable(){
   const el=document.getElementById('gt');if(!el)return;
-  const ro=currentSol.status==='rendido'||currentSol.status==='cerrado'||(ROL==='tesorero');
+  const ro=currentSol.status==='rendido'||currentSol.status==='cerrado'||ROL==='tesorero'||ROL==='autorizante';
   if(!gastoRows.length){el.innerHTML=`<p style="font-size:13px;color:var(--text2);text-align:center;padding:1rem">Sin comprobantes cargados.</p>`;updR();return;}
   if(ro){
     el.innerHTML=`<table class="gt"><colgroup><col style="width:25%"><col style="width:30%"><col style="width:28%"><col style="width:17%"></colgroup>
       <thead><tr><th>Tipo</th><th>Rubro</th><th>Detalle</th><th style="text-align:right">Importe</th></tr></thead>
       <tbody>${gastoRows.map(g=>`<tr><td>${g.tipo}</td><td style="font-size:12px;color:var(--text2)">${RUBROS.find(r=>r.cod===g.rubro)?.desc||g.rubro}</td><td>${g.detalle}</td><td style="text-align:right">${fmt(g.importe)}</td></tr>`).join('')}</tbody>
     </table>`;
-  } else {
+  }else{
     el.innerHTML=`<table class="gt"><colgroup><col style="width:20%"><col style="width:27%"><col style="width:23%"><col style="width:16%"><col style="width:14%"></colgroup>
       <thead><tr><th>Tipo</th><th>Rubro</th><th>Detalle</th><th>Importe</th><th></th></tr></thead>
       <tbody>${gastoRows.map((g,i)=>`<tr>
@@ -980,12 +1116,10 @@ function simScan(){
   showToast('Escaneando...','in');
   setTimeout(()=>{gastoRows.push({tipo:'Ticket / Factura C',rubro:172,detalle:'Almuerzo en ruta',importe:8500});renderGastoTable();showToast('Comprobante cargado','ok');},1000);
 }
-async function _enviarRend(nuevoStatus){
+async function _enviarRend(){
   if(!gastoRows.length){showToast('Cargá al menos un comprobante','wa');return;}
-  const tot=total(currentSol);
-  const gasAct=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
-  const saldo=tot-gasAct;
-  try {
+  const tot=total(currentSol),gasAct=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0),saldo=tot-gasAct;
+  try{
     await api({action:'saveGastos',id:currentSol.id,gastos:JSON.stringify(gastoRows),usuario:currentSol.solicitante});
     await api({action:'updateStatus',id:currentSol.id,status:'rendido',usuario:currentSol.solicitante});
     await api({action:'sendMail',tipo:'rendicion_enviada',id:currentSol.id,
@@ -995,46 +1129,58 @@ async function _enviarRend(nuevoStatus){
     currentSol.status='rendido';currentSol.observacion='';
     updateBadges();renderRendicion();
     showToast('Rendición enviada al tesorero','ok');
-  } catch(e){showToast('Error: '+e.message,'er');}
+  }catch(e){showToast('Error: '+e.message,'er');}
 }
-function enviarRendicion(){_enviarRend('rendido');}
-function reenviarRendicion(){_enviarRend('rendido');}
+function enviarRendicion(){_enviarRend();}
+function reenviarRendicion(){_enviarRend();}
 
-// ══════════════════════════════════════════════
-//  TESORERÍA
-// ══════════════════════════════════════════════
+// ── TESORERÍA ──────────────────────────────────────────────────
 function renderTesoreria(){
   updateBadges();
   const el=document.getElementById('panel-tesoreria');
-  const pend=solicitudes.filter(s=>s.status==='pendiente');
+  const pend=solicitudes.filter(s=>s.status==='pendiente'||s.status==='autorizado');
   const rend=solicitudes.filter(s=>s.status==='rendido');
+  const auth=solicitudes.filter(s=>s.status==='auth_pendiente');
   const cerr=solicitudes.filter(s=>s.status==='cerrado');
+
   el.innerHTML=`
+    ${auth.length?`<div class="ctitle" style="margin-bottom:.75rem;color:var(--pu-t)"><i class="ti ti-shield-check"></i> Esperando autorización externa</div>
+    ${auth.map(s=>`<div class="card pu" style="margin-bottom:1rem">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+        <div><div style="font-weight:500;font-size:15px;margin-bottom:3px">${s.destino}</div>
+        <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span>${s.solicitante}</span><span class="idchip">${s.id}</span>
+        </div></div>
+        <span class="sb s-auth_pendiente">Enviado a ${s.autorizante||'autorizante'}</span>
+      </div>
+    </div>`).join('')}`:''}
+
     ${pend.length?`<div class="ctitle" style="margin-bottom:.75rem">Pendientes de aprobación</div>
     ${pend.map(s=>{const idx=solicitudes.indexOf(s);const tot=total(s);
-      return `<div class="card" style="margin-bottom:1rem">
+      return`<div class="card${s.status==='autorizado'?' pu':''}" style="margin-bottom:1rem">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
           <div><div style="font-weight:500;font-size:15px;margin-bottom:3px">${s.destino}</div>
           <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <span>${s.solicitante}</span><span class="idchip">${s.id}</span>
             <span>${s.dias} días · ${s.transporte}</span>
-            ${s.email?`<span><i class="ti ti-mail" style="font-size:11px"></i> ${s.email}</span>`:''}
+            ${s.status==='autorizado'?`<span class="sb s-autorizado" style="font-size:11px"><i class="ti ti-shield-check"></i> Autorizado por ${s.autorizante}</span>`:''}
           </div></div>
-          <div style="font-size:18px;font-weight:500">${fmt(tot)}</div>
+          <div style="font-size:16px;font-weight:500">${fmt(tot)} <span style="font-size:11px;color:var(--text2)">(estimado)</span></div>
         </div><div class="div"></div>
         <div style="font-size:13px;margin-bottom:.75rem">
-          <div class="rr"><span style="color:var(--text2)">Viáticos</span><span>${fmt(s.viaticos)}</span></div>
-          <div class="rr"><span style="color:var(--text2)">Hospedaje</span><span>${fmt(s.hospedaje)}</span></div>
-          <div class="rr"><span style="color:var(--text2)">Reserva</span><span>${fmt(s.reserva)}</span></div>
+          <div class="rr"><span style="color:var(--text2)">Viáticos estimados</span><span>${fmt(s.viaticos)}</span></div>
+          <div class="rr"><span style="color:var(--text2)">Hospedaje estimado</span><span>${fmt(s.hospedaje)}</span></div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn ok" onclick="aprobar(${idx})"><i class="ti ti-check"></i> Aprobar y entregar fondos</button>
+          <button class="btn ok" onclick="showFondos(${idx})"><i class="ti ti-coin"></i> Revisar fondos y aprobar</button>
+          <button class="btn pu" onclick="showSolicitarAuth(${idx})"><i class="ti ti-shield-check"></i> Solicitar autorización</button>
           <button class="btn er" onclick="showDenegar(${idx})"><i class="ti ti-x"></i> Denegar</button>
         </div>
       </div>`;}).join('')}`:''}
+
     ${rend.length?`<div class="ctitle" style="margin:.5rem 0 .75rem">Rendiciones a revisar</div>
     ${rend.map(s=>{const idx=solicitudes.indexOf(s);const tot=total(s);const gas=gastado(s);const saldo=tot-gas;
-      return `<div class="card" style="margin-bottom:1rem">
+      return`<div class="card" style="margin-bottom:1rem">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:.75rem">
           <div><div style="font-weight:500;font-size:15px;margin-bottom:3px">${s.destino}</div>
           <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -1053,12 +1199,13 @@ function renderTesoreria(){
           <button class="btn wa" onclick="showObservacion(${idx})"><i class="ti ti-message-circle"></i> Observar y devolver</button>
         </div>
       </div>`;}).join('')}`:''}
+
     ${cerr.length?`<div class="ctitle" style="margin:.5rem 0 .75rem">Historial</div>
-    ${cerr.map(s=>{const tot=total(s);const gas=gastado(s);
-      return `<div class="card" style="margin-bottom:.75rem;opacity:.8">
+    ${cerr.map(s=>{const tot=total(s),gas=gastado(s);
+      return`<div class="card" style="margin-bottom:.75rem;opacity:.8">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
           <div><div style="font-weight:500">${s.destino}</div>
-          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div style="font-size:12px;color:var(--text2);display:flex;gap:8px;align-items:center">
             <span>${s.solicitante}</span><span class="idchip">${s.id}</span>
           </div></div>
           <div style="display:flex;align-items:center;gap:10px">
@@ -1067,36 +1214,119 @@ function renderTesoreria(){
           </div>
         </div>
       </div>`;}).join('')}`:''}
-    ${!pend.length&&!rend.length&&!cerr.length?`<div class="card" style="text-align:center;padding:3rem">
+
+    ${!pend.length&&!rend.length&&!auth.length&&!cerr.length?`<div class="card" style="text-align:center;padding:3rem">
       <i class="ti ti-building-bank" style="font-size:48px;color:var(--text2)"></i>
       <p style="margin-top:1rem;color:var(--text2)">Sin movimientos pendientes.</p>
     </div>`:''}
   `;
 }
 
-async function aprobar(i){
-  const s=solicitudes[i];const tot=total(s);
-  try {
-    await api({action:'updateStatus',id:s.id,status:'aprobado',usuario:'Tesorero'});
+// Editar fondos antes de aprobar
+function showFondos(idx){
+  fondosTarget=idx;
+  const s=solicitudes[idx];
+  const d=s.dias||1;
+  document.getElementById('fondos-sol-info').innerHTML=
+    `<strong>${s.destino}</strong> — ${s.solicitante} · ${d} días`;
+  document.getElementById('fv-viat').value=s.viaticos||CFG.viaticos*d;
+  document.getElementById('fv-hosp').value=s.hospedaje||CFG.hospedaje*d;
+  document.getElementById('fv-res').value=s.reserva||0;
+  updFV();
+  openOv('ov-fondos');
+}
+function updFV(){
+  const v=parseFloat(document.getElementById('fv-viat').value)||0;
+  const h=parseFloat(document.getElementById('fv-hosp').value)||0;
+  const r=parseFloat(document.getElementById('fv-res').value)||0;
+  document.getElementById('fv-total').textContent=fmt(v+h+r);
+}
+document.querySelectorAll&&['fv-viat','fv-hosp','fv-res'].forEach(id=>{
+  const el=document.getElementById(id);if(el)el.oninput=updFV;
+});
+// Asignar eventos de fondos después de que el DOM esté listo
+window.addEventListener('load',()=>{
+  ['fv-viat','fv-hosp','fv-res'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.addEventListener('input',updFV);
+  });
+});
+
+async function confirmarAprobacion(){
+  const idx=fondosTarget;
+  const s=solicitudes[idx];
+  const viat=parseFloat(document.getElementById('fv-viat').value)||0;
+  const hosp=parseFloat(document.getElementById('fv-hosp').value)||0;
+  const res=parseFloat(document.getElementById('fv-res').value)||0;
+  const tot=viat+hosp+res;
+  closeOv('ov-fondos');
+  try{
+    // Actualizar montos en Sheet
+    await api({action:'saveSolicitud',id:s.id,solicitante:s.solicitante,emailSolicitante:s.email,
+      jefe:s.jefe,destino:s.destino,fechaSalida:s.fechaSalida,fechaLlegada:s.fechaLlegada,
+      dias:s.dias,viaticos:viat,hospedaje:hosp,reserva:res,
+      transporte:s.transporte,checks:JSON.stringify(s.checks||[]),status:'aprobado'});
     await api({action:'sendMail',tipo:'fondos_aprobados',id:s.id,
       solicitante:s.solicitante,emailSolicitante:s.email,
       destino:s.destino,fechaSalida:s.fechaSalida,fechaLlegada:s.fechaLlegada,total:tot});
-    solicitudes[i].status='aprobado';updateBadges();renderTesoreria();
-    showToast('Fondos aprobados. El vendedor recibió un mail.','ok');
-  } catch(e){showToast('Error: '+e.message,'er');}
+    solicitudes[idx].viaticos=viat;solicitudes[idx].hospedaje=hosp;solicitudes[idx].reserva=res;
+    solicitudes[idx].status='aprobado';
+    updateBadges();renderTesoreria();
+    showToast('Fondos aprobados y enviados al vendedor.','ok');
+  }catch(e){showToast('Error: '+e.message,'er');}
 }
+
+// Solicitar autorización
+function showSolicitarAuth(idx){
+  authTarget=idx;
+  // Cargar autorizantes: usuarios con rol autorizante o tesorero (excluyendo al usuario actual)
+  const autorizantes=usuariosDB.filter(u=>
+    (u.Rol==='autorizante'||u.Rol==='tesorero')&&
+    u.Email&&u.Email.toLowerCase()!==USER.email.toLowerCase()&&
+    u.Activo!=='NO'
+  );
+  const sel=document.getElementById('auth-select');
+  sel.innerHTML=autorizantes.length
+    ? autorizantes.map(u=>`<option value="${u.Email}">${u.Nombre} (${u.Rol})</option>`).join('')
+    : '<option value="">No hay autorizantes disponibles</option>';
+  document.getElementById('auth-nota').value='';
+  openOv('ov-auth');
+}
+
+async function confirmarSolicitarAuth(){
+  const idx=authTarget;
+  const s=solicitudes[idx];
+  const sel=document.getElementById('auth-select');
+  const authEmail=sel.value;
+  const authNombre=sel.options[sel.selectedIndex]?.text||authEmail;
+  const nota=document.getElementById('auth-nota').value.trim();
+  if(!authEmail){showToast('Seleccioná un autorizante','wa');return;}
+  closeOv('ov-auth');
+  try{
+    await api({action:'solicitarAutorizacion',id:s.id,
+      autorizanteEmail:authEmail,autorizanteNombre:authNombre.split(' (')[0],
+      nota,solicitante:s.solicitante,emailSolicitante:s.email,
+      destino:s.destino,fechaSalida:s.fechaSalida,fechaLlegada:s.fechaLlegada,
+      dias:s.dias,viaticos:s.viaticos,hospedaje:s.hospedaje,transporte:s.transporte});
+    solicitudes[idx].status='auth_pendiente';
+    solicitudes[idx].autorizante=authNombre.split(' (')[0];
+    solicitudes[idx].emailAutorizante=authEmail;
+    updateBadges();renderTesoreria();
+    showToast('Solicitud de autorización enviada a '+authNombre.split(' (')[0],'ok');
+  }catch(e){showToast('Error: '+e.message,'er');}
+}
+
 function showDenegar(i){denegarTarget=i;document.getElementById('denegar-texto').value='';openOv('ov-denegar');}
 async function confirmarDenegar(){
   const i=denegarTarget,s=solicitudes[i];
   const obs=document.getElementById('denegar-texto').value.trim();
   closeOv('ov-denegar');
-  try {
+  try{
     await api({action:'updateStatus',id:s.id,status:'denegado',usuario:'Tesorero',observacion:obs});
     await api({action:'sendMail',tipo:'fondos_denegados',id:s.id,
       solicitante:s.solicitante,emailSolicitante:s.email,destino:s.destino,observacion:obs});
     solicitudes[i].status='denegado';updateBadges();renderTesoreria();
     showToast('Solicitud denegada.','wa');
-  } catch(e){showToast('Error: '+e.message,'er');}
+  }catch(e){showToast('Error: '+e.message,'er');}
 }
 function showObservacion(i){obsTarget=i;document.getElementById('obs-texto').value='';openOv('ov-obs');}
 async function confirmarObservacion(){
@@ -1104,85 +1334,75 @@ async function confirmarObservacion(){
   const obs=document.getElementById('obs-texto').value.trim();
   if(!obs){showToast('Escribí la observación','wa');return;}
   closeOv('ov-obs');
-  try {
+  try{
     await api({action:'updateStatus',id:s.id,status:'observado',usuario:'Tesorero',observacion:obs});
     await api({action:'sendMail',tipo:'rendicion_observada',id:s.id,
       solicitante:s.solicitante,emailSolicitante:s.email,destino:s.destino,observacion:obs});
     solicitudes[i].status='observado';solicitudes[i].observacion=obs;
-    updateBadges();renderTesoreria();
-    showToast('Rendición devuelta con observación.','wa');
-  } catch(e){showToast('Error: '+e.message,'er');}
+    updateBadges();renderTesoreria();showToast('Rendición devuelta con observación.','wa');
+  }catch(e){showToast('Error: '+e.message,'er');}
 }
 async function cerrar(i){
   const s=solicitudes[i];
-  try {
+  try{
     await api({action:'updateStatus',id:s.id,status:'cerrado',usuario:'Tesorero'});
     solicitudes[i].status='cerrado';updateBadges();renderTesoreria();
-    showToast('Rendición cerrada y archivada.','ok');
-  } catch(e){showToast('Error: '+e.message,'er');}
+    showToast('Rendición cerrada.','ok');
+  }catch(e){showToast('Error: '+e.message,'er');}
 }
 
-// ══════════════════════════════════════════════
-//  GESTIÓN DE USUARIOS
-// ══════════════════════════════════════════════
+// ── GESTIÓN USUARIOS ───────────────────────────────────────────
 async function abrirUsuarios(){
   openOv('ov-usuarios');
   document.getElementById('usuarios-lista').innerHTML='<div style="display:flex;align-items:center;gap:8px;color:var(--text2)"><div class="spin"></div> Cargando...</div>';
-  try {
+  try{
     const res=await api({action:'getUsuarios'});
     usuariosDB=Array.isArray(res)?res:[];
     renderUsuariosList();
-  } catch(e){
-    document.getElementById('usuarios-lista').innerHTML=`<p style="color:var(--er-t)">Error: ${e.message}</p>`;
-  }
+  }catch(e){document.getElementById('usuarios-lista').innerHTML=`<p style="color:var(--er-t)">Error: ${e.message}</p>`;}
 }
-
 function renderUsuariosList(){
   const el=document.getElementById('usuarios-lista');
-  if(!usuariosDB.length){el.innerHTML='<p style="font-size:13px;color:var(--text2)">No hay usuarios registrados.</p>';return;}
+  if(!usuariosDB.length){el.innerHTML='<p style="font-size:13px;color:var(--text2)">No hay usuarios.</p>';return;}
+  const rolColor={vendedor:'s-rendido',autorizante:'s-auth_pendiente',tesorero:'s-aprobado'};
   el.innerHTML=`<table class="gt" style="font-size:13px">
     <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th></th></tr></thead>
     <tbody>${usuariosDB.map((u,i)=>`<tr>
       <td>${u.Nombre||'—'}</td>
       <td style="font-size:12px;color:var(--text2)">${u.Email||'—'}</td>
-      <td><span class="sb ${u.Rol==='tesorero'?'s-aprobado':'s-rendido'}" style="font-size:11px">${u.Rol||'vendedor'}</span></td>
+      <td><span class="sb ${rolColor[u.Rol]||'s-borrador'}" style="font-size:11px">${u.Rol||'vendedor'}</span></td>
       <td><span style="font-size:12px;color:${u.Activo==='NO'?'var(--er-t)':'var(--ok-t)'}">${u.Activo==='NO'?'Inactivo':'Activo'}</span></td>
       <td><button class="btn" style="padding:3px 8px;font-size:12px" onclick="toggleUsuario(${i})">${u.Activo==='NO'?'Activar':'Desactivar'}</button></td>
     </tr>`).join('')}</tbody>
   </table>`;
 }
-
 async function agregarUsuario(){
   const nombre=document.getElementById('nu-nombre').value.trim();
   const email=document.getElementById('nu-email').value.trim().toLowerCase();
   const rol=document.getElementById('nu-rol').value;
-  const clave=document.getElementById('nu-clave').value.trim()||CLAVE_DEFAULT;
+  const clave=document.getElementById('nu-clave').value.trim()||'cuenca2026';
   if(!nombre||!email){showToast('Completá nombre y email','wa');return;}
-  try {
+  try{
     await api({action:'saveUsuario',nombre,email,rol,clave,activo:'SI'});
-    usuariosDB.push({Nombre:nombre,Email:email,Rol:rol,Clave:clave,Activo:'SI'});
+    usuariosDB.push({Nombre:nombre,Email:email,Rol:rol,Activo:'SI'});
     renderUsuariosList();
     document.getElementById('nu-nombre').value='';
     document.getElementById('nu-email').value='';
-    document.getElementById('nu-clave').value=CLAVE_DEFAULT;
+    document.getElementById('nu-clave').value='';
     showToast(`Usuario ${nombre} agregado.`,'ok');
-  } catch(e){showToast('Error: '+e.message,'er');}
+  }catch(e){showToast('Error: '+e.message,'er');}
 }
-
 async function toggleUsuario(i){
   const u=usuariosDB[i];
-  const nuevoActivo=u.Activo==='NO'?'SI':'NO';
-  try {
-    await api({action:'saveUsuario',nombre:u.Nombre,email:u.Email,rol:u.Rol,clave:u.Clave,activo:nuevoActivo});
-    usuariosDB[i].Activo=nuevoActivo;
-    renderUsuariosList();
-    showToast(`Usuario ${nuevoActivo==='SI'?'activado':'desactivado'}.`,'ok');
-  } catch(e){showToast('Error: '+e.message,'er');}
+  const nuevo=u.Activo==='NO'?'SI':'NO';
+  try{
+    await api({action:'saveUsuario',nombre:u.Nombre,email:u.Email,rol:u.Rol,clave:u.Clave||'',activo:nuevo});
+    usuariosDB[i].Activo=nuevo;renderUsuariosList();
+    showToast(`Usuario ${nuevo==='SI'?'activado':'desactivado'}.`,'ok');
+  }catch(e){showToast('Error: '+e.message,'er');}
 }
 
-// ══════════════════════════════════════════════
-//  CAMBIAR CLAVE
-// ══════════════════════════════════════════════
+// ── CAMBIAR CLAVE ──────────────────────────────────────────────
 async function guardarClave(){
   const nueva=document.getElementById('clave-nueva').value;
   const rep=document.getElementById('clave-rep').value;
@@ -1190,18 +1410,16 @@ async function guardarClave(){
   err.textContent='';
   if(nueva.length<6){err.textContent='Mínimo 6 caracteres.';return;}
   if(nueva!==rep){err.textContent='Las contraseñas no coinciden.';return;}
-  try {
+  try{
     await api({action:'cambiarClave',email:USER.email,clave:nueva});
     closeOv('ov-clave');
     document.getElementById('clave-nueva').value='';
     document.getElementById('clave-rep').value='';
     showToast('Contraseña actualizada.','ok');
-  } catch(e){err.textContent='Error: '+e.message;}
+  }catch(e){err.textContent='Error: '+e.message;}
 }
 
-// ══════════════════════════════════════════════
-//  DASHBOARD
-// ══════════════════════════════════════════════
+// ── DASHBOARD ──────────────────────────────────────────────────
 function renderDashboard(){
   if(ROL!=='tesorero')return;
   const el=document.getElementById('panel-dashboard');
@@ -1227,10 +1445,10 @@ function renderDashboard(){
     <div class="card">
       <div class="ctitle">Filtros</div>
       <div class="fg3">
-        <div class="fi"><label>Desde</label><input type="date" id="dd" value="${filterDash.desde}" onchange="filterDash.desde=this.value;renderDashboard()"></div>
-        <div class="fi"><label>Hasta</label><input type="date" id="dh" value="${filterDash.hasta}" onchange="filterDash.hasta=this.value;renderDashboard()"></div>
+        <div class="fi"><label>Desde</label><input type="date" value="${filterDash.desde}" onchange="filterDash.desde=this.value;renderDashboard()"></div>
+        <div class="fi"><label>Hasta</label><input type="date" value="${filterDash.hasta}" onchange="filterDash.hasta=this.value;renderDashboard()"></div>
         <div class="fi"><label>Vendedor</label>
-          <select id="du" onchange="filterDash.usuario=this.value;renderDashboard()">
+          <select onchange="filterDash.usuario=this.value;renderDashboard()">
             <option value="">Todos</option>
             ${usuarios.map(u=>`<option${filterDash.usuario===u?' selected':''}>${u}</option>`).join('')}
           </select>
@@ -1247,12 +1465,12 @@ function renderDashboard(){
     ${!filtered.length?`<div class="card" style="text-align:center;padding:2rem"><p style="color:var(--text2)">Sin rendiciones en el período.</p></div>`:`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
       <div class="card"><div class="ctitle">Por rubro</div><canvas id="cr" height="220"></canvas></div>
-      <div class="card"><div class="ctitle">Por tipo de comprobante</div><canvas id="ct" height="220"></canvas></div>
+      <div class="card"><div class="ctitle">Por tipo</div><canvas id="ct" height="220"></canvas></div>
     </div>
     <div class="card">
       <div class="ctitle">Detalle por rubro</div>
       ${re.map(([r,v])=>{const pct=tr>0?Math.round(v/tr*100):0;
-        return `<div class="rr"><span style="color:var(--text2);font-size:13px">${r}</span>
+        return`<div class="rr"><span style="color:var(--text2);font-size:13px">${r}</span>
           <div style="display:flex;align-items:center;gap:10px">
             <div style="width:100px;height:4px;background:var(--bg2);border-radius:999px;overflow:hidden"><div style="width:${pct}%;height:100%;background:var(--in-t);border-radius:999px"></div></div>
             <span style="font-size:12px;color:var(--text2);min-width:28px;text-align:right">${pct}%</span>
@@ -1263,7 +1481,7 @@ function renderDashboard(){
     <div class="card">
       <div class="ctitle">Giras — clic para ver rendición</div>
       ${filtered.map(s=>{const tot=total(s),gas=gastado(s),idx=solicitudes.indexOf(s);const pct=tot>0?Math.min(100,Math.round(gas/tot*100)):0;
-        return `<div style="padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer" onclick="irRendicion(${idx})">
+        return`<div style="padding:10px 0;border-bottom:0.5px solid var(--border);cursor:pointer" onclick="irRendicion(${idx})">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px">
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
               <span style="font-weight:500">${s.destino}</span>
@@ -1296,9 +1514,7 @@ function renderDashboard(){
   },100);
 }
 
-// ══════════════════════════════════════════════
-//  CONFIG
-// ══════════════════════════════════════════════
+// ── CONFIG ─────────────────────────────────────────────────────
 function openCfg(){
   document.getElementById('cfg-viat').value=CFG.viaticos;
   document.getElementById('cfg-hosp').value=CFG.hospedaje;
@@ -1310,23 +1526,59 @@ async function guardarConfig(){
     viaticos:document.getElementById('cfg-viat').value,
     hospedaje:document.getElementById('cfg-hosp').value,
     diasLimite:document.getElementById('cfg-dias').value};
-  try {
+  try{
     await api(params);
     CFG.viaticos=parseFloat(params.viaticos)||60000;
     CFG.hospedaje=parseFloat(params.hospedaje)||100000;
     CFG.diasLimite=parseInt(params.diasLimite)||5;
     closeOv('ov-cfg');showToast('Configuración guardada.','ok');
-  } catch(e){showToast('Error: '+e.message,'er');}
+  }catch(e){showToast('Error: '+e.message,'er');}
 }
 
-// Deep link desde mail
-const urlP=new URLSearchParams(window.location.search);
-if(urlP.get('autoLogin')==='1'&&urlP.get('email')&&urlP.get('tok')){
-  // Token simple para deep links (validado en el script)
-  api({action:'loginToken',email:urlP.get('email'),tok:urlP.get('tok')}).then(r=>{
-    if(r.ok){USER={email:r.email,nombre:r.nombre,rol:r.rol};ROL=r.rol;initApp();}
-  }).catch(()=>{});
+// ── PANTALLA DE RESULTADO AUTORIZACIÓN (link desde mail) ───────
+async function procesarAuthLink(){
+  const p=new URLSearchParams(window.location.search);
+  const id=p.get('id'),tok=p.get('tok'),decision=p.get('decision');
+  if(!id||!tok||!decision)return false;
+
+  const rs=document.getElementById('auth-result-screen');
+  rs.style.display='flex';
+  document.getElementById('login-screen').style.display='none';
+
+  document.getElementById('auth-result-icon').textContent='⏳';
+  document.getElementById('auth-result-title').textContent='Procesando...';
+  document.getElementById('auth-result-body').textContent='';
+
+  try{
+    const res=await api({action:'procesarAutorizacion',id,tok,decision});
+    if(decision==='autorizado'){
+      document.getElementById('auth-result-icon').innerHTML='<i class="ti ti-shield-check" style="color:var(--ok-t)"></i>';
+      document.getElementById('auth-result-title').textContent='Solicitud autorizada';
+      document.getElementById('auth-result-body').textContent='El tesorero fue notificado y puede proceder con la aprobación de los fondos.';
+    }else{
+      document.getElementById('auth-result-icon').innerHTML='<i class="ti ti-x" style="color:var(--er-t)"></i>';
+      document.getElementById('auth-result-title').textContent='Solicitud rechazada';
+      document.getElementById('auth-result-body').textContent='El tesorero fue notificado del rechazo.';
+    }
+  }catch(e){
+    document.getElementById('auth-result-icon').innerHTML='<i class="ti ti-alert-triangle" style="color:var(--wa-t)"></i>';
+    document.getElementById('auth-result-title').textContent='Error al procesar';
+    document.getElementById('auth-result-body').textContent=e.message;
+  }
+  return true;
 }
+
+// ── INIT ───────────────────────────────────────────────────────
+(async()=>{
+  const p=new URLSearchParams(window.location.search);
+  // Link de autorización desde mail
+  if(p.get('tok')&&p.get('decision')){
+    await procesarAuthLink();
+    return;
+  }
+  // Cargar lista de usuarios para autorizantes (la necesitamos antes del login del tesorero)
+  // Se carga lazy cuando el tesorero abre el panel
+})();
 </script>
 </body>
 </html>
