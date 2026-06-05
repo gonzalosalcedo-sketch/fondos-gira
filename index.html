@@ -375,6 +375,10 @@ table.gt tr:last-child td{border-bottom:none}
 <div id="panel-dashboard" class="panel"></div>
 
 <div id="toast"></div>
+
+<!-- Input oculto para captura de cámara/archivo -->
+<input type="file" id="scan-input" accept="image/*" capture="environment"
+  style="display:none" onchange="procesarScan(this.files[0]);this.value=''">
 </div>
 </div>
 
@@ -1124,8 +1128,102 @@ function updR(){
   const rc=document.getElementById('rcomp');if(rc)rc.innerHTML=renderResumen(byTipo,gasAct,saldo);
 }
 function simScan(){
-  showToast('Escaneando...','in');
-  setTimeout(()=>{gastoRows.push({tipo:'Ticket / Factura C',rubro:172,detalle:'Almuerzo en ruta',importe:8500});renderGastoTable();showToast('Comprobante cargado','ok');},1000);
+  // Abrir input de archivo/cámara oculto
+  const input = document.getElementById('scan-input');
+  if(input) input.click();
+}
+
+async function procesarScan(file){
+  if(!file) return;
+  showToast('Leyendo comprobante con IA...','in');
+
+  try {
+    // Convertir imagen a base64
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const mediaType = file.type || 'image/jpeg';
+
+    // Llamar a Claude para extraer datos del comprobante
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: { type: 'base64', media_type: mediaType, data: base64 }
+            },
+            {
+              type: 'text',
+              text: `Analizá este comprobante de gastos argentino y extraé la información. Respondé SOLO con un JSON válido sin ningún texto adicional, en este formato exacto:
+{
+  "tipo": "Factura A" | "Factura B" | "Ticket / Factura C" | "Recibo" | "Comprobante electrónico" | "Otro",
+  "detalle": "descripción breve del gasto (máx 50 caracteres)",
+  "importe": número (solo el total final en pesos, sin símbolo ni puntos de miles, con punto decimal si aplica),
+  "rubro_sugerido": "Viáticos y Refrigerios" | "Alojamiento" | "Combustible Rodados" | "Pasajes y Movilidad" | "Gastos Varios" | "Teléfono e Internet" | "Seguros" | "Mantenimiento Rodados"
+}
+Si no podés leer algún campo con certeza, usá un valor razonable o vacío.`
+            }
+          ]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const texto = data.content && data.content[0] ? data.content[0].text : '';
+
+    // Parsear JSON de la respuesta
+    let resultado;
+    try {
+      const jsonMatch = texto.match(/\{[\s\S]*\}/);
+      resultado = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+    } catch(e) {
+      resultado = null;
+    }
+
+    if(!resultado || !resultado.importe) {
+      showToast('No se pudo leer el comprobante. Cargalo manualmente.','wa');
+      addGasto();
+      return;
+    }
+
+    // Mapear rubro sugerido a código
+    const rubroMap = {
+      'Viáticos y Refrigerios': 172,
+      'Alojamiento': 174,
+      'Combustible Rodados': 138,
+      'Pasajes y Movilidad': 170,
+      'Gastos Varios': 192,
+      'Teléfono e Internet': 180,
+      'Seguros': 166,
+      'Mantenimiento Rodados': 144,
+    };
+    const rubCod = rubroMap[resultado.rubro_sugerido] || 172;
+
+    gastoRows.push({
+      tipo: resultado.tipo || 'Ticket / Factura C',
+      rubro: rubCod,
+      detalle: resultado.detalle || '',
+      importe: parseFloat(resultado.importe) || 0
+    });
+
+    renderGastoTable();
+    showToast('Comprobante cargado: ' + fmt(parseFloat(resultado.importe)||0),'ok');
+
+  } catch(e) {
+    showToast('Error al procesar la imagen: ' + e.message,'er');
+    // Agregar fila vacía para que complete manualmente
+    addGasto();
+  }
 }
 async function _enviarRend(){
   if(!gastoRows.length){showToast('Cargá al menos un comprobante','wa');return;}
