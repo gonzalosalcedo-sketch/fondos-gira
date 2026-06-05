@@ -383,7 +383,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbzFkAz_HuWVWoxmnVZ1vKsQFvIe36ksES4VGornrQ8o-TmbZiUKVJg1d8xifbM1MsiYRg/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycby0LE1e4k6mp1NPa7GmV8KlOQBK5dJH_FHfKC7VIklp3seo-we2rwqxQWaaWJB1-516fw/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -1135,6 +1135,13 @@ function simScan(){
 
 async function procesarScan(file){
   if(!file) return;
+
+  // Validar tipo de archivo
+  if(!file.type.startsWith('image/')){
+    showToast('Seleccioná una imagen (foto o captura de pantalla)','wa');
+    return;
+  }
+
   showToast('Leyendo comprobante con IA...','in');
 
   try {
@@ -1142,56 +1149,22 @@ async function procesarScan(file){
     const base64 = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = reject;
+      reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
       reader.readAsDataURL(file);
     });
 
     const mediaType = file.type || 'image/jpeg';
 
-    // Llamar a Claude para extraer datos del comprobante
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 500,
-        messages: [{
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: { type: 'base64', media_type: mediaType, data: base64 }
-            },
-            {
-              type: 'text',
-              text: `Analizá este comprobante de gastos argentino y extraé la información. Respondé SOLO con un JSON válido sin ningún texto adicional, en este formato exacto:
-{
-  "tipo": "Factura A" | "Factura B" | "Ticket / Factura C" | "Recibo" | "Comprobante electrónico" | "Otro",
-  "detalle": "descripción breve del gasto (máx 50 caracteres)",
-  "importe": número (solo el total final en pesos, sin símbolo ni puntos de miles, con punto decimal si aplica),
-  "rubro_sugerido": "Viáticos y Refrigerios" | "Alojamiento" | "Combustible Rodados" | "Pasajes y Movilidad" | "Gastos Varios" | "Teléfono e Internet" | "Seguros" | "Mantenimiento Rodados"
-}
-Si no podés leer algún campo con certeza, usá un valor razonable o vacío.`
-            }
-          ]
-        }]
-      })
+    // Llamar al Apps Script como proxy (evita bloqueo CORS del browser)
+    // El Apps Script llama a Claude Vision y devuelve el resultado
+    const resultado = await api({
+      action: 'escanearComprobante',
+      imageBase64: base64,
+      mediaType: mediaType
     });
 
-    const data = await response.json();
-    const texto = data.content && data.content[0] ? data.content[0].text : '';
-
-    // Parsear JSON de la respuesta
-    let resultado;
-    try {
-      const jsonMatch = texto.match(/\{[\s\S]*\}/);
-      resultado = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
-    } catch(e) {
-      resultado = null;
-    }
-
-    if(!resultado || !resultado.importe) {
-      showToast('No se pudo leer el comprobante. Cargalo manualmente.','wa');
+    if(!resultado || resultado.error || !resultado.importe) {
+      showToast('No se pudo leer el comprobante. Completalo manualmente.','wa');
       addGasto();
       return;
     }
@@ -1217,11 +1190,10 @@ Si no podés leer algún campo con certeza, usá un valor razonable o vacío.`
     });
 
     renderGastoTable();
-    showToast('Comprobante cargado: ' + fmt(parseFloat(resultado.importe)||0),'ok');
+    showToast('Comprobante leído: ' + fmt(parseFloat(resultado.importe)||0),'ok');
 
   } catch(e) {
-    showToast('Error al procesar la imagen: ' + e.message,'er');
-    // Agregar fila vacía para que complete manualmente
+    showToast('Error al procesar: ' + e.message + '. Cargalo manualmente.','er');
     addGasto();
   }
 }
