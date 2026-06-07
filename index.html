@@ -170,11 +170,15 @@ table.gt tr:last-child td{border-bottom:none}
     </div>
     <div class="fi" style="margin-bottom:.75rem">
       <label>Email</label>
-      <input type="email" id="login-email" placeholder="tu@cuencadelsur.com" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="email" id="login-email" placeholder="tu@cuencadelsur.com"
+        autocomplete="email" autocorrect="off" autocapitalize="none" spellcheck="false"
+        onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div class="fi" style="margin-bottom:1.25rem">
       <label>Contraseña</label>
-      <input type="password" id="login-pass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" id="login-pass" placeholder="Contraseña"
+        autocomplete="current-password" autocorrect="off" autocapitalize="none"
+        onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <button class="btn pr" style="width:100%;justify-content:center;padding:11px" onclick="doLogin()" id="login-btn">Ingresar</button>
     <p style="font-size:12px;color:var(--er-t);margin-top:10px;min-height:16px;text-align:center" id="login-err"></p>
@@ -376,8 +380,8 @@ table.gt tr:last-child td{border-bottom:none}
 
 <div id="toast"></div>
 
-<!-- Input oculto para captura de cámara/archivo -->
-<input type="file" id="scan-input" accept="image/*" capture="environment"
+<!-- Input oculto para cámara o galería -->
+<input type="file" id="scan-input" accept="image/*"
   style="display:none" onchange="procesarScan(this.files[0]);this.value=''">
 </div>
 </div>
@@ -443,8 +447,11 @@ function api(params){
 
 // ── LOGIN ──────────────────────────────────────────────────────
 async function doLogin(){
-  const email=document.getElementById('login-email').value.trim().toLowerCase();
-  const pass=document.getElementById('login-pass').value;
+  // Limpiar agresivamente — el teclado mobile puede agregar espacios o chars invisibles
+  const raw_email = document.getElementById('login-email').value;
+  const raw_pass  = document.getElementById('login-pass').value;
+  const email = raw_email.trim().toLowerCase().replace(/\s+/g,'');
+  const pass  = raw_pass.trim();
   const btn=document.getElementById('login-btn');
   const err=document.getElementById('login-err');
   err.textContent='';
@@ -453,7 +460,11 @@ async function doLogin(){
   try{
     const r=await api({action:'loginUsuario',email,clave:pass});
     if(r.ok){USER={email:r.email,nombre:r.nombre,rol:r.rol};ROL=r.rol;initApp();}
-    else{err.textContent=r.error||'Email o contraseña incorrectos.';btn.disabled=false;btn.innerHTML='Ingresar';}
+    else{
+      // Mostrar email intentado para que el usuario vea si hay diferencia con lo esperado
+      err.textContent=(r.error||'Email o contraseña incorrectos.')+' (usuario: '+email+')';
+      btn.disabled=false;btn.innerHTML='Ingresar';
+    }
   }catch(e){err.textContent='Error de conexión: '+e.message;btn.disabled=false;btn.innerHTML='Ingresar';}
 }
 
@@ -1099,21 +1110,48 @@ function renderGastoTable(){
   const ro=currentSol.status==='rendido'||currentSol.status==='cerrado'||ROL==='tesorero'||ROL==='autorizante';
   if(!gastoRows.length){el.innerHTML=`<p style="font-size:13px;color:var(--text2);text-align:center;padding:1rem">Sin comprobantes cargados.</p>`;updR();return;}
   if(ro){
+    // Vista solo lectura — tabla simple
     el.innerHTML=`<table class="gt"><colgroup><col style="width:25%"><col style="width:30%"><col style="width:28%"><col style="width:17%"></colgroup>
       <thead><tr><th>Tipo</th><th>Rubro</th><th>Detalle</th><th style="text-align:right">Importe</th></tr></thead>
       <tbody>${gastoRows.map(g=>`<tr><td>${g.tipo}</td><td style="font-size:12px;color:var(--text2)">${RUBROS.find(r=>r.cod===g.rubro)?.desc||g.rubro}</td><td>${g.detalle}</td><td style="text-align:right">${fmt(g.importe)}</td></tr>`).join('')}</tbody>
     </table>`;
   }else{
-    el.innerHTML=`<table class="gt"><colgroup><col style="width:20%"><col style="width:27%"><col style="width:23%"><col style="width:16%"><col style="width:14%"></colgroup>
-      <thead><tr><th>Tipo</th><th>Rubro</th><th>Detalle</th><th>Importe</th><th></th></tr></thead>
-      <tbody>${gastoRows.map((g,i)=>`<tr>
-        <td><select style="font-size:12px;padding:3px 5px" onchange="gastoRows[${i}].tipo=this.value;updR()">${TIPOS.map(t=>`<option${g.tipo===t?' selected':''}>${t}</option>`).join('')}</select></td>
-        <td><select style="font-size:12px;padding:3px 5px" onchange="gastoRows[${i}].rubro=parseInt(this.value);updR()">${RUBROS.map(r=>`<option value="${r.cod}"${g.rubro===r.cod?' selected':''}>${r.desc}</option>`).join('')}</select></td>
-        <td><input style="font-size:12px;padding:3px 6px" value="${g.detalle}" placeholder="Descripción" oninput="gastoRows[${i}].detalle=this.value"></td>
-        <td><input type="number" style="font-size:12px;padding:3px 6px" value="${g.importe||''}" placeholder="0" oninput="gastoRows[${i}].importe=parseFloat(this.value)||0;updR()"></td>
-        <td><button class="btn er" style="padding:3px 8px" onclick="removeGasto(${i})"><i class="ti ti-trash"></i></button></td>
-      </tr>`).join('')}</tbody>
-    </table>`;
+    // Vista editable — cards apiladas (funciona bien en mobile y desktop)
+    el.innerHTML=gastoRows.map((g,i)=>`
+      <div style="border:0.5px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:10px;background:var(--bg)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-size:12px;font-weight:500;color:var(--text2)">Comprobante ${i+1}</span>
+          <button class="btn er" style="padding:4px 10px;font-size:12px" onclick="removeGasto(${i})">
+            <i class="ti ti-trash"></i> Eliminar
+          </button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Tipo de comprobante</label>
+            <select style="width:100%;font-size:13px;padding:6px 8px" onchange="gastoRows[${i}].tipo=this.value;updR()">
+              ${TIPOS.map(t=>`<option${g.tipo===t?' selected':''}>${t}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Importe ($)</label>
+            <input type="number" inputmode="decimal" style="width:100%;font-size:13px;padding:6px 8px"
+              value="${g.importe||''}" placeholder="0"
+              oninput="gastoRows[${i}].importe=parseFloat(this.value)||0;updR()">
+          </div>
+        </div>
+        <div style="margin-bottom:8px">
+          <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Rubro contable</label>
+          <select style="width:100%;font-size:13px;padding:6px 8px" onchange="gastoRows[${i}].rubro=parseInt(this.value);updR()">
+            ${RUBROS.map(r=>`<option value="${r.cod}"${g.rubro===r.cod?' selected':''}>${r.desc}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Detalle / Descripción</label>
+          <input style="width:100%;font-size:13px;padding:6px 8px"
+            value="${g.detalle}" placeholder="Ej: Almuerzo reunión cliente"
+            oninput="gastoRows[${i}].detalle=this.value">
+        </div>
+      </div>`).join('');
   }
   updR();
 }
