@@ -1173,67 +1173,112 @@ function simScan(){
 
 async function procesarScan(file){
   if(!file) return;
-
-  // Validar tipo de archivo
   if(!file.type.startsWith('image/')){
-    showToast('Seleccioná una imagen (foto o captura de pantalla)','wa');
+    showToast('Seleccioná una imagen','wa');
     return;
   }
 
   showToast('Leyendo comprobante con IA...','in');
 
   try {
-    // Convertir imagen a base64
-    const base64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
-      reader.readAsDataURL(file);
+    // Redimensionar imagen antes de enviar (mejora velocidad y evita límites de tamaño)
+    const base64 = await resizeImage(file, 1200);
+    const mediaType = 'image/jpeg';
+
+    // Llamar a Claude Vision directo desde el browser
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': await getClaudeKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 300,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+            { type: 'text', text: `Sos un sistema de lectura de comprobantes de gastos argentinos.
+Analizá esta imagen y devolvé ÚNICAMENTE un objeto JSON con esta estructura exacta, sin texto adicional:
+{
+  "tipo": uno de ["Factura A","Factura B","Ticket / Factura C","Recibo","Comprobante electrónico","Otro"],
+  "detalle": texto corto describiendo el gasto (máx 50 caracteres, ej: "YPF Calle 25 Mayo", "Hotel Mendoza", "Almuerzo"),
+  "importe": número entero o decimal con el TOTAL FINAL en pesos (sin $ ni puntos de miles),
+  "rubro_sugerido": uno de ["Viáticos y Refrigerios","Alojamiento","Combustible Rodados","Pasajes y Movilidad","Gastos Varios","Teléfono e Internet","Seguros","Mantenimiento Rodados"]
+}` }
+          ]
+        }]
+      })
     });
 
-    const mediaType = file.type || 'image/jpeg';
-
-    // Llamar al Apps Script como proxy (evita bloqueo CORS del browser)
-    // El Apps Script llama a Claude Vision y devuelve el resultado
-    const resultado = await api({
-      action: 'escanearComprobante',
-      imageBase64: base64,
-      mediaType: mediaType
-    });
-
-    if(!resultado || resultado.error || !resultado.importe) {
-      showToast('No se pudo leer el comprobante. Completalo manualmente.','wa');
-      addGasto();
-      return;
+    if(!resp.ok){
+      const err = await resp.json();
+      throw new Error(err.error?.message || 'Error de API: ' + resp.status);
     }
 
-    // Mapear rubro sugerido a código
+    const data = await resp.json();
+    const texto = data.content?.[0]?.text || '';
+    const match = texto.match(/\{[\s\S]*\}/);
+    if(!match) throw new Error('Respuesta no parseable');
+
+    const r = JSON.parse(match[0]);
+
     const rubroMap = {
-      'Viáticos y Refrigerios': 172,
-      'Alojamiento': 174,
-      'Combustible Rodados': 138,
-      'Pasajes y Movilidad': 170,
-      'Gastos Varios': 192,
-      'Teléfono e Internet': 180,
-      'Seguros': 166,
-      'Mantenimiento Rodados': 144,
+      'Viáticos y Refrigerios': 172, 'Alojamiento': 174,
+      'Combustible Rodados': 138,    'Pasajes y Movilidad': 170,
+      'Gastos Varios': 192,          'Teléfono e Internet': 180,
+      'Seguros': 166,                'Mantenimiento Rodados': 144,
     };
-    const rubCod = rubroMap[resultado.rubro_sugerido] || 172;
 
     gastoRows.push({
-      tipo: resultado.tipo || 'Ticket / Factura C',
-      rubro: rubCod,
-      detalle: resultado.detalle || '',
-      importe: parseFloat(resultado.importe) || 0
+      tipo:    r.tipo    || 'Ticket / Factura C',
+      rubro:   rubroMap[r.rubro_sugerido] || 172,
+      detalle: r.detalle || '',
+      importe: parseFloat(r.importe) || 0
     });
 
     renderGastoTable();
-    showToast('Comprobante leído: ' + fmt(parseFloat(resultado.importe)||0),'ok');
+    showToast('Comprobante leído: ' + fmt(parseFloat(r.importe)||0), 'ok');
 
   } catch(e) {
-    showToast('Error al procesar: ' + e.message + '. Cargalo manualmente.','er');
-    addGasto();
+    showToast('No se pudo leer: ' + e.message,'er');
+    addGasto(); // agregar fila vacía para completar manual
   }
+}
+
+// Redimensiona imagen para optimizar el envío
+function resizeImage(file, maxWidth){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const ratio = Math.min(1, maxWidth / img.width);
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
+    };
+    img.onerror = () => reject(new Error('No se pudo cargar la imagen'));
+    img.src = url;
+  });
+}
+
+// Lee la API key de Claude desde CONFIG en el Apps Script
+async function getClaudeKey(){
+  if(window._claudeKey) return window._claudeKey;
+  try {
+    const cfg = await api({action:'getConfig'});
+    if(cfg && cfg.claudeApiKey && cfg.claudeApiKey.startsWith('sk-ant-')){
+      window._claudeKey = cfg.claudeApiKey;
+      return window._claudeKey;
+    }
+  } catch(e) {}
+  throw new Error('API key de Claude no configurada. Agregá claudeApiKey en la solapa CONFIG de la Sheet.');
 }
 async function _enviarRend(){
   if(!gastoRows.length){showToast('Cargá al menos un comprobante','wa');return;}
