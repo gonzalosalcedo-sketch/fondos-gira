@@ -387,7 +387,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbzeA67Xin_r26-wYNQ2D-DxRi1LJvBECYOh2c_VrzDrdTQtatKykXU2nVaAJZdEKuWD3Q/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycbyw0hZsi-KUiod-ZMGWLqZycGgocusPRdWHUOvfatE42FbisoahNBxa1d3t3PVpVJ0WQw/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -549,6 +549,7 @@ function parseSol(s){
     observacion:s.Observacion||'',
     autorizante:s.Autorizante||'',
     emailAutorizante:s.EmailAutorizante||'',
+    folderId:s.FolderDrive||'',
     gastos:[]
   };
 }
@@ -1233,15 +1234,27 @@ Analizá esta imagen y devolvé ÚNICAMENTE un objeto JSON con esta estructura e
       'Seguros': 166,                'Mantenimiento Rodados': 144,
     };
 
-    gastoRows.push({
+    const nuevoGasto = {
       tipo:    r.tipo    || 'Ticket / Factura C',
       rubro:   rubroMap[r.rubro_sugerido] || 172,
       detalle: r.detalle || '',
       importe: parseFloat(r.importe) || 0
-    });
-
+    };
+    gastoRows.push(nuevoGasto);
     renderGastoTable();
     showToast('Comprobante leído: ' + fmt(parseFloat(r.importe)||0), 'ok');
+
+    // Guardar imagen en Drive si hay carpeta creada para esta solicitud
+    if(currentSol && currentSol.folderId) {
+      const nroComp = gastoRows.length;
+      const nombreArchivo = 'comprobante_' + nroComp + '_' + Date.now() + '.jpg';
+      api({action:'guardarComprobante',
+        folderId: currentSol.folderId,
+        imageBase64: base64,
+        mediaType: mediaType,
+        nombre: nombreArchivo
+      }).catch(e => console.warn('No se guardó en Drive:', e.message));
+    }
 
   } catch(e) {
     showToast('No se pudo leer: ' + e.message,'er');
@@ -1432,6 +1445,17 @@ async function confirmarAprobacion(){
     await api({action:'sendMail',tipo:'fondos_aprobados',id:s.id,
       solicitante:s.solicitante,emailSolicitante:s.email,
       destino:s.destino,fechaSalida:s.fechaSalida,fechaLlegada:s.fechaLlegada,total:tot});
+    // Crear carpeta en Drive y guardar el ID en la Sheet
+    try {
+      const carpeta = await api({action:'crearCarpetaSolicitud',
+        id:s.id, solicitante:s.solicitante, destino:s.destino});
+      if(carpeta && carpeta.folderId) {
+        solicitudes[idx].folderId = carpeta.folderId;
+        // Persistir folderId en la Sheet
+        await api({action:'updateStatus', id:s.id, status:'aprobado',
+          usuario:'Tesorero', folderId:carpeta.folderId});
+      }
+    } catch(e) { console.warn('No se pudo crear carpeta Drive:', e.message); }
     solicitudes[idx].viaticos=viat;solicitudes[idx].hospedaje=hosp;solicitudes[idx].reserva=res;
     solicitudes[idx].status='aprobado';
     updateBadges();renderTesoreria();
