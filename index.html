@@ -390,7 +390,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycby1vVTCpUX1NUeOoB6CsE2DwylwcB6EvCsFOFDcpKQQuESG3kcgz3zqbqs8H_lareh96A/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycbyKRkk9RXrHfNDSNkraKhAoHSs09IbP-O52fXuvXC7YimllMnQhJFdgLgjQ0E9ZVbzJvQ/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -1283,7 +1283,11 @@ function renderGastoTable(){
       <tbody>${gastoRows.map((g,gi)=>`<tr>
         <td>${g.tipo}</td>
         <td style="font-size:12px;color:var(--text2)">${RUBROS.find(r=>r.cod===g.rubro)?.desc||g.rubro}</td>
-        <td>${g.detalle}${g.preview?` <button class="btn in" style="padding:2px 8px;font-size:11px;margin-left:4px" onclick="verImagen('${g.preview}')"><i class="ti ti-eye"></i></button>`:''}</td>
+        <td>
+          ${g.detalle}
+          ${g.preview?`<button class="btn in" style="padding:2px 8px;font-size:11px;margin-left:4px" onclick="verImagen('${g.preview}')"><i class="ti ti-eye"></i></button>`:''}
+          ${g.driveUrl&&!g.preview?`<a href="${g.driveUrl}" target="_blank" class="btn in" style="padding:2px 8px;font-size:11px;margin-left:4px;text-decoration:none"><i class="ti ti-eye"></i> Ver</a>`:''}
+        </td>
         <td style="text-align:right">${fmt(g.importe)}</td>
       </tr>`).join('')}</tbody>
     </table>`;
@@ -1323,12 +1327,13 @@ function renderGastoTable(){
             value="${g.detalle}" placeholder="Ej: Almuerzo reunión cliente"
             oninput="gastoRows[${i}].detalle=this.value">
         </div>
-        ${g.preview?`<div style="margin-top:8px">
+        ${g.preview?`<div style="margin-top:8px;display:flex;align-items:center;gap:8px">
           <img src="${g.preview}" onclick="verImagen('${g.preview}')"
-            style="max-height:80px;border-radius:6px;border:0.5px solid var(--border);cursor:pointer"
+            style="max-height:72px;border-radius:6px;border:0.5px solid var(--border);cursor:pointer"
             title="Clic para ampliar">
-          <span style="font-size:11px;color:var(--text2);margin-left:8px">Clic para ampliar</span>
-        </div>`:''}
+          ${g.driveUrl?`<a href="${g.driveUrl}" target="_blank" class="btn in" style="font-size:12px;padding:5px 10px;text-decoration:none"><i class="ti ti-brand-google-drive"></i> Ver en Drive</a>`:''}
+        </div>`:
+        g.driveUrl?`<div style="margin-top:8px"><a href="${g.driveUrl}" target="_blank" class="btn in" style="font-size:12px;padding:5px 10px;text-decoration:none"><i class="ti ti-brand-google-drive"></i> Ver comprobante en Drive</a></div>`:''}
       </div>`).join('');
   }
   updR();
@@ -1425,17 +1430,35 @@ Analizá esta imagen y devolvé ÚNICAMENTE un objeto JSON con esta estructura e
     renderGastoTable();
     showToast('Comprobante leído: ' + fmt(parseFloat(r.importe)||0), 'ok');
 
-    // Guardar imagen en Drive si hay carpeta creada para esta solicitud
-    if(currentSol && currentSol.folderId) {
-      const nroComp = gastoRows.length;
-      const nombreArchivo = 'comprobante_' + nroComp + '_' + Date.now() + '.jpg';
-      api({action:'guardarComprobante',
-        folderId: currentSol.folderId,
+    // Guardar imagen en Drive (crea carpeta automáticamente si no existe)
+    const nroComp = gastoRows.length;
+    const nombreArchivo = 'comp_' + nroComp + '_' + Date.now() + '.jpg';
+    try {
+      const driveRes = await api({
+        action: 'guardarComprobante',
+        folderId:    currentSol.folderId || '',
+        solicitudId: currentSol.id,
+        solicitante: currentSol.solicitante,
+        fechaSalida: currentSol.fechaSalida,
         imageBase64: base64,
-        mediaType: mediaType,
-        nombre: nombreArchivo
-      }).catch(e => console.warn('No se guardó en Drive:', e.message));
-    }
+        mediaType:   mediaType,
+        nombre:      nombreArchivo
+      });
+      if(driveRes && driveRes.ok) {
+        // Guardar driveUrl y folderId en el gasto
+        nuevoGasto.driveUrl = driveRes.driveUrl || '';
+        if(driveRes.folderId && !currentSol.folderId) {
+          currentSol.folderId = driveRes.folderId;
+          // Persistir folderId en la Sheet
+          api({action:'updateStatus', id:currentSol.id, status:currentSol.status,
+            usuario:currentSol.solicitante, folderId:driveRes.folderId
+          }).catch(()=>{});
+        }
+        // Actualizar la última fila con la driveUrl
+        gastoRows[gastoRows.length-1].driveUrl = driveRes.driveUrl || '';
+        renderGastoTable();
+      }
+    } catch(e) { console.warn('No se guardó en Drive:', e.message); }
 
   } catch(e) {
     showToast('No se pudo leer: ' + e.message,'er');
