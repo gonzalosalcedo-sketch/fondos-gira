@@ -390,7 +390,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbyKRkk9RXrHfNDSNkraKhAoHSs09IbP-O52fXuvXC7YimllMnQhJFdgLgjQ0E9ZVbzJvQ/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycbwOIIya6PK7vS6LLadsELSUibt-sODC0yGJqOBuaCylvT63yHrBMoVNFigBSWz8zI2INA/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -429,6 +429,18 @@ let dashChart=null;
 const TODAY=new Date(); TODAY.setHours(0,0,0,0);
 
 // ── API JSONP ──────────────────────────────────────────────────
+// fetch POST para payloads grandes (imágenes en base64)
+async function apiPost(params){
+  const resp = await fetch(AS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params)
+  });
+  if(!resp.ok) throw new Error('HTTP ' + resp.status);
+  return await resp.json();
+}
+
+
 function api(params){
   return new Promise((resolve,reject)=>{
     const cb='cb_'+Date.now()+'_'+Math.floor(Math.random()*9999);
@@ -1456,12 +1468,12 @@ Analizá esta imagen y devolvé ÚNICAMENTE un objeto JSON con esta estructura e
     renderGastoTable();
     showToast('Comprobante leído: ' + fmt(parseFloat(r.importe)||0), 'ok');
 
-    // Guardar imagen en Drive (crea carpeta automáticamente si no existe)
+    // Guardar imagen en Drive via POST (evita límite de URL del JSONP)
     const nroComp = gastoRows.length;
     const nombreArchivo = 'comp_' + nroComp + '_' + Date.now() + '.jpg';
     try {
-      const driveRes = await api({
-        action: 'guardarComprobante',
+      const driveRes = await apiPost({
+        action:      'guardarComprobante',
         folderId:    currentSol.folderId || '',
         solicitudId: currentSol.id,
         solicitante: currentSol.solicitante,
@@ -1471,18 +1483,18 @@ Analizá esta imagen y devolvé ÚNICAMENTE un objeto JSON con esta estructura e
         nombre:      nombreArchivo
       });
       if(driveRes && driveRes.ok) {
-        // Guardar driveUrl y folderId en el gasto
         nuevoGasto.driveUrl = driveRes.driveUrl || '';
         if(driveRes.folderId && !currentSol.folderId) {
           currentSol.folderId = driveRes.folderId;
-          // Persistir folderId en la Sheet
           api({action:'updateStatus', id:currentSol.id, status:currentSol.status,
             usuario:currentSol.solicitante, folderId:driveRes.folderId
           }).catch(()=>{});
         }
-        // Actualizar la última fila con la driveUrl
         gastoRows[gastoRows.length-1].driveUrl = driveRes.driveUrl || '';
         renderGastoTable();
+        showToast('Guardado en Drive ✓', 'ok');
+      } else if(driveRes && driveRes.error) {
+        console.warn('Drive error:', driveRes.error);
       }
     } catch(e) { console.warn('No se guardó en Drive:', e.message); }
 
