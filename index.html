@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Fondos de Gira — Cuenca del Sur</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -387,7 +390,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbyw0hZsi-KUiod-ZMGWLqZycGgocusPRdWHUOvfatE42FbisoahNBxa1d3t3PVpVJ0WQw/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycby1vVTCpUX1NUeOoB6CsE2DwylwcB6EvCsFOFDcpKQQuESG3kcgz3zqbqs8H_lareh96A/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -459,7 +462,15 @@ async function doLogin(){
   btn.disabled=true;btn.innerHTML='<div class="spin"></div> Verificando...';
   try{
     const r=await api({action:'loginUsuario',email,clave:pass});
-    if(r.ok){USER={email:r.email,nombre:r.nombre,rol:r.rol};ROL=r.rol;initApp();}
+    if(r.ok){
+      USER={email:r.email,nombre:r.nombre,rol:r.rol};
+      ROL=r.rol;
+      // Guardar sesión en sessionStorage
+      sessionStorage.setItem('fgSession', JSON.stringify({
+        user: USER, rol: ROL, ts: Date.now()
+      }));
+      initApp();
+    }
     else{
       // Mostrar email intentado para que el usuario vea si hay diferencia con lo esperado
       err.textContent=(r.error||'Email o contraseña incorrectos.')+' (usuario: '+email+')';
@@ -468,12 +479,14 @@ async function doLogin(){
   }catch(e){err.textContent='Error de conexión: '+e.message;btn.disabled=false;btn.innerHTML='Ingresar';}
 }
 
-function logout(){
+function logout(showMsg){
+  sessionStorage.removeItem('fgSession');
+  clearInactivityTimer();
   ROL=null;USER=null;solicitudes=[];currentSol=null;gastoRows=[];
   document.getElementById('main-app').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('login-pass').value='';
-  document.getElementById('login-err').textContent='';
+  document.getElementById('login-err').textContent=showMsg||'';
   document.getElementById('login-btn').disabled=false;
   document.getElementById('login-btn').innerHTML='Ingresar';
 }
@@ -508,6 +521,7 @@ function initApp(){
   document.getElementById('t-solicitudes').innerHTML=`<i class="ti ti-list"></i> ${tabLabel}`;
 
   cargarDatos();
+  resetInactivityTimer();
 }
 
 // ── CARGA DATOS ────────────────────────────────────────────────
@@ -1080,7 +1094,13 @@ function renderRendicion(){
       </button>
     </div>`:''}
     ${currentSol.status==='rendido'&&!(isT&&esSuSolicitud)?`<div style="font-size:13px;color:var(--ok-t);background:var(--ok-bg);border:0.5px solid var(--ok-b);border-radius:var(--r);padding:10px 14px"><i class="ti ti-check"></i> Rendición enviada — pendiente de revisión.</div>`:''}
-    ${currentSol.status==='cerrado'?`<div style="font-size:13px;color:var(--text2);background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:10px 14px"><i class="ti ti-archive"></i> Rendición cerrada y archivada.</div>`:''}
+    ${currentSol.status==='cerrado'?`<div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:10px 14px">
+      <span style="font-size:13px;color:var(--text2)"><i class="ti ti-archive"></i> Rendición cerrada y archivada.</span>
+      <button class="btn" onclick="imprimirRendicion()" style="font-size:12px;padding:6px 14px"><i class="ti ti-printer"></i> Imprimir rendición</button>
+    </div>`:''}
+    ${(currentSol.status==='rendido'&&ROL==='tesorero')?`<div style="display:flex;justify-content:flex-end;margin-top:.5rem">
+      <button class="btn" onclick="imprimirRendicion()" style="font-size:12px;padding:6px 14px"><i class="ti ti-printer"></i> Imprimir rendición</button>
+    </div>`:''}
   `;
   renderGastoTable();
 }
@@ -1115,6 +1135,140 @@ function renderResumen(byTipo,gasAct,saldo){
     <span style="font-weight:500;color:var(--${saldo>=0?'wa':'ok'}-t)">${fmt(Math.abs(saldo))}</span></div>`;
 }
 function addGasto(){gastoRows.push({tipo:'Factura B',rubro:172,detalle:'',importe:0});renderGastoTable();}
+
+// Ampliar imagen escaneada
+function verImagen(src){
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem;cursor:zoom-out';
+  ov.onclick=()=>ov.remove();
+  const img=document.createElement('img');
+  img.src=src;
+  img.style.cssText='max-width:95vw;max-height:90vh;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.5)';
+  ov.appendChild(img);
+  document.body.appendChild(ov);
+}
+
+// Imprimir rendición completa
+function imprimirRendicion(){
+  const s=currentSol;
+  const tot=total(s);
+  const gas=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0);
+  const saldo=tot-gas;
+
+  // Agrupar por rubro y por tipo
+  const porRubro={}, porTipo={};
+  gastoRows.forEach(g=>{
+    const desc=RUBROS.find(r=>r.cod===g.rubro)?.desc||'Otros';
+    porRubro[desc]=(porRubro[desc]||0)+(parseFloat(g.importe)||0);
+    porTipo[g.tipo]=(porTipo[g.tipo]||0)+(parseFloat(g.importe)||0);
+  });
+
+  const filas=gastoRows.map((g,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${g.tipo}</td>
+      <td>${RUBROS.find(r=>r.cod===g.rubro)?.desc||g.rubro}</td>
+      <td>${g.detalle}</td>
+      <td style="text-align:right">${fmt(g.importe)}</td>
+    </tr>`).join('');
+
+  const filasRubro=Object.entries(porRubro).sort((a,b)=>b[1]-a[1]).map(([r,v])=>`
+    <tr><td>${r}</td><td style="text-align:right"><strong>${fmt(v)}</strong></td>
+    <td style="text-align:right">${gas>0?Math.round(v/gas*100):0}%</td></tr>`).join('');
+
+  const filasTipo=Object.entries(porTipo).sort((a,b)=>b[1]-a[1]).map(([t,v])=>`
+    <tr><td>${t}</td><td style="text-align:right"><strong>${fmt(v)}</strong></td></tr>`).join('');
+
+  const html=`<!DOCTYPE html><html lang="es"><head>
+  <meta charset="UTF-8">
+  <title>Rendición ${s.id}</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Arial,sans-serif;font-size:12px;color:#1a1a1a;padding:24px}
+    .logo{font-size:18px;font-weight:bold;color:#185fa5;margin-bottom:4px}
+    .sub{font-size:11px;color:#6b6b6b;margin-bottom:20px}
+    h2{font-size:15px;color:#185fa5;margin:20px 0 8px;border-bottom:1px solid #e0ddd6;padding-bottom:4px}
+    h3{font-size:13px;color:#333;margin:16px 0 6px}
+    table{width:100%;border-collapse:collapse;margin-bottom:12px}
+    th{background:#e8f0f8;text-align:left;padding:6px 8px;font-size:11px;color:#185fa5;border:0.5px solid #e0ddd6}
+    td{padding:5px 8px;border:0.5px solid #e0ddd6;vertical-align:top}
+    tr:nth-child(even){background:#fafaf9}
+    .resumen{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+    .met{background:#f5f5f4;border-radius:6px;padding:10px 12px}
+    .ml{font-size:10px;color:#6b6b6b;margin-bottom:3px}
+    .mv{font-size:17px;font-weight:bold}
+    .saldo-neg{color:#3b6d11}.saldo-pos{color:#854f0b}
+    .firma{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-top:32px}
+    .firma-box{border-top:1px solid #333;padding-top:6px;text-align:center;font-size:10px;color:#666}
+    @media print{body{padding:12px}button{display:none}}
+  </style>
+  </head><body>
+
+  <div class="logo">Cuenca del Sur — Fondos de Gira</div>
+  <div class="sub">Rendición de gastos — Generada el ${new Date().toLocaleDateString('es-AR')}</div>
+
+  <h2>Datos de la solicitud</h2>
+  <table>
+    <tr><th>ID</th><th>Solicitante</th><th>Destino</th><th>Período</th><th>Transporte</th></tr>
+    <tr><td>${s.id}</td><td>${s.solicitante}</td><td>${s.destino}</td>
+        <td>${s.fechaSalida} → ${s.fechaLlegada} (${s.dias} días)</td>
+        <td>${s.transporte}</td></tr>
+  </table>
+
+  <h2>Resumen de fondos</h2>
+  <div class="resumen">
+    <div class="met"><div class="ml">Fondos recibidos</div><div class="mv">${fmt(tot)}</div></div>
+    <div class="met"><div class="ml">Total gastado</div><div class="mv">${fmt(gas)}</div></div>
+    <div class="met"><div class="ml">${saldo>=0?'A reintegrar':'A recibir'}</div>
+      <div class="mv ${saldo>=0?'saldo-pos':'saldo-neg'}">${fmt(Math.abs(saldo))}</div></div>
+  </div>
+
+  <h2>Detalle de comprobantes</h2>
+  <table>
+    <tr><th>#</th><th>Tipo</th><th>Rubro</th><th>Detalle</th><th style="text-align:right">Importe</th></tr>
+    ${filas}
+    <tr style="background:#e8f0f8;font-weight:bold">
+      <td colspan="4" style="text-align:right">TOTAL</td>
+      <td style="text-align:right">${fmt(gas)}</td>
+    </tr>
+  </table>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div>
+      <h3>Distribución por rubro</h3>
+      <table>
+        <tr><th>Rubro</th><th style="text-align:right">Importe</th><th style="text-align:right">%</th></tr>
+        ${filasRubro}
+        <tr style="background:#e8f0f8;font-weight:bold">
+          <td>TOTAL</td><td style="text-align:right">${fmt(gas)}</td><td style="text-align:right">100%</td>
+        </tr>
+      </table>
+    </div>
+    <div>
+      <h3>Por tipo de comprobante</h3>
+      <table>
+        <tr><th>Tipo</th><th style="text-align:right">Importe</th></tr>
+        ${filasTipo}
+        <tr style="background:#e8f0f8;font-weight:bold">
+          <td>TOTAL</td><td style="text-align:right">${fmt(gas)}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="firma">
+    <div class="firma-box">Firma del solicitante<br><br>${s.solicitante}</div>
+    <div class="firma-box">Firma del tesorero<br><br>&nbsp;</div>
+    <div class="firma-box">Fecha de aprobación<br><br>&nbsp;</div>
+  </div>
+
+  <sc"+"ript>setTimeout(()=>window.print(),400);<"+"/sc"+"ript>
+  </body></html>`;
+
+  const win=window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+}
 function removeGasto(i){gastoRows.splice(i,1);renderGastoTable();}
 function renderGastoTable(){
   const el=document.getElementById('gt');if(!el)return;
@@ -1126,7 +1280,12 @@ function renderGastoTable(){
     // Vista solo lectura — tabla simple
     el.innerHTML=`<table class="gt"><colgroup><col style="width:25%"><col style="width:30%"><col style="width:28%"><col style="width:17%"></colgroup>
       <thead><tr><th>Tipo</th><th>Rubro</th><th>Detalle</th><th style="text-align:right">Importe</th></tr></thead>
-      <tbody>${gastoRows.map(g=>`<tr><td>${g.tipo}</td><td style="font-size:12px;color:var(--text2)">${RUBROS.find(r=>r.cod===g.rubro)?.desc||g.rubro}</td><td>${g.detalle}</td><td style="text-align:right">${fmt(g.importe)}</td></tr>`).join('')}</tbody>
+      <tbody>${gastoRows.map((g,gi)=>`<tr>
+        <td>${g.tipo}</td>
+        <td style="font-size:12px;color:var(--text2)">${RUBROS.find(r=>r.cod===g.rubro)?.desc||g.rubro}</td>
+        <td>${g.detalle}${g.preview?` <button class="btn in" style="padding:2px 8px;font-size:11px;margin-left:4px" onclick="verImagen('${g.preview}')"><i class="ti ti-eye"></i></button>`:''}</td>
+        <td style="text-align:right">${fmt(g.importe)}</td>
+      </tr>`).join('')}</tbody>
     </table>`;
   }else{
     // Vista editable — cards apiladas (funciona bien en mobile y desktop)
@@ -1164,6 +1323,12 @@ function renderGastoTable(){
             value="${g.detalle}" placeholder="Ej: Almuerzo reunión cliente"
             oninput="gastoRows[${i}].detalle=this.value">
         </div>
+        ${g.preview?`<div style="margin-top:8px">
+          <img src="${g.preview}" onclick="verImagen('${g.preview}')"
+            style="max-height:80px;border-radius:6px;border:0.5px solid var(--border);cursor:pointer"
+            title="Clic para ampliar">
+          <span style="font-size:11px;color:var(--text2);margin-left:8px">Clic para ampliar</span>
+        </div>`:''}
       </div>`).join('');
   }
   updR();
@@ -1246,11 +1411,15 @@ Analizá esta imagen y devolvé ÚNICAMENTE un objeto JSON con esta estructura e
       'Seguros': 166,                'Mantenimiento Rodados': 144,
     };
 
+    // Crear URL local para previsualización
+    const previewUrl = 'data:' + mediaType + ';base64,' + base64;
+
     const nuevoGasto = {
       tipo:    r.tipo    || 'Ticket / Factura C',
       rubro:   rubroMap[r.rubro_sugerido] || 172,
       detalle: r.detalle || '',
-      importe: parseFloat(r.importe) || 0
+      importe: parseFloat(r.importe) || 0,
+      preview: previewUrl
     };
     gastoRows.push(nuevoGasto);
     renderGastoTable();
@@ -1460,10 +1629,10 @@ async function confirmarAprobacion(){
     // Crear carpeta en Drive y guardar el ID en la Sheet
     try {
       const carpeta = await api({action:'crearCarpetaSolicitud',
-        id:s.id, solicitante:s.solicitante, destino:s.destino});
+        id:s.id, solicitante:s.solicitante, destino:s.destino,
+        fechaSalida:s.fechaSalida});
       if(carpeta && carpeta.folderId) {
         solicitudes[idx].folderId = carpeta.folderId;
-        // Persistir folderId en la Sheet
         await api({action:'updateStatus', id:s.id, status:'aprobado',
           usuario:'Tesorero', folderId:carpeta.folderId});
       }
@@ -1801,18 +1970,56 @@ async function procesarAuthLink(id, tok, decision){
   return true;
 }
 
+// ── SESIÓN E INACTIVIDAD ───────────────────────────────────────
+const INACTIVIDAD_MS = 15 * 60 * 1000; // 15 minutos de inactividad
+let _inactTimer = null;
+
+function resetInactivityTimer(){
+  clearInactivityTimer();
+  _inactTimer = setTimeout(()=>{
+    logout('Sesión cerrada por inactividad. Ingresá nuevamente.');
+  }, INACTIVIDAD_MS);
+}
+
+function clearInactivityTimer(){
+  if(_inactTimer){ clearTimeout(_inactTimer); _inactTimer=null; }
+}
+
+// Resetear timer con cualquier interacción del usuario
+['click','keydown','touchstart','scroll'].forEach(ev=>{
+  document.addEventListener(ev, ()=>{ if(ROL) resetInactivityTimer(); }, {passive:true});
+});
+
 // ── INIT ───────────────────────────────────────────────────────
 (async()=>{
   const p=new URLSearchParams(window.location.search);
-  // Link de autorización desde mail — leer params ANTES de limpiar la URL
+  // Link de autorización desde mail
   const tok=p.get('tok'), decision=p.get('decision'), authId=p.get('id');
   if(tok && decision && authId){
-    // Limpiar URL DESPUÉS de guardar los params
     window.history.replaceState({}, document.title, window.location.pathname);
     await procesarAuthLink(authId, tok, decision);
     return;
   }
-  // App normal — mostrar login
+  // Restaurar sesión desde sessionStorage si existe
+  try {
+    const saved = sessionStorage.getItem('fgSession');
+    if(saved){
+      const s = JSON.parse(saved);
+      // Verificar que no expiró (tiempo de inactividad configurable)
+      if(s.ts && (Date.now() - s.ts) < INACTIVIDAD_MS && s.user && s.rol){
+        USER = s.user;
+        ROL  = s.rol;
+        // Actualizar timestamp
+        s.ts = Date.now();
+        sessionStorage.setItem('fgSession', JSON.stringify(s));
+        initApp();
+        return;
+      } else {
+        sessionStorage.removeItem('fgSession');
+      }
+    }
+  } catch(e) { sessionStorage.removeItem('fgSession'); }
+  // Sin sesión — mostrar login
 })();
 </script>
 </body>
