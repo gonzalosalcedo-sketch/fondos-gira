@@ -1011,10 +1011,10 @@ function renderRendicion(){
   const saldo=tot-gasAct;
   const isT=ROL==='tesorero';
   const isA=ROL==='autorizante';
-  // Editable si: es vendedor con solicitud propia, O tesorero con su propia solicitud
+  // Editable si: es el dueño de la solicitud Y el status lo permite
   const esSuSolicitud = currentSol.email && USER && currentSol.email.toLowerCase()===USER.email.toLowerCase();
-  const editable = (esSuSolicitud || ROL==='vendedor') && !isA && 
-                   (currentSol.status==='aprobado'||currentSol.status==='observado');
+  const statusEditable = ['aprobado','observado','pendiente','autorizado'].includes(currentSol.status);
+  const editable = esSuSolicitud && !isA && statusEditable;
   const byTipo={};gastoRows.forEach(g=>{byTipo[g.tipo]=(byTipo[g.tipo]||0)+(parseFloat(g.importe)||0);});
 
   el.innerHTML=`
@@ -1120,8 +1120,7 @@ function renderGastoTable(){
   const el=document.getElementById('gt');if(!el)return;
   const esSuya = currentSol.email && USER && currentSol.email.toLowerCase()===USER.email.toLowerCase();
   const ro = currentSol.status==='rendido' || currentSol.status==='cerrado' ||
-             ROL==='autorizante' ||
-             (ROL==='tesorero' && !esSuya);
+             ROL==='autorizante' || !esSuya;
   if(!gastoRows.length){el.innerHTML=`<p style="font-size:13px;color:var(--text2);text-align:center;padding:1rem">Sin comprobantes cargados.</p>`;updR();return;}
   if(ro){
     // Vista solo lectura — tabla simple
