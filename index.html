@@ -1075,9 +1075,10 @@ function renderRendicion(){
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
         <div class="ctitle" style="margin-bottom:0">Comprobantes</div>
-        ${editable?`<div style="display:flex;gap:8px">
+        ${editable?`<div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn" onclick="simScan()"><i class="ti ti-camera"></i> Escanear</button>
           <button class="btn in" onclick="addGasto()"><i class="ti ti-plus"></i> Agregar</button>
+          <button class="btn ok" id="btn-guardar-parcial" onclick="guardarGastosParcial()"><i class="ti ti-device-floppy"></i> Guardar</button>
         </div>`:''}
       </div>
       <div id="gt"></div>
@@ -1088,8 +1089,11 @@ function renderRendicion(){
       <div id="rcomp">${renderResumen(byTipo,gasAct,saldo)}</div>
     </div>
 
-    ${editable?`<div style="display:flex;justify-content:flex-end">
-      <button class="btn pr" onclick="${currentSol.status==='observado'?'reenviarRendicion()':'enviarRendicion()'}">
+    ${editable?`<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:.5rem">
+      <button class="btn ok" id="btn-guardar-avance" onclick="guardarGastosParcial()">
+        <i class="ti ti-device-floppy"></i> Guardar avance
+      </button>
+      <button class="btn pr" onclick="${currentSol.status==='observado'?'reenviarRendicion()':'enviarRendicion()}'}">
         <i class="ti ti-send"></i> ${currentSol.status==='observado'?'Reenviar rendición corregida':'Enviar rendición al tesorero'}
       </button>
     </div>`:''}
@@ -1135,6 +1139,28 @@ function renderResumen(byTipo,gasAct,saldo){
     <span style="font-weight:500;color:var(--${saldo>=0?'wa':'ok'}-t)">${fmt(Math.abs(saldo))}</span></div>`;
 }
 function addGasto(){gastoRows.push({tipo:'Factura B',rubro:172,detalle:'',importe:0});renderGastoTable();}
+
+// Guardar gastos sin enviar la rendición
+async function guardarGastosParcial(){
+  if(!gastoRows.length){showToast('No hay gastos para guardar','wa');return;}
+  const btn=document.getElementById('btn-guardar-parcial');
+  if(btn){btn.disabled=true;btn.innerHTML='<div class="spin"></div> Guardando...';}
+  try{
+    const gastosParaGuardar=gastoRows.map(g=>({
+      tipo:g.tipo,rubro:g.rubro,detalle:g.detalle,
+      importe:g.importe,driveUrl:g.driveUrl||''
+    }));
+    await api({action:'saveGastos',id:currentSol.id,
+      gastos:JSON.stringify(gastosParaGuardar),
+      usuario:currentSol.solicitante});
+    currentSol.gastos=JSON.parse(JSON.stringify(gastoRows));
+    showToast('Gastos guardados correctamente','ok');
+  }catch(e){
+    showToast('Error al guardar: '+e.message,'er');
+  }finally{
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Guardar';}
+  }
+}
 
 // Ampliar imagen escaneada
 function verImagen(src){
@@ -1501,7 +1527,12 @@ async function _enviarRend(){
   if(!gastoRows.length){showToast('Cargá al menos un comprobante','wa');return;}
   const tot=total(currentSol),gasAct=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0),saldo=tot-gasAct;
   try{
-    await api({action:'saveGastos',id:currentSol.id,gastos:JSON.stringify(gastoRows),usuario:currentSol.solicitante});
+    // Limpiar campo preview (base64 enorme) antes de enviar — solo guardamos driveUrl
+    const gastosParaGuardar = gastoRows.map(g=>({
+      tipo:g.tipo, rubro:g.rubro, detalle:g.detalle,
+      importe:g.importe, driveUrl:g.driveUrl||''
+    }));
+    await api({action:'saveGastos',id:currentSol.id,gastos:JSON.stringify(gastosParaGuardar),usuario:currentSol.solicitante});
     await api({action:'updateStatus',id:currentSol.id,status:'rendido',usuario:currentSol.solicitante});
     await api({action:'sendMail',tipo:'rendicion_enviada',id:currentSol.id,
       solicitante:currentSol.solicitante,emailSolicitante:currentSol.email,
