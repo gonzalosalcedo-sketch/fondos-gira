@@ -652,7 +652,14 @@ function renderSolicitudes(){
       accionBadge=`<span class="sb s-auth_pendiente"><i class="ti ti-shield-check"></i> Requiere tu autorización</span>`;
     } else if(isT){
       clickable=true;
-      accionBadge=`<span class="sb s-${statusKey}">${ESTADOS[s.status]||s.status}</span>`;
+      // Si es su propia solicitud aprobada/observada, mostrar badge de acción
+      const esPropiaT = s.email && USER && s.email.toLowerCase()===USER.email.toLowerCase();
+      if(esPropiaT && s.status==='aprobado')
+        accionBadge=`<span class="sb s-aprobado"><i class="ti ti-receipt"></i> Cargar gastos</span>`;
+      else if(esPropiaT && s.status==='observado')
+        accionBadge=`<span class="sb s-observado"><i class="ti ti-alert-triangle"></i> Corregir rendición</span>`;
+      else
+        accionBadge=`<span class="sb s-${statusKey}">${ESTADOS[s.status]||s.status}</span>`;
     } else {
       // vendedor
       if(['aprobado','rendido','observado','cerrado'].includes(s.status))clickable=true;
@@ -1004,7 +1011,10 @@ function renderRendicion(){
   const saldo=tot-gasAct;
   const isT=ROL==='tesorero';
   const isA=ROL==='autorizante';
-  const editable=!isT&&!isA&&(currentSol.status==='aprobado'||currentSol.status==='observado');
+  // Editable si: es vendedor con solicitud propia, O tesorero con su propia solicitud
+  const esSuSolicitud = currentSol.email && USER && currentSol.email.toLowerCase()===USER.email.toLowerCase();
+  const editable = (esSuSolicitud || ROL==='vendedor') && !isA && 
+                   (currentSol.status==='aprobado'||currentSol.status==='observado');
   const byTipo={};gastoRows.forEach(g=>{byTipo[g.tipo]=(byTipo[g.tipo]||0)+(parseFloat(g.importe)||0);});
 
   el.innerHTML=`
@@ -1069,7 +1079,7 @@ function renderRendicion(){
         <i class="ti ti-send"></i> ${currentSol.status==='observado'?'Reenviar rendición corregida':'Enviar rendición al tesorero'}
       </button>
     </div>`:''}
-    ${currentSol.status==='rendido'&&!isT?`<div style="font-size:13px;color:var(--ok-t);background:var(--ok-bg);border:0.5px solid var(--ok-b);border-radius:var(--r);padding:10px 14px"><i class="ti ti-check"></i> Rendición enviada — el tesorero está revisando.</div>`:''}
+    ${currentSol.status==='rendido'&&!(isT&&esSuSolicitud)?`<div style="font-size:13px;color:var(--ok-t);background:var(--ok-bg);border:0.5px solid var(--ok-b);border-radius:var(--r);padding:10px 14px"><i class="ti ti-check"></i> Rendición enviada — pendiente de revisión.</div>`:''}
     ${currentSol.status==='cerrado'?`<div style="font-size:13px;color:var(--text2);background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--r);padding:10px 14px"><i class="ti ti-archive"></i> Rendición cerrada y archivada.</div>`:''}
   `;
   renderGastoTable();
@@ -1108,7 +1118,10 @@ function addGasto(){gastoRows.push({tipo:'Factura B',rubro:172,detalle:'',import
 function removeGasto(i){gastoRows.splice(i,1);renderGastoTable();}
 function renderGastoTable(){
   const el=document.getElementById('gt');if(!el)return;
-  const ro=currentSol.status==='rendido'||currentSol.status==='cerrado'||ROL==='tesorero'||ROL==='autorizante';
+  const esSuya = currentSol.email && USER && currentSol.email.toLowerCase()===USER.email.toLowerCase();
+  const ro = currentSol.status==='rendido' || currentSol.status==='cerrado' ||
+             ROL==='autorizante' ||
+             (ROL==='tesorero' && !esSuya);
   if(!gastoRows.length){el.innerHTML=`<p style="font-size:13px;color:var(--text2);text-align:center;padding:1rem">Sin comprobantes cargados.</p>`;updR();return;}
   if(ro){
     // Vista solo lectura — tabla simple
