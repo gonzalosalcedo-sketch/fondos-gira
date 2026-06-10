@@ -7,6 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Fondos de Gira — Cuenca del Sur</title>
+<meta name="version" content="2.1">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -142,6 +143,67 @@ table.gt tr:last-child td{border-bottom:none}
 #toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:10px 16px;border-radius:var(--r);font-size:13px;display:flex;align-items:center;gap:8px;z-index:9999;max-width:320px;border:0.5px solid;opacity:0;transition:opacity .3s;pointer-events:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--text2);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+
+/* ── MOBILE ─────────────────────────────────────────────────── */
+@media(max-width:600px){
+  .app{padding:1rem .75rem}
+  .hdr{gap:6px}
+  .hdr-brand{font-size:15px}
+  /* Botones del header más compactos */
+  .hdr-right{gap:4px}
+  .hdr-right .btn{padding:6px 10px;font-size:12px}
+  #hdr-user{font-size:11px;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Tabs */
+  .tabs{gap:2px;padding:3px}
+  .tab{font-size:11px;padding:7px 5px;min-width:60px}
+  /* Grillas — una columna en mobile */
+  .fg{grid-template-columns:1fr}
+  .fg3{grid-template-columns:1fr}
+  .mrow{grid-template-columns:1fr 1fr}
+  .mrow4{grid-template-columns:1fr 1fr}
+  .fi.full{grid-column:1}
+  /* Cards */
+  .card{padding:1rem}
+  .ovbox{padding:1.25rem;width:100%!important}
+  /* Tabla de gastos readonly — ocultar columna rubro en mobile */
+  table.gt{font-size:12px}
+  table.gt th:nth-child(2),table.gt td:nth-child(2){display:none}
+  /* Paginación de pasos */
+  .pbar{gap:4px}
+  .paso{gap:4px}
+  .pl{font-size:11px}
+  .psep{width:12px}
+  /* Métricas */
+  .met .mv{font-size:16px}
+  /* Timeline */
+  .tls{gap:8px}
+  /* Barra de filtros */
+  .fbar{gap:4px}
+  .fbtn{padding:4px 10px;font-size:11px}
+  /* Login */
+  .login-box{padding:1.5rem 1.25rem}
+  /* Botones de acción en tesorería */
+  .btn{padding:7px 12px;font-size:12px}
+  /* Sol cards */
+  .sol-card{padding:1rem}
+  /* Dashboard grid */
+  #panel-dashboard [style*="grid-template-columns:1fr 1fr"]{
+    display:block!important
+  }
+  /* Overlay autorizacion */
+  .ov{padding:1rem;padding-top:1.5rem;margin:-1rem}
+}
+
+@media(max-width:600px){
+  .dash-charts-grid{grid-template-columns:1fr!important}
+}
+
+@media(max-width:380px){
+  .tab{font-size:10px;padding:6px 3px;min-width:48px}
+  .hdr-brand{font-size:14px}
+  .mrow{grid-template-columns:1fr}
+  .mrow4{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
@@ -390,7 +452,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbz_4L7eJvI_hGo9-XXu42zgwe7ntHR03yz-EbGo3vjzRCIkFO8OTIMVFdDEmlPTEOpREQ/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycbzPa27jH6J5wsAQhh9BhDRPws0cpLvGnPstOYXScw6UfaePDoBN_A5XxqIlzW5shFTp1g/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -451,6 +513,7 @@ function api(params){
       else resolve(data);
     };
     params.callback=cb;
+    params._t=Date.now(); // evitar caché del browser en llamadas JSONP
     const url=AS_URL+'?'+new URLSearchParams(params).toString();
     const s=document.createElement('script');
     s.id=cb;s.src=url;
@@ -1926,7 +1989,7 @@ function renderDashboard(){
       <div class="met"><div class="ml">${ts>=0?'Reintegro':'A devolver'}</div><div class="mv" style="font-size:16px;color:var(--${ts>=0?'wa':'ok'}-t)">${fmt(Math.abs(ts))}</div></div>
     </div>
     ${!filtered.length?`<div class="card" style="text-align:center;padding:2rem"><p style="color:var(--text2)">Sin rendiciones en el período.</p></div>`:`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+    <div class="dash-charts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
       <div class="card"><div class="ctitle">Por rubro</div><canvas id="cr" height="220"></canvas></div>
       <div class="card"><div class="ctitle">Por tipo</div><canvas id="ct" height="220"></canvas></div>
     </div>
@@ -2071,11 +2134,9 @@ function clearInactivityTimer(){
     const saved = sessionStorage.getItem('fgSession');
     if(saved){
       const s = JSON.parse(saved);
-      // Verificar que no expiró (tiempo de inactividad configurable)
       if(s.ts && (Date.now() - s.ts) < INACTIVIDAD_MS && s.user && s.rol){
         USER = s.user;
         ROL  = s.rol;
-        // Actualizar timestamp
         s.ts = Date.now();
         sessionStorage.setItem('fgSession', JSON.stringify(s));
         initApp();
@@ -2084,7 +2145,10 @@ function clearInactivityTimer(){
         sessionStorage.removeItem('fgSession');
       }
     }
-  } catch(e) { sessionStorage.removeItem('fgSession'); }
+  } catch(e) {
+    // Si hay cualquier error leyendo la sesión, limpiar y mostrar login
+    try { sessionStorage.clear(); } catch(e2) {}
+  }
   // Sin sesión — mostrar login
 })();
 </script>
