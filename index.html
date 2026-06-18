@@ -452,7 +452,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbzPa27jH6J5wsAQhh9BhDRPws0cpLvGnPstOYXScw6UfaePDoBN_A5XxqIlzW5shFTp1g/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycbylpoRuk5tszhw2JVQYxIwu7XApS7-FAHYRmkVqkirAWPIXx-Z8WKzrOa6T6KwFFWi8sg/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -486,6 +486,7 @@ let currentSol=null, currentStep=1, gastoRows=[];
 let filterSeg='todos', filterDash={desde:'',hasta:'',usuario:''};
 let ROL=null, USER=null;
 let obsTarget=null, denegarTarget=null, authTarget=null, fondosTarget=null;
+let alertasActuales=null;
 let dashChart=null;
 
 const TODAY=new Date(); TODAY.setHours(0,0,0,0);
@@ -1085,11 +1086,19 @@ async function enviarSolicitud(){
 }
 
 // ── RENDICIÓN ──────────────────────────────────────────────────
-function irRendicion(idx){
+async function irRendicion(idx){
   currentSol=solicitudes[idx];
   gastoRows=currentSol.gastos?JSON.parse(JSON.stringify(currentSol.gastos)):[];
+  alertasActuales=null;
   document.getElementById('t-rendicion').style.display='';
   showTab('rendicion');
+  // Cargar alertas existentes si la solicitud ya fue rendida/cerrada
+  if(['rendido','observado','cerrado'].includes(currentSol.status)){
+    try{
+      const al = await api({action:'getAlertas', id:currentSol.id});
+      if(al && !al.error){ alertasActuales = al; renderRendicion(); }
+    }catch(e){}
+  }
 }
 
 function renderRendicion(){
@@ -1138,6 +1147,8 @@ function renderRendicion(){
 
     ${currentSol.status==='observado'?`<div style="font-size:13px;color:var(--wa-t);background:var(--wa-bg);border:0.5px solid var(--wa-b);border-radius:var(--r);padding:10px 14px;margin-bottom:1rem"><i class="ti ti-message-circle"></i> <strong>Observación:</strong> ${currentSol.observacion}</div>`:''}
 
+    ${renderPanelAlertas()}
+
     <div class="card">
       <div class="mrow">
         <div class="met"><div class="ml">Fondos recibidos</div><div class="mv">${fmt(tot)}</div></div>
@@ -1177,9 +1188,18 @@ function renderRendicion(){
       <span style="font-size:13px;color:var(--text2)"><i class="ti ti-archive"></i> Rendición cerrada y archivada.</span>
       <button class="btn" onclick="imprimirRendicion()" style="font-size:12px;padding:6px 14px"><i class="ti ti-printer"></i> Imprimir rendición</button>
     </div>`:''}
-    ${(currentSol.status==='rendido'&&ROL==='tesorero')?`<div style="display:flex;justify-content:flex-end;margin-top:.5rem">
-      <button class="btn" onclick="imprimirRendicion()" style="font-size:12px;padding:6px 14px"><i class="ti ti-printer"></i> Imprimir rendición</button>
-    </div>`:''}
+    ${(currentSol.status==='rendido'&&ROL==='tesorero')?(()=>{
+      const hayAlertasSinRevisar = alertasActuales && alertasActuales.tieneAlertas && !alertasActuales.revisadas;
+      return `<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:.5rem">
+        <button class="btn" onclick="imprimirRendicion()" style="font-size:12px;padding:6px 14px"><i class="ti ti-printer"></i> Imprimir</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn wa" onclick="showObservacion(${solicitudes.indexOf(currentSol)})" style="font-size:12px;padding:6px 14px"><i class="ti ti-message-circle"></i> Observar</button>
+          <button class="btn ok" onclick="cerrar(${solicitudes.indexOf(currentSol)})" ${hayAlertasSinRevisar?'disabled title="Marcá las alertas como revisadas antes de aprobar"':''} style="font-size:12px;padding:6px 14px">
+            <i class="ti ti-check"></i> Aprobar y cerrar
+          </button>
+        </div>
+      </div>${hayAlertasSinRevisar?`<div style="font-size:12px;color:var(--er-t);text-align:right;margin-top:4px"><i class="ti ti-lock"></i> Revisá las alertas para poder aprobar</div>`:''}`;
+    })():''}
   `;
   renderGastoTable();
 }
@@ -1214,6 +1234,88 @@ function renderResumen(byTipo,gasAct,saldo){
     <span style="font-weight:500;color:var(--${saldo>=0?'wa':'ok'}-t)">${fmt(Math.abs(saldo))}</span></div>`;
 }
 function addGasto(){gastoRows.push({tipo:'Factura B',rubro:172,detalle:'',importe:0});renderGastoTable();}
+
+// Analizar rendición con IA — detecta gastos prohibidos, montos atípicos, duplicados, incoherencias
+async function analizarRendicionIA(silencioso){
+  if(!currentSol || !gastoRows.length) return;
+
+  const btn = document.getElementById('btn-reanalizar');
+  if(btn && !silencioso){ btn.disabled=true; btn.innerHTML='<div class="spin"></div> Analizando...'; }
+
+  try {
+    const gastosConDesc = gastoRows.map(g => ({
+      tipo: g.tipo, importe: g.importe, detalle: g.detalle,
+      rubro_desc: RUBROS.find(r=>r.cod===g.rubro)?.desc || g.rubro
+    }));
+
+    const resultado = await apiPost({
+      action: 'analizarRendicion',
+      solicitudId: currentSol.id,
+      gastos: gastosConDesc,
+      solicitud: {
+        destino: currentSol.destino, fechaSalida: currentSol.fechaSalida,
+        fechaLlegada: currentSol.fechaLlegada, dias: currentSol.dias,
+        transporte: currentSol.transporte, total: total(currentSol)
+      }
+    });
+
+    alertasActuales = resultado;
+    if(!silencioso) renderRendicion();
+    return resultado;
+
+  } catch(e) {
+    console.warn('Error al analizar rendición:', e.message);
+    if(!silencioso) showToast('No se pudo analizar: ' + e.message, 'wa');
+  } finally {
+    if(btn){ btn.disabled=false; btn.innerHTML='<i class="ti ti-refresh"></i> Re-analizar'; }
+  }
+}
+
+async function marcarRevisado(){
+  try{
+    await api({action:'marcarAlertasRevisadas', id:currentSol.id, usuario:USER.nombre});
+    if(alertasActuales) alertasActuales.revisadas = true;
+    renderRendicion();
+    showToast('Alertas marcadas como revisadas','ok');
+  }catch(e){ showToast('Error: '+e.message,'er'); }
+}
+
+function renderPanelAlertas(){
+  if(!alertasActuales || !alertasActuales.tieneAlertas) return '';
+  const nivel = alertasActuales.nivel || 'atencion';
+  const colores = {
+    info:     {bg:'var(--in-bg)',  t:'var(--in-t)',  b:'var(--in-b)',  ic:'ti-info-circle'},
+    atencion: {bg:'var(--wa-bg)',  t:'var(--wa-t)',  b:'var(--wa-b)',  ic:'ti-alert-triangle'},
+    critico:  {bg:'var(--er-bg)',  t:'var(--er-t)',  b:'var(--er-b)',  ic:'ti-alert-octagon'},
+  };
+  const c = colores[nivel] || colores.atencion;
+  const revisadas = alertasActuales.revisadas;
+
+  return `<div class="card" style="border-color:${c.b};background:${c.bg};margin-bottom:1rem">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:.75rem">
+      <div style="display:flex;align-items:center;gap:8px">
+        <i class="ti ${c.ic}" style="font-size:20px;color:${c.t}"></i>
+        <div>
+          <div style="font-weight:500;color:${c.t}">Análisis automático detectó observaciones</div>
+          <div style="font-size:12px;color:${c.t};opacity:.85">${alertasActuales.resumen||''}</div>
+        </div>
+      </div>
+      ${ROL==='tesorero'?`<button class="btn" id="btn-reanalizar" style="font-size:11px;padding:4px 10px;flex-shrink:0" onclick="analizarRendicionIA()"><i class="ti ti-refresh"></i> Re-analizar</button>`:''}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:${ROL==='tesorero'?'.75rem':'0'}">
+      ${alertasActuales.alertas.map(a=>{
+        const tipoLabel={prohibido:'Gasto prohibido',monto:'Monto atípico',duplicado:'Posible duplicado',incoherencia:'Incoherencia'}[a.tipo]||'Observación';
+        return `<div style="background:var(--bg);border-radius:6px;padding:8px 10px;font-size:13px">
+          <strong style="color:${c.t}">${tipoLabel}${a.comprobante?' (comprobante '+a.comprobante+')':''}:</strong> ${a.mensaje}
+        </div>`;
+      }).join('')}
+    </div>
+    ${ROL==='tesorero'?`<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:${c.t}">
+      <input type="checkbox" ${revisadas?'checked':''} onchange="if(this.checked)marcarRevisado()" ${revisadas?'disabled':''}>
+      ${revisadas?'<span><i class="ti ti-check"></i> Alertas revisadas — podés aprobar</span>':'<span>Confirmo que revisé estas observaciones</span>'}
+    </label>`:''}
+  </div>`;
+}
 
 // Guardar gastos sin enviar la rendición
 async function guardarGastosParcial(){
@@ -1602,7 +1704,6 @@ async function _enviarRend(){
   if(!gastoRows.length){showToast('Cargá al menos un comprobante','wa');return;}
   const tot=total(currentSol),gasAct=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0),saldo=tot-gasAct;
   try{
-    // Limpiar campo preview (base64 enorme) antes de enviar — solo guardamos driveUrl
     const gastosParaGuardar = gastoRows.map(g=>({
       tipo:g.tipo, rubro:g.rubro, detalle:g.detalle,
       importe:g.importe, driveUrl:g.driveUrl||''
@@ -1614,8 +1715,11 @@ async function _enviarRend(){
       destino:currentSol.destino,total:tot,gastado:gasAct,saldo});
     currentSol.gastos=JSON.parse(JSON.stringify(gastoRows));
     currentSol.status='rendido';currentSol.observacion='';
-    updateBadges();renderRendicion();
-    showToast('Rendición enviada al tesorero','ok');
+    updateBadges();
+    showToast('Rendición enviada. Analizando con IA...','ok');
+    // Análisis automático en segundo plano — no bloquea la UI
+    await analizarRendicionIA(true);
+    renderRendicion();
   }catch(e){showToast('Error: '+e.message,'er');}
 }
 function enviarRendicion(){_enviarRend();}
@@ -1870,9 +1974,18 @@ async function confirmarObservacion(){
 }
 async function cerrar(i){
   const s=solicitudes[i];
+  // Verificar si hay alertas sin revisar antes de cerrar
+  if(currentSol && currentSol.id===s.id && alertasActuales && alertasActuales.tieneAlertas && !alertasActuales.revisadas){
+    showToast('Revisá las alertas antes de aprobar','wa');
+    return;
+  }
   try{
     await api({action:'updateStatus',id:s.id,status:'cerrado',usuario:'Tesorero'});
-    solicitudes[i].status='cerrado';updateBadges();renderTesoreria();
+    solicitudes[i].status='cerrado';
+    updateBadges();
+    // Si estamos viendo el detalle de esta solicitud, refrescar ahí; si no, refrescar Tesorería
+    if(currentSol && currentSol.id===s.id){ renderRendicion(); }
+    else { renderTesoreria(); }
     showToast('Rendición cerrada.','ok');
   }catch(e){showToast('Error: '+e.message,'er');}
 }
