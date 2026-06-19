@@ -454,7 +454,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbyZ6T0dzX9iUJIh7nvTMIftoB86hNkxXUaU_JNJxD_E4vJbeXzPZvAiJuKzec7INO1dyg/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycbz9SOtYWVHCr3xwdMbBE2YhaP3MPgUJpTKx39hS2HMkNzGeCjStJf6h6x_ZZ1dQBLd4-g/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -1242,7 +1242,7 @@ function renderResumen(byTipo,gasAct,saldo){
     <div class="rr"><span style="color:var(--text2)">${saldo>=0?'A reintegrar':'El tesorero debe abonar'}</span>
     <span style="font-weight:500;color:var(--${saldo>=0?'wa':'ok'}-t)">${fmt(Math.abs(saldo))}</span></div>`;
 }
-function addGasto(){gastoRows.push({tipo:'Factura B',rubro:172,detalle:'',importe:0});renderGastoTable();}
+function addGasto(){gastoRows.push({tipo:'Factura B',rubro:172,detalle:'',importe:0,nroComprobante:''});renderGastoTable();}
 
 // Analizar rendición con IA — detecta gastos prohibidos, montos atípicos, duplicados, incoherencias
 async function analizarRendicionIA(silencioso){
@@ -1634,10 +1634,11 @@ async function procesarScan(file){
     }
 
     if(r && r.tipo) {
-      nuevoGasto.tipo    = r.tipo;
-      nuevoGasto.rubro   = rubroMap[r.rubro_sugerido] || 172;
-      nuevoGasto.detalle = r.detalle || '';
-      nuevoGasto.importe = parseFloat(r.importe) || 0;
+      nuevoGasto.tipo           = r.tipo;
+      nuevoGasto.rubro          = rubroMap[r.rubro_sugerido] || 172;
+      nuevoGasto.detalle        = r.detalle || '';
+      nuevoGasto.importe        = parseFloat(r.importe) || 0;
+      nuevoGasto.nroComprobante = r.nroComprobante || '';
       showToast('Comprobante leído: ' + fmt(nuevoGasto.importe), 'ok');
     } else {
       showToast('Guardado en Drive. Completá los datos manualmente.','wa');
@@ -1690,11 +1691,12 @@ async function _enviarRend(){
   try{
     // Limpiar SOLO los campos necesarios — preview y base64 se eliminan
     const gastosParaGuardar = gastoRows.map(g=>({
-      tipo:    String(g.tipo    ||'Ticket / Factura C'),
-      rubro:   parseInt(g.rubro)||172,
-      detalle: String(g.detalle||'').substring(0,200),
-      importe: parseFloat(g.importe)||0,
-      driveUrl:String(g.driveUrl||'').substring(0,500)
+      tipo:           String(g.tipo    ||'Ticket / Factura C'),
+      rubro:          parseInt(g.rubro)||172,
+      detalle:        String(g.detalle||'').substring(0,200),
+      importe:        parseFloat(g.importe)||0,
+      driveUrl:       String(g.driveUrl||'').substring(0,500),
+      nroComprobante: String(g.nroComprobante||'').substring(0,50)
     }));
 
     const jsonGastos = JSON.stringify(gastosParaGuardar);
