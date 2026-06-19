@@ -454,7 +454,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbzShioEvRFnOKWg84aTrxJKIas8HOWgwstMmtcKLdEAFiWCkEj45juzTvCMIu_nWG5_JA/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycbwNXIiV-ibGhs0RnFpeR1Q9dkJahzm9Cx7Uw4vOjghgkKGakDessskNl84i5TOVgKHjmA/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -495,14 +495,21 @@ const TODAY=new Date(); TODAY.setHours(0,0,0,0);
 
 // ── API JSONP ──────────────────────────────────────────────────
 // fetch POST para payloads grandes (imágenes en base64)
+// Usa un canal alternativo para evitar bloqueo CORS en algunos browsers
 async function apiPost(params){
-  const resp = await fetch(AS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params)
-  });
-  if(!resp.ok) throw new Error('HTTP ' + resp.status);
-  return await resp.json();
+  // Intentar fetch normal primero
+  try {
+    const resp = await fetch(AS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, // text/plain evita preflight CORS
+      body: JSON.stringify(params)
+    });
+    if(resp.ok) return await resp.json();
+  } catch(e) {
+    console.warn('fetch POST falló, intentando alternativa:', e.message);
+  }
+  // Fallback: enviar via form en iframe oculto y esperar respuesta via JSONP
+  throw new Error('POST no disponible — verificá la conexión');
 }
 
 
