@@ -454,7 +454,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbwNXIiV-ibGhs0RnFpeR1Q9dkJahzm9Cx7Uw4vOjghgkKGakDessskNl84i5TOVgKHjmA/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycbyZ6T0dzX9iUJIh7nvTMIftoB86hNkxXUaU_JNJxD_E4vJbeXzPZvAiJuKzec7INO1dyg/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -1591,117 +1591,85 @@ async function procesarScan(file){
   }
 
   showToast('Procesando comprobante...','in');
-
-  // 1. Redimensionar imagen SIEMPRE primero
-  let base64, mediaType = 'image/jpeg';
-  try {
-    base64 = await resizeImage(file, 1200);
-  } catch(e) {
-    showToast('No se pudo leer la imagen: ' + e.message,'er');
-    return;
-  }
-
-  // 2. Subir imagen a Drive SIEMPRE — independientemente de si la IA la lee o no
+  const mediaType = 'image/jpeg';
   const nroComp = gastoRows.length + 1;
-  const nombreArchivo = 'comp_' + nroComp + '_' + Date.now() + '.jpg';
-  let driveUrl = '';
-  let folderId = currentSol.folderId || '';
+  const nombre = 'comp_' + nroComp + '_' + Date.now() + '.jpg';
+
+  let nuevoGasto = { tipo:'Ticket / Factura C', rubro:172, detalle:'', importe:0, driveUrl:'' };
+
   try {
-    showToast('Guardando en Drive...','in');
-    const driveRes = await apiPost({
-      action:      'guardarComprobante',
-      folderId:    folderId,
+    // Comprimir a 400px/0.5 para que entre en JSONP (~8-15KB base64)
+    const base64Small = await resizeImage(file, 400, 0.5);
+    // Comprimir a 800px para preview local
+    const base64Preview = await resizeImage(file, 800, 0.6);
+    nuevoGasto.preview = 'data:image/jpeg;base64,' + base64Preview;
+
+    showToast('Leyendo con IA y guardando...','in');
+
+    // Llamar via JSONP (GET) — funciona cross-origin sin restricciones
+    const r = await api({
+      action:      'escanearYGuardar',
+      imageBase64: base64Small,
+      mediaType:   mediaType,
+      nombre:      nombre,
       solicitudId: currentSol.id,
       solicitante: currentSol.solicitante,
       fechaSalida: currentSol.fechaSalida,
-      imageBase64: base64,
-      mediaType:   mediaType,
-      nombre:      nombreArchivo
+      folderId:    currentSol.folderId || ''
     });
-    if(driveRes && driveRes.ok) {
-      driveUrl = driveRes.driveUrl || '';
-      if(driveRes.folderId && !currentSol.folderId) {
-        currentSol.folderId = driveRes.folderId;
-        folderId = driveRes.folderId;
+
+    const rubroMap = {
+      'Viáticos y Refrigerios':172,'Alojamiento':174,'Combustible Rodados':138,
+      'Pasajes y Movilidad':170,'Gastos Varios':192,'Teléfono e Internet':180,
+      'Seguros':166,'Mantenimiento Rodados':144
+    };
+
+    if(r && r.driveUrl) {
+      nuevoGasto.driveUrl = r.driveUrl;
+      if(r.folderId && !currentSol.folderId) {
+        currentSol.folderId = r.folderId;
         api({action:'updateStatus', id:currentSol.id, status:currentSol.status,
-          usuario:currentSol.solicitante, folderId:driveRes.folderId
-        }).catch(()=>{});
+          usuario:currentSol.solicitante, folderId:r.folderId}).catch(()=>{});
       }
-      showToast('Imagen guardada en Drive ✓','ok');
-    } else {
-      console.warn('Drive error:', driveRes && driveRes.error);
     }
-  } catch(e) {
-    console.warn('No se guardó en Drive:', e.message);
-  }
 
-  // 3. Intentar leer con IA — si falla, agregar igual con fila manual
-  let nuevoGasto = {
-    tipo: 'Ticket / Factura C', rubro: 172,
-    detalle: '', importe: 0,
-    preview: 'data:' + mediaType + ';base64,' + base64,
-    driveUrl: driveUrl
-  };
-
-  try {
-    showToast('Leyendo con IA...','in');
-    // Llamar al Apps Script como proxy — evita problemas de CORS en mobile
-    const r = await apiPost({
-      action:      'escanearComprobante',
-      imageBase64: base64,
-      mediaType:   mediaType
-    });
-
-    if(r && !r.error && r.importe) {
-      const rubroMap = {
-        'Viáticos y Refrigerios':172,'Alojamiento':174,'Combustible Rodados':138,
-        'Pasajes y Movilidad':170,'Gastos Varios':192,'Teléfono e Internet':180,
-        'Seguros':166,'Mantenimiento Rodados':144
-      };
-      nuevoGasto.tipo    = r.tipo    || nuevoGasto.tipo;
-      nuevoGasto.rubro   = rubroMap[r.rubro_sugerido] || nuevoGasto.rubro;
-      nuevoGasto.detalle = r.detalle || nuevoGasto.detalle;
-      nuevoGasto.importe = parseFloat(r.importe) || nuevoGasto.importe;
+    if(r && r.tipo) {
+      nuevoGasto.tipo    = r.tipo;
+      nuevoGasto.rubro   = rubroMap[r.rubro_sugerido] || 172;
+      nuevoGasto.detalle = r.detalle || '';
+      nuevoGasto.importe = parseFloat(r.importe) || 0;
       showToast('Comprobante leído: ' + fmt(nuevoGasto.importe), 'ok');
     } else {
-      showToast('IA no pudo leer — completá manualmente','wa');
-      console.warn('escanearComprobante:', r && r.error);
+      showToast('Guardado en Drive. Completá los datos manualmente.','wa');
     }
+
   } catch(e) {
-    showToast('Imagen guardada. Completá los datos manualmente.','wa');
-    console.warn('escanearComprobante error:', e.message);
+    showToast('No se pudo procesar. Completá manualmente.','wa');
+    console.warn('procesarScan:', e.message);
   }
 
-  // 4. Agregar el gasto SIEMPRE (con o sin lectura de IA, con o sin Drive)
   gastoRows.push(nuevoGasto);
   renderGastoTable();
 }
 
-// Redimensiona imagen para optimizar el envío
-function resizeImage(file, maxWidth){
+function resizeImage(file, maxWidth, quality){
+  quality = quality || 0.7;
   return new Promise((resolve, reject) => {
-    // Usar FileReader para mayor compatibilidad con mobile
     const reader = new FileReader();
     reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
     reader.onload = (ev) => {
       const img = new Image();
-      img.onerror = () => {
-        // Si falla el redimensionado, devolver el base64 original sin redimensionar
-        const raw = ev.target.result.split(',')[1];
-        resolve(raw);
-      };
+      img.onerror = () => resolve(ev.target.result.split(',')[1]);
       img.onload = () => {
         try {
-          const ratio = Math.min(1, maxWidth / img.width);
+          const ratio = Math.min(1, maxWidth / Math.max(img.width, img.height));
           const canvas = document.createElement('canvas');
           canvas.width  = Math.round(img.width  * ratio);
           canvas.height = Math.round(img.height * ratio);
           canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-          resolve(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
+          resolve(canvas.toDataURL('image/jpeg', quality).split(',')[1]);
         } catch(e) {
-          // Si canvas falla (ej: imagen muy grande), devolver base64 original
-          const raw = ev.target.result.split(',')[1];
-          resolve(raw);
+          resolve(ev.target.result.split(',')[1]);
         }
       };
       img.src = ev.target.result;
