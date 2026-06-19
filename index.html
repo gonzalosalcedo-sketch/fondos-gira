@@ -454,7 +454,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbz9SOtYWVHCr3xwdMbBE2YhaP3MPgUJpTKx39hS2HMkNzGeCjStJf6h6x_ZZ1dQBLd4-g/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycbwfWEPjaik3z1-ncgudtkBNeA68YcsJA7TA-s-nbtkcr_fmzv8K3c3oI5pd56X-0D8J9w/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -494,22 +494,66 @@ let dashChart=null;
 const TODAY=new Date(); TODAY.setHours(0,0,0,0);
 
 // ── API JSONP ──────────────────────────────────────────────────
-// fetch POST para payloads grandes (imágenes en base64)
-// Usa un canal alternativo para evitar bloqueo CORS en algunos browsers
-async function apiPost(params){
-  // Intentar fetch normal primero
-  try {
-    const resp = await fetch(AS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' }, // text/plain evita preflight CORS
-      body: JSON.stringify(params)
-    });
-    if(resp.ok) return await resp.json();
-  } catch(e) {
-    console.warn('fetch POST falló, intentando alternativa:', e.message);
-  }
-  // Fallback: enviar via form en iframe oculto y esperar respuesta via JSONP
-  throw new Error('POST no disponible — verificá la conexión');
+// POST via form+iframe — único método que funciona cross-origin sin CORS
+function apiPost(params){
+  return new Promise((resolve, reject) => {
+    const cbName = 'iframePost_' + Date.now();
+    const iframeId = 'iframe_' + cbName;
+
+    // Crear iframe oculto
+    const iframe = document.createElement('iframe');
+    iframe.name = iframeId;
+    iframe.id = iframeId;
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    // Crear form que apunta al iframe
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = AS_URL;
+    form.target = iframeId;
+    form.style.display = 'none';
+
+    // Pasar todos los params como campo oculto (JSON en un solo campo)
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'payload';
+    input.value = JSON.stringify(params);
+    form.appendChild(input);
+
+    // Callback para cuando el iframe cargue la respuesta
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error('Timeout en apiPost'));
+    }, 30000);
+
+    function cleanup() {
+      clearTimeout(timeout);
+      try { document.body.removeChild(iframe); } catch(e) {}
+      try { document.body.removeChild(form); } catch(e) {}
+    }
+
+    // El Apps Script devuelve JSONP con el callback en la URL
+    // Para el POST via form, el Apps Script devuelve JSON plano
+    iframe.onload = () => {
+      try {
+        const txt = iframe.contentDocument
+          ? iframe.contentDocument.body.innerText
+          : iframe.contentWindow.document.body.innerText;
+        const data = JSON.parse(txt);
+        cleanup();
+        resolve(data);
+      } catch(e) {
+        cleanup();
+        reject(new Error('Error parseando respuesta: ' + e.message));
+      }
+    };
+
+    iframe.onerror = () => { cleanup(); reject(new Error('Error en iframe POST')); };
+
+    document.body.appendChild(form);
+    form.submit();
+  });
 }
 
 
