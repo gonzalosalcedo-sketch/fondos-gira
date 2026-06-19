@@ -454,7 +454,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbyFpnfFQn0TlovGEgsoiBKLOxv1St8A1XbDtYWgUFk7rgpoPhlWKWaqHKk3yzUj-ZR-qw/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycby9lkBvzuBXAOpWP1uDvgKQzy_IuOD93w-P9AFhb7lKns1ugJZKvm2xxTuDkk8MwrODAw/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -1638,52 +1638,31 @@ async function procesarScan(file){
 
   try {
     showToast('Leyendo con IA...','in');
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': await getClaudeKey(),
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 300,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-            { type: 'text', text: 'Sos un sistema de lectura de comprobantes de gastos argentinos.\nAnalizá esta imagen y devolvé ÚNICAMENTE un objeto JSON con esta estructura exacta, sin texto adicional:\n{\n  "tipo": uno de ["Factura A","Factura B","Ticket / Factura C","Recibo","Comprobante electrónico","Otro"],\n  "detalle": texto corto describiendo el gasto (máx 50 caracteres),\n  "importe": número con el TOTAL FINAL en pesos sin símbolo,\n  "rubro_sugerido": uno de ["Viáticos y Refrigerios","Alojamiento","Combustible Rodados","Pasajes y Movilidad","Gastos Varios","Teléfono e Internet","Seguros","Mantenimiento Rodados"]\n}' }
-          ]
-        }]
-      })
+    // Llamar al Apps Script como proxy — evita problemas de CORS en mobile
+    const r = await apiPost({
+      action:      'escanearComprobante',
+      imageBase64: base64,
+      mediaType:   mediaType
     });
 
-    if(resp.ok) {
-      const data = await resp.json();
-      const texto = data.content?.[0]?.text || '';
-      const match = texto.match(/\{[\s\S]*\}/);
-      if(match) {
-        const r = JSON.parse(match[0]);
-        const rubroMap = {
-          'Viáticos y Refrigerios':172,'Alojamiento':174,'Combustible Rodados':138,
-          'Pasajes y Movilidad':170,'Gastos Varios':192,'Teléfono e Internet':180,
-          'Seguros':166,'Mantenimiento Rodados':144
-        };
-        nuevoGasto.tipo    = r.tipo    || nuevoGasto.tipo;
-        nuevoGasto.rubro   = rubroMap[r.rubro_sugerido] || nuevoGasto.rubro;
-        nuevoGasto.detalle = r.detalle || nuevoGasto.detalle;
-        nuevoGasto.importe = parseFloat(r.importe) || nuevoGasto.importe;
-        showToast('Comprobante leído: ' + fmt(nuevoGasto.importe), 'ok');
-      } else {
-        showToast('IA no pudo leer — completá manualmente','wa');
-      }
+    if(r && !r.error && r.importe) {
+      const rubroMap = {
+        'Viáticos y Refrigerios':172,'Alojamiento':174,'Combustible Rodados':138,
+        'Pasajes y Movilidad':170,'Gastos Varios':192,'Teléfono e Internet':180,
+        'Seguros':166,'Mantenimiento Rodados':144
+      };
+      nuevoGasto.tipo    = r.tipo    || nuevoGasto.tipo;
+      nuevoGasto.rubro   = rubroMap[r.rubro_sugerido] || nuevoGasto.rubro;
+      nuevoGasto.detalle = r.detalle || nuevoGasto.detalle;
+      nuevoGasto.importe = parseFloat(r.importe) || nuevoGasto.importe;
+      showToast('Comprobante leído: ' + fmt(nuevoGasto.importe), 'ok');
     } else {
-      showToast('IA no disponible — completá manualmente','wa');
+      showToast('IA no pudo leer — completá manualmente','wa');
+      console.warn('escanearComprobante:', r && r.error);
     }
   } catch(e) {
     showToast('IA no disponible — completá manualmente','wa');
-    console.warn('Claude Vision error:', e.message);
+    console.warn('escanearComprobante error:', e.message);
   }
 
   // 4. Agregar el gasto SIEMPRE (con o sin lectura de IA, con o sin Drive)
@@ -1710,18 +1689,7 @@ function resizeImage(file, maxWidth){
   });
 }
 
-// Lee la API key de Claude desde CONFIG en el Apps Script
-async function getClaudeKey(){
-  if(window._claudeKey) return window._claudeKey;
-  try {
-    const cfg = await api({action:'getConfig'});
-    if(cfg && cfg.claudeApiKey && cfg.claudeApiKey.startsWith('sk-ant-')){
-      window._claudeKey = cfg.claudeApiKey;
-      return window._claudeKey;
-    }
-  } catch(e) {}
-  throw new Error('API key de Claude no configurada. Agregá claudeApiKey en la solapa CONFIG de la Sheet.');
-}
+// API key manejada en el Apps Script
 async function _enviarRend(){
   if(!gastoRows.length){showToast('Cargá al menos un comprobante','wa');return;}
 
