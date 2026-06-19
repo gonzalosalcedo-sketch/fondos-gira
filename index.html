@@ -1640,55 +1640,26 @@ async function procesarScan(file){
   const nombre = 'comp_' + nroComp + '_' + Date.now() + '.jpg';
   let nuevoGasto = { tipo:'Ticket / Factura C', rubro:172, detalle:'', importe:0, driveUrl:'', nroComprobante:'' };
 
-  // Paso 1: redimensionar imagen en dos versiones
-  let base64Full, base64Tiny;
   try {
-    base64Full = await resizeImage(file, 1000, 0.75); // para Drive y Claude
-    base64Tiny = await resizeImage(file, 150, 0.2);   // para JSONP (< 3000 chars)
-    nuevoGasto.preview = 'data:image/jpeg;base64,' + await resizeImage(file, 600, 0.6);
-  } catch(e) {
-    showToast('No se pudo leer la imagen: ' + e.message,'er');
-    gastoRows.push(nuevoGasto);
-    renderGastoTable();
-    return;
-  }
+    // Preview local
+    const base64Preview = await resizeImage(file, 600, 0.6);
+    nuevoGasto.preview = 'data:image/jpeg;base64,' + base64Preview;
 
-  // Paso 2: guardar imagen FULL en Drive via POST
-  showToast('Guardando en Drive...','in');
-  try {
-    const driveRes = await apiPost({
-      action:      'guardarComprobante',
-      folderId:    currentSol.folderId || '',
+    // Imagen en buena calidad para Drive y Claude (1200px)
+    const base64Full = await resizeImage(file, 1200, 0.8);
+
+    showToast('Guardando en Drive y leyendo con IA...','in');
+
+    // Una sola llamada via iframe POST: guarda en Drive Y lee con Claude
+    const r = await apiPost({
+      action:      'escanearYGuardar',
+      imageBase64: base64Full,
+      mediaType:   mediaType,
+      nombre:      nombre,
       solicitudId: currentSol.id,
       solicitante: currentSol.solicitante,
       fechaSalida: currentSol.fechaSalida,
-      imageBase64: base64Full,
-      mediaType:   mediaType,
-      nombre:      nombre
-    });
-    if(driveRes && driveRes.ok) {
-      nuevoGasto.driveUrl = driveRes.driveUrl || '';
-      if(driveRes.folderId && !currentSol.folderId) {
-        currentSol.folderId = driveRes.folderId;
-        api({action:'updateStatus', id:currentSol.id, status:currentSol.status,
-          usuario:currentSol.solicitante, folderId:driveRes.folderId}).catch(()=>{});
-      }
-      showToast('Guardado en Drive ✓. Leyendo con IA...','ok');
-    } else {
-      console.warn('Drive error:', driveRes && driveRes.error);
-      showToast('Drive falló. Leyendo con IA...','wa');
-    }
-  } catch(e) {
-    console.warn('Drive POST error:', e.message);
-    showToast('Drive falló. Leyendo con IA...','wa');
-  }
-
-  // Paso 3: leer con IA via JSONP usando imagen tiny
-  try {
-    const r = await api({
-      action:      'escanearComprobante',
-      imageBase64: base64Tiny,
-      mediaType:   mediaType
+      folderId:    currentSol.folderId || ''
     });
 
     const rubroMap = {
@@ -1697,20 +1668,31 @@ async function procesarScan(file){
       'Seguros':166,'Mantenimiento Rodados':144
     };
 
-    if(r && !r.error && r.importe) {
-      nuevoGasto.tipo           = r.tipo           || nuevoGasto.tipo;
+    if(r && r.driveUrl) {
+      nuevoGasto.driveUrl = r.driveUrl;
+      if(r.folderId && !currentSol.folderId) {
+        currentSol.folderId = r.folderId;
+        api({action:'updateStatus', id:currentSol.id, status:currentSol.status,
+          usuario:currentSol.solicitante, folderId:r.folderId}).catch(()=>{});
+      }
+    }
+
+    if(r && r.tipo && r.importe) {
+      nuevoGasto.tipo           = r.tipo;
       nuevoGasto.rubro          = rubroMap[r.rubro_sugerido] || 172;
-      nuevoGasto.detalle        = r.detalle        || '';
+      nuevoGasto.detalle        = r.detalle || '';
       nuevoGasto.importe        = parseFloat(r.importe) || 0;
       nuevoGasto.nroComprobante = r.nroComprobante || '';
-      showToast('Comprobante leído: ' + fmt(nuevoGasto.importe), 'ok');
+      showToast('Leído: ' + fmt(nuevoGasto.importe) + (r.driveUrl?' ✓ Drive':''), 'ok');
+    } else if(r && r.driveUrl) {
+      showToast('Guardado en Drive ✓. Completá los datos manualmente.','wa');
     } else {
-      showToast('Imagen guardada. Completá los datos manualmente.','wa');
-      console.warn('IA error:', r && r.error);
+      showToast('Completá los datos manualmente.','wa');
     }
+
   } catch(e) {
-    showToast('Imagen guardada. Completá manualmente.','wa');
-    console.warn('IA error:', e.message);
+    showToast('Error: ' + e.message + '. Completá manualmente.','wa');
+    console.warn('procesarScan:', e.message);
   }
 
   gastoRows.push(nuevoGasto);
