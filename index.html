@@ -445,8 +445,10 @@ table.gt tr:last-child td{border-bottom:none}
 
 <div id="toast"></div>
 
-<!-- Input oculto para cámara o galería -->
-<input type="file" id="scan-input" accept="image/*"
+<!-- Inputs para cámara y galería -->
+<input type="file" id="scan-input-camara" accept="image/*" capture="environment"
+  style="display:none" onchange="procesarScan(this.files[0]);this.value=''">
+<input type="file" id="scan-input-galeria" accept="image/*"
   style="display:none" onchange="procesarScan(this.files[0]);this.value=''">
 </div>
 </div>
@@ -1552,9 +1554,26 @@ function updR(){
   const rc=document.getElementById('rcomp');if(rc)rc.innerHTML=renderResumen(byTipo,gasAct,saldo);
 }
 function simScan(){
-  // Abrir input de archivo/cámara oculto
-  const input = document.getElementById('scan-input');
-  if(input) input.click();
+  // Mostrar opciones: cámara directa o galería
+  const existing = document.getElementById('scan-opciones-ov');
+  if(existing){ existing.remove(); return; }
+  const ov = document.createElement('div');
+  ov.id = 'scan-opciones-ov';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;display:flex;align-items:flex-end;justify-content:center;padding:1rem';
+  ov.innerHTML = `<div style="background:var(--bg);border-radius:var(--r);padding:1.25rem;width:100%;max-width:400px;display:flex;flex-direction:column;gap:10px">
+    <div style="font-weight:500;font-size:15px;margin-bottom:4px">Agregar comprobante</div>
+    <button class="btn" style="width:100%;padding:12px;font-size:14px;justify-content:center" onclick="document.getElementById('scan-opciones-ov').remove();document.getElementById('scan-input-camara').click()">
+      <i class="ti ti-camera"></i>&nbsp; Sacar foto ahora
+    </button>
+    <button class="btn in" style="width:100%;padding:12px;font-size:14px;justify-content:center" onclick="document.getElementById('scan-opciones-ov').remove();document.getElementById('scan-input-galeria').click()">
+      <i class="ti ti-photo"></i>&nbsp; Elegir de la galería
+    </button>
+    <button class="btn" style="width:100%;padding:10px;font-size:13px;background:transparent;border:0.5px solid var(--border)" onclick="document.getElementById('scan-opciones-ov').remove()">
+      Cancelar
+    </button>
+  </div>`;
+  ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+  document.body.appendChild(ov);
 }
 
 async function procesarScan(file){
@@ -1564,14 +1583,61 @@ async function procesarScan(file){
     return;
   }
 
-  showToast('Leyendo comprobante con IA...','in');
+  showToast('Procesando comprobante...','in');
+
+  // 1. Redimensionar imagen SIEMPRE primero
+  let base64, mediaType = 'image/jpeg';
+  try {
+    base64 = await resizeImage(file, 1200);
+  } catch(e) {
+    showToast('No se pudo leer la imagen: ' + e.message,'er');
+    return;
+  }
+
+  // 2. Subir imagen a Drive SIEMPRE — independientemente de si la IA la lee o no
+  const nroComp = gastoRows.length + 1;
+  const nombreArchivo = 'comp_' + nroComp + '_' + Date.now() + '.jpg';
+  let driveUrl = '';
+  let folderId = currentSol.folderId || '';
+  try {
+    showToast('Guardando en Drive...','in');
+    const driveRes = await apiPost({
+      action:      'guardarComprobante',
+      folderId:    folderId,
+      solicitudId: currentSol.id,
+      solicitante: currentSol.solicitante,
+      fechaSalida: currentSol.fechaSalida,
+      imageBase64: base64,
+      mediaType:   mediaType,
+      nombre:      nombreArchivo
+    });
+    if(driveRes && driveRes.ok) {
+      driveUrl = driveRes.driveUrl || '';
+      if(driveRes.folderId && !currentSol.folderId) {
+        currentSol.folderId = driveRes.folderId;
+        folderId = driveRes.folderId;
+        api({action:'updateStatus', id:currentSol.id, status:currentSol.status,
+          usuario:currentSol.solicitante, folderId:driveRes.folderId
+        }).catch(()=>{});
+      }
+      showToast('Imagen guardada en Drive ✓','ok');
+    } else {
+      console.warn('Drive error:', driveRes && driveRes.error);
+    }
+  } catch(e) {
+    console.warn('No se guardó en Drive:', e.message);
+  }
+
+  // 3. Intentar leer con IA — si falla, agregar igual con fila manual
+  let nuevoGasto = {
+    tipo: 'Ticket / Factura C', rubro: 172,
+    detalle: '', importe: 0,
+    preview: 'data:' + mediaType + ';base64,' + base64,
+    driveUrl: driveUrl
+  };
 
   try {
-    // Redimensionar imagen antes de enviar (mejora velocidad y evita límites de tamaño)
-    const base64 = await resizeImage(file, 1200);
-    const mediaType = 'image/jpeg';
-
-    // Llamar a Claude Vision directo desde el browser
+    showToast('Leyendo con IA...','in');
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -1587,86 +1653,42 @@ async function procesarScan(file){
           role: 'user',
           content: [
             { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-            { type: 'text', text: `Sos un sistema de lectura de comprobantes de gastos argentinos.
-Analizá esta imagen y devolvé ÚNICAMENTE un objeto JSON con esta estructura exacta, sin texto adicional:
-{
-  "tipo": uno de ["Factura A","Factura B","Ticket / Factura C","Recibo","Comprobante electrónico","Otro"],
-  "detalle": texto corto describiendo el gasto (máx 50 caracteres, ej: "YPF Calle 25 Mayo", "Hotel Mendoza", "Almuerzo"),
-  "importe": número entero o decimal con el TOTAL FINAL en pesos (sin $ ni puntos de miles),
-  "rubro_sugerido": uno de ["Viáticos y Refrigerios","Alojamiento","Combustible Rodados","Pasajes y Movilidad","Gastos Varios","Teléfono e Internet","Seguros","Mantenimiento Rodados"]
-}` }
+            { type: 'text', text: 'Sos un sistema de lectura de comprobantes de gastos argentinos.\nAnalizá esta imagen y devolvé ÚNICAMENTE un objeto JSON con esta estructura exacta, sin texto adicional:\n{\n  "tipo": uno de ["Factura A","Factura B","Ticket / Factura C","Recibo","Comprobante electrónico","Otro"],\n  "detalle": texto corto describiendo el gasto (máx 50 caracteres),\n  "importe": número con el TOTAL FINAL en pesos sin símbolo,\n  "rubro_sugerido": uno de ["Viáticos y Refrigerios","Alojamiento","Combustible Rodados","Pasajes y Movilidad","Gastos Varios","Teléfono e Internet","Seguros","Mantenimiento Rodados"]\n}' }
           ]
         }]
       })
     });
 
-    if(!resp.ok){
-      const err = await resp.json();
-      throw new Error(err.error?.message || 'Error de API: ' + resp.status);
-    }
-
-    const data = await resp.json();
-    const texto = data.content?.[0]?.text || '';
-    const match = texto.match(/\{[\s\S]*\}/);
-    if(!match) throw new Error('Respuesta no parseable');
-
-    const r = JSON.parse(match[0]);
-
-    const rubroMap = {
-      'Viáticos y Refrigerios': 172, 'Alojamiento': 174,
-      'Combustible Rodados': 138,    'Pasajes y Movilidad': 170,
-      'Gastos Varios': 192,          'Teléfono e Internet': 180,
-      'Seguros': 166,                'Mantenimiento Rodados': 144,
-    };
-
-    // Crear URL local para previsualización
-    const previewUrl = 'data:' + mediaType + ';base64,' + base64;
-
-    const nuevoGasto = {
-      tipo:    r.tipo    || 'Ticket / Factura C',
-      rubro:   rubroMap[r.rubro_sugerido] || 172,
-      detalle: r.detalle || '',
-      importe: parseFloat(r.importe) || 0,
-      preview: previewUrl
-    };
-    gastoRows.push(nuevoGasto);
-    renderGastoTable();
-    showToast('Comprobante leído: ' + fmt(parseFloat(r.importe)||0), 'ok');
-
-    // Guardar imagen en Drive via POST (evita límite de URL del JSONP)
-    const nroComp = gastoRows.length;
-    const nombreArchivo = 'comp_' + nroComp + '_' + Date.now() + '.jpg';
-    try {
-      const driveRes = await apiPost({
-        action:      'guardarComprobante',
-        folderId:    currentSol.folderId || '',
-        solicitudId: currentSol.id,
-        solicitante: currentSol.solicitante,
-        fechaSalida: currentSol.fechaSalida,
-        imageBase64: base64,
-        mediaType:   mediaType,
-        nombre:      nombreArchivo
-      });
-      if(driveRes && driveRes.ok) {
-        nuevoGasto.driveUrl = driveRes.driveUrl || '';
-        if(driveRes.folderId && !currentSol.folderId) {
-          currentSol.folderId = driveRes.folderId;
-          api({action:'updateStatus', id:currentSol.id, status:currentSol.status,
-            usuario:currentSol.solicitante, folderId:driveRes.folderId
-          }).catch(()=>{});
-        }
-        gastoRows[gastoRows.length-1].driveUrl = driveRes.driveUrl || '';
-        renderGastoTable();
-        showToast('Guardado en Drive ✓', 'ok');
-      } else if(driveRes && driveRes.error) {
-        console.warn('Drive error:', driveRes.error);
+    if(resp.ok) {
+      const data = await resp.json();
+      const texto = data.content?.[0]?.text || '';
+      const match = texto.match(/\{[\s\S]*\}/);
+      if(match) {
+        const r = JSON.parse(match[0]);
+        const rubroMap = {
+          'Viáticos y Refrigerios':172,'Alojamiento':174,'Combustible Rodados':138,
+          'Pasajes y Movilidad':170,'Gastos Varios':192,'Teléfono e Internet':180,
+          'Seguros':166,'Mantenimiento Rodados':144
+        };
+        nuevoGasto.tipo    = r.tipo    || nuevoGasto.tipo;
+        nuevoGasto.rubro   = rubroMap[r.rubro_sugerido] || nuevoGasto.rubro;
+        nuevoGasto.detalle = r.detalle || nuevoGasto.detalle;
+        nuevoGasto.importe = parseFloat(r.importe) || nuevoGasto.importe;
+        showToast('Comprobante leído: ' + fmt(nuevoGasto.importe), 'ok');
+      } else {
+        showToast('IA no pudo leer — completá manualmente','wa');
       }
-    } catch(e) { console.warn('No se guardó en Drive:', e.message); }
-
+    } else {
+      showToast('IA no disponible — completá manualmente','wa');
+    }
   } catch(e) {
-    showToast('No se pudo leer: ' + e.message,'er');
-    addGasto(); // agregar fila vacía para completar manual
+    showToast('IA no disponible — completá manualmente','wa');
+    console.warn('Claude Vision error:', e.message);
   }
+
+  // 4. Agregar el gasto SIEMPRE (con o sin lectura de IA, con o sin Drive)
+  gastoRows.push(nuevoGasto);
+  renderGastoTable();
 }
 
 // Redimensiona imagen para optimizar el envío
@@ -1702,25 +1724,47 @@ async function getClaudeKey(){
 }
 async function _enviarRend(){
   if(!gastoRows.length){showToast('Cargá al menos un comprobante','wa');return;}
+
+  const btn = event && event.target;
+  if(btn){ btn.disabled=true; btn.innerHTML='<div class="spin"></div> Enviando...'; }
+
   const tot=total(currentSol),gasAct=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0),saldo=tot-gasAct;
   try{
+    // Limpiar SOLO los campos necesarios — preview y base64 se eliminan
     const gastosParaGuardar = gastoRows.map(g=>({
-      tipo:g.tipo, rubro:g.rubro, detalle:g.detalle,
-      importe:g.importe, driveUrl:g.driveUrl||''
+      tipo:    String(g.tipo    ||'Ticket / Factura C'),
+      rubro:   parseInt(g.rubro)||172,
+      detalle: String(g.detalle||'').substring(0,200),
+      importe: parseFloat(g.importe)||0,
+      driveUrl:String(g.driveUrl||'').substring(0,500)
     }));
-    await api({action:'saveGastos',id:currentSol.id,gastos:JSON.stringify(gastosParaGuardar),usuario:currentSol.solicitante});
+
+    const jsonGastos = JSON.stringify(gastosParaGuardar);
+    // Verificar tamaño antes de enviar
+    if(jsonGastos.length > 5000){
+      showToast('Demasiados comprobantes para enviar de una vez. Reducí la cantidad o usá Guardar primero.','wa');
+      if(btn){ btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Enviar rendición al tesorero'; }
+      return;
+    }
+
+    await api({action:'saveGastos',id:currentSol.id,gastos:jsonGastos,usuario:currentSol.solicitante});
     await api({action:'updateStatus',id:currentSol.id,status:'rendido',usuario:currentSol.solicitante});
     await api({action:'sendMail',tipo:'rendicion_enviada',id:currentSol.id,
       solicitante:currentSol.solicitante,emailSolicitante:currentSol.email,
       destino:currentSol.destino,total:tot,gastado:gasAct,saldo});
-    currentSol.gastos=JSON.parse(JSON.stringify(gastoRows));
-    currentSol.status='rendido';currentSol.observacion='';
+
+    // Guardar en memoria sin campos pesados
+    currentSol.gastos = gastosParaGuardar;
+    currentSol.status='rendido';
+    currentSol.observacion='';
     updateBadges();
     showToast('Rendición enviada. Analizando con IA...','ok');
-    // Análisis automático en segundo plano — no bloquea la UI
     await analizarRendicionIA(true);
     renderRendicion();
-  }catch(e){showToast('Error: '+e.message,'er');}
+  }catch(e){
+    showToast('Error al enviar: '+e.message,'er');
+    if(btn){ btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Enviar rendición al tesorero'; }
+  }
 }
 function enviarRendicion(){_enviarRend();}
 function reenviarRendicion(){_enviarRend();}
