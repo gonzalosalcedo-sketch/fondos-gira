@@ -454,7 +454,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbyAxSQ7rNGka0y_s5P8QK1KQiHig2vCxrzv6l20G0rQQRykwdG2Gm4abIlQyPLydqTRwA/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycbydCfqV33uvoiusmmlGgcWkK9ifoLAGE9sdStNy5jTaCMsksyN3NjUuoBSRz2g-evkm/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -1661,7 +1661,7 @@ async function procesarScan(file){
       console.warn('escanearComprobante:', r && r.error);
     }
   } catch(e) {
-    showToast('IA no disponible — completá manualmente','wa');
+    showToast('Imagen guardada. Completá los datos manualmente.','wa');
     console.warn('escanearComprobante error:', e.message);
   }
 
@@ -1707,8 +1707,9 @@ function resizeImage(file, maxWidth){
 async function _enviarRend(){
   if(!gastoRows.length){showToast('Cargá al menos un comprobante','wa');return;}
 
-  const btn = event && event.target;
-  if(btn){ btn.disabled=true; btn.innerHTML='<div class="spin"></div> Enviando...'; }
+  // Deshabilitar botones de envío para evitar doble clic
+  const btns = document.querySelectorAll('.btn.pr');
+  btns.forEach(b=>{ b.disabled=true; b.dataset.orig=b.innerHTML; b.innerHTML='<div class="spin"></div> Enviando...'; });
 
   const tot=total(currentSol),gasAct=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0),saldo=tot-gasAct;
   try{
@@ -1745,7 +1746,9 @@ async function _enviarRend(){
     renderRendicion();
   }catch(e){
     showToast('Error al enviar: '+e.message,'er');
-    if(btn){ btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Enviar rendición al tesorero'; }
+  } finally {
+    const btns2 = document.querySelectorAll('.btn.pr');
+    btns2.forEach(b=>{ b.disabled=false; if(b.dataset.orig) b.innerHTML=b.dataset.orig; });
   }
 }
 function enviarRendicion(){_enviarRend();}
