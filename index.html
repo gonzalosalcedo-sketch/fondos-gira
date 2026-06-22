@@ -1762,9 +1762,8 @@ async function _enviarRend(){
     currentSol.status='rendido';
     currentSol.observacion='';
     updateBadges();
-    showToast('Rendición enviada. Analizando con IA...','ok');
-    await analizarRendicionIA(true);
     renderRendicion();
+    showToast('Rendición enviada al tesorero','ok');
   }catch(e){
     showToast('Error al enviar: '+e.message,'er');
     if(btn){btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Enviar rendición al tesorero';}
