@@ -1366,7 +1366,8 @@ async function guardarGastosParcial(){
   try{
     const gastosParaGuardar=gastoRows.map(g=>({
       tipo:g.tipo,rubro:g.rubro,detalle:g.detalle,
-      importe:g.importe,driveUrl:g.driveUrl||''
+      importe:g.importe,driveUrl:g.driveUrl||'',
+      nroComprobante:g.nroComprobante||''
     }));
     await api({action:'saveGastos',id:currentSol.id,
       gastos:JSON.stringify(gastosParaGuardar),
