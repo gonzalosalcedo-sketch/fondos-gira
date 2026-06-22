@@ -1220,7 +1220,7 @@ function renderRendicion(){
       <button class="btn ok" id="btn-guardar-avance" onclick="guardarGastosParcial()">
         <i class="ti ti-device-floppy"></i> Guardar avance
       </button>
-      <button class="btn pr" onclick="${currentSol.status==='observado'?'reenviarRendicion()':'enviarRendicion()}'}">
+      <button class="btn pr" onclick="${currentSol.status==='observado'?'reenviarRendicion()':'enviarRendicion()'}">
         <i class="ti ti-send"></i> ${currentSol.status==='observado'?'Reenviar rendición corregida':'Enviar rendición al tesorero'}
       </button>
     </div>`:''}
