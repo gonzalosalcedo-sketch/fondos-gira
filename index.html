@@ -1128,18 +1128,50 @@ async function enviarSolicitud(){
 }
 
 // ── RENDICIÓN ──────────────────────────────────────────────────
-async function irRendicion(idx){
+async function ejecutarAnalisisIA(){
+  const btn = document.querySelector('#card-ia-analisis .btn');
+  if(btn){btn.disabled=true; btn.innerHTML='<div class="spin"></div> Analizando...';}
+  try {
+    const gastosConDesc = (currentSol.gastos||[]).map(g=>({
+      tipo:g.tipo, rubro:g.rubro,
+      rubro_desc: (RUBROS.find(r=>r.cod===g.rubro)||{desc:g.rubro}).desc,
+      detalle:g.detalle, importe:g.importe, driveUrl:g.driveUrl||''
+    }));
+    const r = await apiPost({
+      action:'analizarRendicion',
+      solicitudId: currentSol.id,
+      gastos: gastosConDesc,
+      solicitud: {
+        destino:currentSol.destino, fechaSalida:currentSol.fechaSalida,
+        fechaLlegada:currentSol.fechaLlegada, dias:currentSol.dias,
+        transporte:currentSol.transporte, total:total(currentSol)
+      }
+    });
+    if(r && r.resumen){
+      currentSol.alertas = r;
+      renderRendicion();
+      showToast('Análisis completado','ok');
+    } else {
+      showToast('No se pudo analizar: '+(r&&r.error||'sin respuesta'),'wa');
+      if(btn){btn.disabled=false; btn.innerHTML='<i class="ti ti-robot"></i> Analizar ahora';}
+    }
+  } catch(e){
+    showToast('Error en análisis: '+e.message,'er');
+    if(btn){btn.disabled=false; btn.innerHTML='<i class="ti ti-robot"></i> Analizar ahora';}
+  }
+}
+
+function irRendicion(idx){
   currentSol=solicitudes[idx];
   gastoRows=currentSol.gastos?JSON.parse(JSON.stringify(currentSol.gastos)):[];
   alertasActuales=null;
   document.getElementById('t-rendicion').style.display='';
   showTab('rendicion');
-  // Cargar alertas existentes si la solicitud ya fue rendida/cerrada
-  if(['rendido','observado','cerrado'].includes(currentSol.status)){
-    try{
-      const al = await api({action:'getAlertas', id:currentSol.id});
-      if(al && !al.error){ alertasActuales = al; renderRendicion(); }
-    }catch(e){}
+  // Cargar alertas guardadas via then/catch (irRendicion no es async)
+  if(ROL==='tesorero' && ['rendido','observado','cerrado'].includes(currentSol.status)){
+    api({action:'getAlertas', id:currentSol.id})
+      .then(al=>{ if(al && !al.error){ alertasActuales=al; currentSol.alertas=al; renderRendicion(); } })
+      .catch(()=>{});
   }
 }
 
@@ -1200,15 +1232,18 @@ function renderRendicion(){
       </div>
     </div>
 
-    ${isT&&currentSol.alertas?`
-    <div class="card" style="border-color:${currentSol.alertas.tieneAlertas?'var(--wa-b)':'var(--ok-b)'};background:${currentSol.alertas.tieneAlertas?'var(--wa-bg)':'var(--ok-bg)'}">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem">
-        <i class="ti ${currentSol.alertas.tieneAlertas?'ti-alert-triangle':'ti-robot'}" style="font-size:18px;color:${currentSol.alertas.tieneAlertas?'var(--wa-t)':'var(--ok-t)'}"></i>
-        <div style="font-weight:500;font-size:13px;color:${currentSol.alertas.tieneAlertas?'var(--wa-t)':'var(--ok-t)'}">
-          Análisis IA ${currentSol.alertas.tieneAlertas?'— Se detectaron observaciones':'— Sin observaciones'}
+    ${isT?`
+    <div class="card" id="card-ia-analisis" style="border-color:${currentSol.alertas?(currentSol.alertas.tieneAlertas?'var(--wa-b)':'var(--ok-b)'):'var(--border)'};background:${currentSol.alertas?(currentSol.alertas.tieneAlertas?'var(--wa-bg)':'var(--ok-bg)'):'var(--bg2)'}">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:${currentSol.alertas?'.75rem':'0'}">
+        <div style="display:flex;align-items:center;gap:8px">
+          <i class="ti ${currentSol.alertas?(currentSol.alertas.tieneAlertas?'ti-alert-triangle':'ti-robot'):'ti-robot'}" style="font-size:18px;color:${currentSol.alertas?(currentSol.alertas.tieneAlertas?'var(--wa-t)':'var(--ok-t)'):'var(--text2)'}"></i>
+          <div style="font-weight:500;font-size:13px;color:${currentSol.alertas?(currentSol.alertas.tieneAlertas?'var(--wa-t)':'var(--ok-t)'):'var(--text2)'}">
+            ${currentSol.alertas?(currentSol.alertas.tieneAlertas?'Análisis IA — Se detectaron observaciones':'Análisis IA — Sin observaciones'):'Análisis IA no ejecutado'}
+          </div>
         </div>
+        ${!currentSol.alertas?`<button class="btn in" style="font-size:12px;padding:5px 12px" onclick="ejecutarAnalisisIA()"><i class="ti ti-robot"></i> Analizar ahora</button>`:''}
       </div>
-      <div style="font-size:13px;white-space:pre-line;color:var(--text)">${currentSol.alertas.resumen||'Sin detalle'}</div>
+      ${currentSol.alertas?`<div style="font-size:13px;white-space:pre-line;color:var(--text)">${currentSol.alertas.resumen||'Sin detalle'}</div>`:''}
     </div>`:''}
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
