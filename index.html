@@ -454,7 +454,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbwfWEPjaik3z1-ncgudtkBNeA68YcsJA7TA-s-nbtkcr_fmzv8K3c3oI5pd56X-0D8J9w/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycbxDcbcsiyHRTz5O3M7vo8MNTwvSqvRzRvAn90TIbxiaSyyBoWbQVoK-lwRDxN7-Le6zmQ/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -494,64 +494,52 @@ let dashChart=null;
 const TODAY=new Date(); TODAY.setHours(0,0,0,0);
 
 // ── API JSONP ──────────────────────────────────────────────────
-// POST via form+iframe — único método que funciona cross-origin sin CORS
+// POST via form+iframe con JSONP callback para leer la respuesta
 function apiPost(params){
   return new Promise((resolve, reject) => {
-    const cbName = 'iframePost_' + Date.now();
-    const iframeId = 'iframe_' + cbName;
+    // Usar JSONP callback para que el Apps Script devuelva la respuesta via script tag
+    const cb = 'postCb_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+    const iframeId = 'iframe_' + cb;
 
-    // Crear iframe oculto
+    window[cb] = (data) => {
+      delete window[cb];
+      try { document.body.removeChild(iframe); } catch(e) {}
+      try { document.body.removeChild(form); } catch(e) {}
+      clearTimeout(timeout);
+      if(data && data.error) reject(new Error(data.error));
+      else resolve(data);
+    };
+
     const iframe = document.createElement('iframe');
     iframe.name = iframeId;
     iframe.id = iframeId;
     iframe.style.display = 'none';
     document.body.appendChild(iframe);
 
-    // Crear form que apunta al iframe
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = AS_URL;
     form.target = iframeId;
     form.style.display = 'none';
 
-    // Pasar todos los params como campo oculto (JSON en un solo campo)
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'payload';
-    input.value = JSON.stringify(params);
-    form.appendChild(input);
-
-    // Callback para cuando el iframe cargue la respuesta
-    const timeout = setTimeout(() => {
-      cleanup();
-      reject(new Error('Timeout en apiPost'));
-    }, 30000);
-
-    function cleanup() {
-      clearTimeout(timeout);
-      try { document.body.removeChild(iframe); } catch(e) {}
-      try { document.body.removeChild(form); } catch(e) {}
-    }
-
-    // El Apps Script devuelve JSONP con el callback en la URL
-    // Para el POST via form, el Apps Script devuelve JSON plano
-    iframe.onload = () => {
-      try {
-        const txt = iframe.contentDocument
-          ? iframe.contentDocument.body.innerText
-          : iframe.contentWindow.document.body.innerText;
-        const data = JSON.parse(txt);
-        cleanup();
-        resolve(data);
-      } catch(e) {
-        cleanup();
-        reject(new Error('Error parseando respuesta: ' + e.message));
-      }
-    };
-
-    iframe.onerror = () => { cleanup(); reject(new Error('Error en iframe POST')); };
+    // Payload como campo oculto
+    const inp = document.createElement('input');
+    inp.type = 'hidden';
+    inp.name = 'payload';
+    // Incluir callback en el payload para que el script lo use
+    const p = Object.assign({}, params, {callback: cb});
+    inp.value = JSON.stringify(p);
+    form.appendChild(inp);
 
     document.body.appendChild(form);
+
+    const timeout = setTimeout(() => {
+      delete window[cb];
+      try { document.body.removeChild(iframe); } catch(e) {}
+      try { document.body.removeChild(form); } catch(e) {}
+      reject(new Error('Timeout guardando imagen'));
+    }, 45000);
+
     form.submit();
   });
 }
@@ -1565,6 +1553,12 @@ function renderGastoTable(){
             </select>
           </div>
           <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">N° comprobante</label>
+            <input style="width:100%;font-size:13px;padding:6px 8px"
+              value="${g.nroComprobante||''}" placeholder="Ej: 0001-00012345"
+              oninput="gastoRows[${i}].nroComprobante=this.value">
+          </div>
+          <div>
             <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Importe ($)</label>
             <input type="number" inputmode="decimal" style="width:100%;font-size:13px;padding:6px 8px"
               value="${g.importe||''}" placeholder="0"
@@ -1629,69 +1623,75 @@ function simScan(){
 
 async function procesarScan(file){
   if(!file) return;
-  if(!file.type.startsWith('image/')){
-    showToast('Seleccioná una imagen','wa');
-    return;
-  }
+  if(!file.type.startsWith('image/')){showToast('Seleccioná una imagen','wa');return;}
 
   showToast('Procesando...','in');
   const mediaType = 'image/jpeg';
   const nroComp = gastoRows.length + 1;
   const nombre = 'comp_' + nroComp + '_' + Date.now() + '.jpg';
-  let nuevoGasto = { tipo:'Ticket / Factura C', rubro:172, detalle:'', importe:0, driveUrl:'', nroComprobante:'' };
+  let nuevoGasto = {tipo:'Ticket / Factura C', rubro:172, detalle:'', importe:0, driveUrl:'', nroComprobante:''};
 
   try {
-    // Preview local
-    const base64Preview = await resizeImage(file, 600, 0.6);
-    nuevoGasto.preview = 'data:image/jpeg;base64,' + base64Preview;
+    const base64Full = await resizeImage(file, 1000, 0.75);
+    nuevoGasto.preview = 'data:image/jpeg;base64,' + await resizeImage(file, 400, 0.5);
 
-    // Imagen en buena calidad para Drive y Claude (1200px)
-    const base64Full = await resizeImage(file, 1200, 0.8);
-
-    showToast('Guardando en Drive y leyendo con IA...','in');
-
-    // Una sola llamada via iframe POST: guarda en Drive Y lee con Claude
-    const r = await apiPost({
-      action:      'escanearYGuardar',
-      imageBase64: base64Full,
-      mediaType:   mediaType,
-      nombre:      nombre,
-      solicitudId: currentSol.id,
-      solicitante: currentSol.solicitante,
-      fechaSalida: currentSol.fechaSalida,
-      folderId:    currentSol.folderId || ''
-    });
-
-    const rubroMap = {
-      'Viáticos y Refrigerios':172,'Alojamiento':174,'Combustible Rodados':138,
-      'Pasajes y Movilidad':170,'Gastos Varios':192,'Teléfono e Internet':180,
-      'Seguros':166,'Mantenimiento Rodados':144
-    };
-
-    if(r && r.driveUrl) {
-      nuevoGasto.driveUrl = r.driveUrl;
-      if(r.folderId && !currentSol.folderId) {
-        currentSol.folderId = r.folderId;
-        api({action:'updateStatus', id:currentSol.id, status:currentSol.status,
-          usuario:currentSol.solicitante, folderId:r.folderId}).catch(()=>{});
+    // Paso 1: guardar en Drive via iframe POST
+    showToast('Guardando en Drive...','in');
+    try {
+      const dr = await apiPost({
+        action:'guardarComprobante',
+        folderId: currentSol.folderId||'',
+        solicitudId: currentSol.id,
+        solicitante: currentSol.solicitante,
+        fechaSalida: currentSol.fechaSalida,
+        imageBase64: base64Full,
+        mediaType: mediaType,
+        nombre: nombre
+      });
+      if(dr && dr.ok){
+        nuevoGasto.driveUrl = dr.driveUrl||'';
+        if(dr.folderId && !currentSol.folderId){
+          currentSol.folderId = dr.folderId;
+          api({action:'updateStatus',id:currentSol.id,status:currentSol.status,
+            usuario:currentSol.solicitante,folderId:dr.folderId}).catch(()=>{});
+        }
+        showToast('Guardado en Drive ✓. Leyendo con IA...','ok');
       }
-    }
+    } catch(e){ console.warn('Drive:', e.message); }
 
-    if(r && r.tipo && r.importe) {
-      nuevoGasto.tipo           = r.tipo;
-      nuevoGasto.rubro          = rubroMap[r.rubro_sugerido] || 172;
-      nuevoGasto.detalle        = r.detalle || '';
-      nuevoGasto.importe        = parseFloat(r.importe) || 0;
-      nuevoGasto.nroComprobante = r.nroComprobante || '';
-      showToast('Leído: ' + fmt(nuevoGasto.importe) + (r.driveUrl?' ✓ Drive':''), 'ok');
-    } else if(r && r.driveUrl) {
-      showToast('Guardado en Drive ✓. Completá los datos manualmente.','wa');
-    } else {
-      showToast('Completá los datos manualmente.','wa');
-    }
+    // Paso 2: IA via JSONP con imagen comprimida (entra en URL)
+    try {
+      const base64Tiny = await resizeImage(file, 250, 0.4);
+      if(base64Tiny.length < 8000){
+        const r = await api({
+          action:'escanearComprobante',
+          imageBase64: base64Tiny,
+          mediaType: mediaType
+        });
+        const rubroMap = {
+          'Viaticos y Refrigerios':172,'Viáticos y Refrigerios':172,
+          'Alojamiento':174,'Combustible Rodados':138,
+          'Pasajes y Movilidad':170,'Gastos Varios':192,
+          'Telefono e Internet':180,'Teléfono e Internet':180,
+          'Seguros':166,'Mantenimiento Rodados':144
+        };
+        if(r && !r.error && r.importe){
+          nuevoGasto.tipo           = r.tipo || nuevoGasto.tipo;
+          nuevoGasto.rubro          = rubroMap[r.rubro_sugerido] || 172;
+          nuevoGasto.detalle        = r.detalle || '';
+          nuevoGasto.importe        = parseFloat(r.importe) || 0;
+          nuevoGasto.nroComprobante = r.nroComprobante || '';
+          showToast('Leído: ' + fmt(nuevoGasto.importe), 'ok');
+        } else {
+          showToast('Guardado en Drive. Completá los datos.','wa');
+        }
+      } else {
+        showToast('Guardado en Drive. Completá los datos.','wa');
+      }
+    } catch(e){ showToast('Guardado. Completá los datos manualmente.','wa'); }
 
-  } catch(e) {
-    showToast('Error: ' + e.message + '. Completá manualmente.','wa');
+  } catch(e){
+    showToast('No se pudo procesar. Completá manualmente.','wa');
     console.warn('procesarScan:', e.message);
   }
 
@@ -1729,10 +1729,8 @@ function resizeImage(file, maxWidth, quality){
 // API key manejada en el Apps Script
 async function _enviarRend(){
   if(!gastoRows.length){showToast('Cargá al menos un comprobante','wa');return;}
-
-  // Deshabilitar botones de envío para evitar doble clic
-  const btns = document.querySelectorAll('.btn.pr');
-  btns.forEach(b=>{ b.disabled=true; b.dataset.orig=b.innerHTML; b.innerHTML='<div class="spin"></div> Enviando...'; });
+  const btn = document.querySelector('.btn.pr[onclick*="enviar"]') || document.querySelector('.btn.pr');
+  if(btn){btn.disabled=true; btn.innerHTML='<div class="spin"></div> Enviando...';}
 
   const tot=total(currentSol),gasAct=gastoRows.reduce((a,g)=>a+(parseFloat(g.importe)||0),0),saldo=tot-gasAct;
   try{
@@ -1770,9 +1768,7 @@ async function _enviarRend(){
     renderRendicion();
   }catch(e){
     showToast('Error al enviar: '+e.message,'er');
-  } finally {
-    const btns2 = document.querySelectorAll('.btn.pr');
-    btns2.forEach(b=>{ b.disabled=false; if(b.dataset.orig) b.innerHTML=b.dataset.orig; });
+    if(btn){btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Enviar rendición al tesorero';}
   }
 }
 function enviarRendicion(){_enviarRend();}
