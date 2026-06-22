@@ -681,6 +681,7 @@ function parseSol(s){
     autorizante:s.Autorizante||'',
     emailAutorizante:s.EmailAutorizante||'',
     folderId:s.FolderDrive||'',
+    alertas: s.Alertas ? (()=>{try{return JSON.parse(s.Alertas);}catch(e){return null;}})() : null,
     gastos:[]
   };
 }
@@ -1199,6 +1200,16 @@ function renderRendicion(){
       </div>
     </div>
 
+    ${isT&&currentSol.alertas?`
+    <div class="card" style="border-color:${currentSol.alertas.tieneAlertas?'var(--wa-b)':'var(--ok-b)'};background:${currentSol.alertas.tieneAlertas?'var(--wa-bg)':'var(--ok-bg)'}">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem">
+        <i class="ti ${currentSol.alertas.tieneAlertas?'ti-alert-triangle':'ti-robot'}" style="font-size:18px;color:${currentSol.alertas.tieneAlertas?'var(--wa-t)':'var(--ok-t)'}"></i>
+        <div style="font-weight:500;font-size:13px;color:${currentSol.alertas.tieneAlertas?'var(--wa-t)':'var(--ok-t)'}">
+          Análisis IA ${currentSol.alertas.tieneAlertas?'— Se detectaron observaciones':'— Sin observaciones'}
+        </div>
+      </div>
+      <div style="font-size:13px;white-space:pre-line;color:var(--text)">${currentSol.alertas.resumen||'Sin detalle'}</div>
+    </div>`:''}
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
         <div class="ctitle" style="margin-bottom:0">Comprobantes</div>
