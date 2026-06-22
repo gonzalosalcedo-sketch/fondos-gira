@@ -1564,14 +1564,14 @@ function renderGastoTable(){
               value="${g.importe||''}" placeholder="0"
               oninput="gastoRows[${i}].importe=parseFloat(this.value)||0;updR()">
           </div>
+          <div>
+            <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Rubro contable</label>
+            <select style="width:100%;font-size:13px;padding:6px 8px" onchange="gastoRows[${i}].rubro=parseInt(this.value);updR()">
+              ${RUBROS.map(r=>`<option value="${r.cod}"${g.rubro===r.cod?' selected':''}>${r.desc}</option>`).join('')}
+            </select>
+          </div>
         </div>
         <div style="margin-bottom:8px">
-          <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Rubro contable</label>
-          <select style="width:100%;font-size:13px;padding:6px 8px" onchange="gastoRows[${i}].rubro=parseInt(this.value);updR()">
-            ${RUBROS.map(r=>`<option value="${r.cod}"${g.rubro===r.cod?' selected':''}>${r.desc}</option>`).join('')}
-          </select>
-        </div>
-        <div>
           <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Detalle / Descripción</label>
           <input style="width:100%;font-size:13px;padding:6px 8px"
             value="${g.detalle}" placeholder="Ej: Almuerzo reunión cliente"
@@ -1625,18 +1625,23 @@ async function procesarScan(file){
   if(!file) return;
   if(!file.type.startsWith('image/')){showToast('Seleccioná una imagen','wa');return;}
 
-  showToast('Procesando...','in');
   const mediaType = 'image/jpeg';
   const nroComp = gastoRows.length + 1;
   const nombre = 'comp_' + nroComp + '_' + Date.now() + '.jpg';
-  let nuevoGasto = {tipo:'Ticket / Factura C', rubro:172, detalle:'', importe:0, driveUrl:'', nroComprobante:''};
+
+  // Agregar la card inmediatamente para que el usuario vea que se está procesando
+  let nuevoGasto = {tipo:'Ticket / Factura C', rubro:172, detalle:'Procesando...', importe:0, driveUrl:'', nroComprobante:''};
+  const idxGasto = gastoRows.length;
+  gastoRows.push(nuevoGasto);
 
   try {
     const base64Full = await resizeImage(file, 1000, 0.75);
     nuevoGasto.preview = 'data:image/jpeg;base64,' + await resizeImage(file, 400, 0.5);
-
-    // Paso 1: guardar en Drive via iframe POST
+    nuevoGasto.detalle = '';
+    renderGastoTable();
     showToast('Guardando en Drive...','in');
+
+    // Drive via iframe POST
     try {
       const dr = await apiPost({
         action:'guardarComprobante',
@@ -1655,11 +1660,12 @@ async function procesarScan(file){
           api({action:'updateStatus',id:currentSol.id,status:currentSol.status,
             usuario:currentSol.solicitante,folderId:dr.folderId}).catch(()=>{});
         }
+        renderGastoTable();
         showToast('Guardado en Drive ✓. Leyendo con IA...','ok');
       }
-    } catch(e){ console.warn('Drive:', e.message); }
+    } catch(e){ console.warn('Drive:', e.message); showToast('Drive falló. Leyendo con IA...','wa'); }
 
-    // Paso 2: IA via JSONP con imagen comprimida (entra en URL)
+    // IA via JSONP con imagen comprimida
     try {
       const base64Tiny = await resizeImage(file, 250, 0.4);
       if(base64Tiny.length < 8000){
@@ -1681,22 +1687,21 @@ async function procesarScan(file){
           nuevoGasto.detalle        = r.detalle || '';
           nuevoGasto.importe        = parseFloat(r.importe) || 0;
           nuevoGasto.nroComprobante = r.nroComprobante || '';
+          renderGastoTable();
           showToast('Leído: ' + fmt(nuevoGasto.importe), 'ok');
         } else {
-          showToast('Guardado en Drive. Completá los datos.','wa');
+          showToast('Guardado. Completá los datos.','wa');
         }
       } else {
         showToast('Guardado en Drive. Completá los datos.','wa');
       }
-    } catch(e){ showToast('Guardado. Completá los datos manualmente.','wa'); }
+    } catch(e){ showToast('Guardado. Completá manualmente.','wa'); }
 
   } catch(e){
-    showToast('No se pudo procesar. Completá manualmente.','wa');
-    console.warn('procesarScan:', e.message);
+    nuevoGasto.detalle = '';
+    renderGastoTable();
+    showToast('Error al procesar imagen.','wa');
   }
-
-  gastoRows.push(nuevoGasto);
-  renderGastoTable();
 }
 
 
