@@ -1233,17 +1233,17 @@ function renderRendicion(){
     </div>
 
     ${isT?`
-    <div class="card" id="card-ia-analisis" style="border-color:${currentSol.alertas?(currentSol.alertas.tieneAlertas?'var(--wa-b)':'var(--ok-b)'):'var(--border)'};background:${currentSol.alertas?(currentSol.alertas.tieneAlertas?'var(--wa-bg)':'var(--ok-bg)'):'var(--bg2)'}">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:${currentSol.alertas?'.75rem':'0'}">
+    <div class="card" id="card-ia-analisis" style="border-color:${currentSol.alertas?(currentSol.alertas.tieneAlertas?'var(--wa-b)':'var(--ok-b)'):'var(--border)'};background:${currentSol.alertas?(currentSol.alertas.tieneAlertas?'var(--wa-bg)':'var(--ok-bg)'):'var(--bg)'}">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:.5rem">
         <div style="display:flex;align-items:center;gap:8px">
           <i class="ti ${currentSol.alertas?(currentSol.alertas.tieneAlertas?'ti-alert-triangle':'ti-robot'):'ti-robot'}" style="font-size:18px;color:${currentSol.alertas?(currentSol.alertas.tieneAlertas?'var(--wa-t)':'var(--ok-t)'):'var(--text2)'}"></i>
           <div style="font-weight:500;font-size:13px;color:${currentSol.alertas?(currentSol.alertas.tieneAlertas?'var(--wa-t)':'var(--ok-t)'):'var(--text2)'}">
-            ${currentSol.alertas?(currentSol.alertas.tieneAlertas?'Análisis IA — Se detectaron observaciones':'Análisis IA — Sin observaciones'):'Análisis IA no ejecutado'}
+            ${currentSol.alertas?(currentSol.alertas.tieneAlertas?'Análisis IA — Se detectaron observaciones':'Análisis IA — Sin observaciones'):'Análisis IA — pendiente'}
           </div>
         </div>
         ${!currentSol.alertas?`<button class="btn in" style="font-size:12px;padding:5px 12px" onclick="ejecutarAnalisisIA()"><i class="ti ti-robot"></i> Analizar ahora</button>`:''}
       </div>
-      ${currentSol.alertas?`<div style="font-size:13px;white-space:pre-line;color:var(--text)">${currentSol.alertas.resumen||'Sin detalle'}</div>`:''}
+      ${currentSol.alertas?`<div style="font-size:13px;white-space:pre-line;color:var(--text)">${currentSol.alertas.resumen||'Sin detalle'}</div>`:'<div style="font-size:12px;color:var(--text2)">La rendición aún no fue analizada por la IA.</div>'}
     </div>`:''}
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
