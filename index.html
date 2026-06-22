@@ -1751,13 +1751,6 @@ async function _enviarRend(){
     }));
 
     const jsonGastos = JSON.stringify(gastosParaGuardar);
-    // Verificar tamaño antes de enviar
-    if(jsonGastos.length > 5000){
-      showToast('Demasiados comprobantes para enviar de una vez. Reducí la cantidad o usá Guardar primero.','wa');
-      if(btn){ btn.disabled=false; btn.innerHTML='<i class="ti ti-send"></i> Enviar rendición al tesorero'; }
-      return;
-    }
-
     await api({action:'saveGastos',id:currentSol.id,gastos:jsonGastos,usuario:currentSol.solicitante});
     await api({action:'updateStatus',id:currentSol.id,status:'rendido',usuario:currentSol.solicitante});
     await api({action:'sendMail',tipo:'rendicion_enviada',id:currentSol.id,
