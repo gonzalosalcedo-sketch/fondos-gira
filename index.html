@@ -397,9 +397,20 @@ table.gt tr:last-child td{border-bottom:none}
         <div class="fi"><label>Email</label><input type="email" id="nu-email" placeholder="correo@cuencadelsur.com"></div>
         <div class="fi"><label>Rol</label>
           <select id="nu-rol">
-            <option value="vendedor">Vendedor</option>
+            <option value="vendedor">Solicitante</option>
             <option value="autorizante">Autorizante</option>
             <option value="tesorero">Tesorero</option>
+          </select>
+        </div>
+        <div class="fi"><label>Área / Sector</label>
+          <select id="nu-area">
+            <option value="">— Sin área —</option>
+            <option value="Ventas">Ventas</option>
+            <option value="Logística">Logística</option>
+            <option value="Operaciones">Operaciones</option>
+            <option value="Capital Humano">Capital Humano</option>
+            <option value="Compras">Compras</option>
+            <option value="Administración">Administración</option>
           </select>
         </div>
         <div class="fi"><label>Clave inicial</label><input type="text" id="nu-clave" placeholder="nombre2026"></div>
@@ -454,7 +465,7 @@ table.gt tr:last-child td{border-bottom:none}
 </div>
 
 <script>
-const AS_URL  = 'https://script.google.com/macros/s/AKfycbxDcbcsiyHRTz5O3M7vo8MNTwvSqvRzRvAn90TIbxiaSyyBoWbQVoK-lwRDxN7-Le6zmQ/exec';
+const AS_URL  = 'https://script.google.com/macros/s/AKfycbzyXgXioOt9neQ1QPqZ1rjWxITG6LPv8jSaXVC57yCsW65m70ZO1HIMCuiqtpInsGWZ2w/exec';
 const APP_URL = 'https://gonzalosalcedo-sketch.github.io/fondos-gira';
 
 const RUBROS=[
@@ -2102,7 +2113,8 @@ function renderUsuariosList(){
     <tbody>${usuariosDB.map((u,i)=>`<tr>
       <td>${u.Nombre||'—'}</td>
       <td style="font-size:12px;color:var(--text2)">${u.Email||'—'}</td>
-      <td><span class="sb ${rolColor[u.Rol]||'s-borrador'}" style="font-size:11px">${u.Rol||'vendedor'}</span></td>
+      <td><span class="sb ${rolColor[u.Rol]||'s-borrador'}" style="font-size:11px">${u.Rol==='vendedor'?'Solicitante':u.Rol==='autorizante'?'Autorizante':'Tesorero'}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${u.Area||'—'}</td>
       <td><span style="font-size:12px;color:${u.Activo==='NO'?'var(--er-t)':'var(--ok-t)'}">${u.Activo==='NO'?'Inactivo':'Activo'}</span></td>
       <td><button class="btn" style="padding:3px 8px;font-size:12px" onclick="toggleUsuario(${i})">${u.Activo==='NO'?'Activar':'Desactivar'}</button></td>
     </tr>`).join('')}</tbody>
@@ -2179,7 +2191,7 @@ function renderDashboard(){
       <div class="fg3">
         <div class="fi"><label>Desde</label><input type="date" value="${filterDash.desde}" onchange="filterDash.desde=this.value;renderDashboard()"></div>
         <div class="fi"><label>Hasta</label><input type="date" value="${filterDash.hasta}" onchange="filterDash.hasta=this.value;renderDashboard()"></div>
-        <div class="fi"><label>Vendedor</label>
+        <div class="fi"><label>Solicitante</label>
           <select onchange="filterDash.usuario=this.value;renderDashboard()">
             <option value="">Todos</option>
             ${usuarios.map(u=>`<option${filterDash.usuario===u?' selected':''}>${u}</option>`).join('')}
