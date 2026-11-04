@@ -384,15 +384,28 @@ table.gt tr:last-child td{border-bottom:none}
 
 <!-- OVERLAY GESTIÓN USUARIOS -->
 <div class="ov" id="ov-usuarios">
-  <div class="ovbox" style="width:580px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+  <div class="ovbox" style="width:min(1150px,96vw);max-width:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:1rem">
       <div style="font-weight:500;font-size:15px"><i class="ti ti-users"></i> Gestión de usuarios</div>
-      <button class="btn" onclick="closeOv('ov-usuarios')"><i class="ti ti-x"></i></button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="us-buscar" placeholder="Buscar por nombre, email, rol o área..." oninput="renderUsuariosList()" style="padding:7px 10px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg);color:inherit;font:inherit;font-size:13px;min-width:230px">
+        <button class="btn ok" onclick="abrirNuevoUsuario()"><i class="ti ti-user-plus"></i> Agregar usuario</button>
+        <button class="btn" onclick="closeOv('ov-usuarios')" title="Cerrar"><i class="ti ti-x"></i></button>
+      </div>
     </div>
-    <div id="usuarios-lista" style="margin-bottom:1rem;max-height:280px;overflow-y:auto"></div>
-    <div style="border-top:0.5px solid var(--border);padding-top:1rem">
-      <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:.75rem">AGREGAR USUARIO</div>
-      <div class="fg" style="margin-bottom:.75rem">
+    <div id="usuarios-resumen" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:1rem"></div>
+    <div id="usuarios-lista" style="max-height:62vh;overflow:auto"></div>
+  </div>
+</div>
+
+<!-- OVERLAY NUEVO USUARIO -->
+<div class="ov" id="ov-nuevo-usuario">
+  <div class="ovbox" style="width:min(560px,96vw)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+      <div style="font-weight:500;font-size:15px"><i class="ti ti-user-plus"></i> Agregar usuario</div>
+      <button class="btn" onclick="closeOv('ov-nuevo-usuario')" title="Cerrar"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="fg" style="margin-bottom:1rem">
         <div class="fi"><label>Nombre</label><input id="nu-nombre" placeholder="Nombre completo"></div>
         <div class="fi"><label>Email</label><input type="email" id="nu-email" placeholder="correo@cuencadelsur.com"></div>
         <div class="fi"><label>Rol</label>
@@ -415,6 +428,8 @@ table.gt tr:last-child td{border-bottom:none}
         </div>
         <div class="fi"><label>Clave inicial</label><input type="text" id="nu-clave" placeholder="nombre2026"></div>
       </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="closeOv('ov-nuevo-usuario')">Cancelar</button>
       <button class="btn ok" onclick="agregarUsuario()"><i class="ti ti-plus"></i> Agregar usuario</button>
     </div>
   </div>
@@ -430,6 +445,7 @@ table.gt tr:last-child td{border-bottom:none}
   <div class="hdr-right">
     <span style="font-size:12px;color:var(--text2)" id="hdr-user"></span>
     <button class="btn" onclick="openOv('ov-clave')" title="Cambiar contraseña"><i class="ti ti-lock"></i> Mi clave</button>
+    <button class="btn" id="btn-refresh" onclick="refrescar()" title="Actualizar datos"><i class="ti ti-refresh"></i> Actualizar</button>
     <button class="btn" id="btn-usuarios" style="display:none" onclick="abrirUsuarios()"><i class="ti ti-users"></i> Usuarios</button>
     <button class="btn" id="btn-cfg" style="display:none" onclick="openCfg()"><i class="ti ti-settings"></i> Config</button>
     <button class="btn pr" id="btn-nueva" style="display:none" onclick="nuevaSolicitud()"><i class="ti ti-plus"></i> Nueva gira</button>
@@ -749,9 +765,29 @@ function showTab(name){
 }
 
 // ── ALERTA VENCIMIENTO ─────────────────────────────────────────
+// ── ACTUALIZAR ────────────────────────────────────────────────
+async function refrescar(){
+  const b=document.getElementById('btn-refresh');
+  if(!b||b.disabled)return;
+  b.disabled=true;b.innerHTML='<div class="spin"></div> Actualizando...';
+  const activo=((document.querySelector('.panel.on')||{}).id||'').replace('panel-','');
+  try{
+    await cargarDatos();
+    if(['seguimiento','tesoreria','dashboard'].includes(activo))showTab(activo);
+    showToast('Datos actualizados.','ok');
+  }finally{
+    b.disabled=false;b.innerHTML='<i class="ti ti-refresh"></i> Actualizar';
+  }
+}
+
+let _vencMostradoPara=null; // la alerta se muestra una vez por sesión de usuario
 function checkVencimientos(){
-  const venc=solicitudes.filter(s=>estaVencida(s));
+  const mail=((USER&&USER.email)||'').toLowerCase();
+  if(_vencMostradoPara===mail)return;
+  // Tesorero (administrador) ve todas; el resto solo las propias
+  const venc=solicitudes.filter(s=>estaVencida(s)&&(ROL==='tesorero'||(s.email||'').toLowerCase()===mail));
   if(!venc.length)return;
+  _vencMostradoPara=mail;
   document.getElementById('alerta-dias').textContent=CFG.diasLimite;
   document.getElementById('alerta-lista').innerHTML=venc.map(s=>`
     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:0.5px solid var(--er-b);border-radius:var(--r);margin-bottom:8px;background:var(--bg)">
@@ -2108,35 +2144,66 @@ async function abrirUsuarios(){
     renderUsuariosList();
   }catch(e){document.getElementById('usuarios-lista').innerHTML=`<p style="color:var(--er-t)">Error: ${e.message}</p>`;}
 }
+const _clavesVisibles=new Set();
+const escU=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function renderUsuariosList(){
   const el=document.getElementById('usuarios-lista');
-  if(!usuariosDB.length){el.innerHTML='<p style="font-size:13px;color:var(--text2)">No hay usuarios.</p>';return;}
+  const resEl=document.getElementById('usuarios-resumen');
+  const rolLbl={vendedor:'Solicitante',autorizante:'Autorizante',tesorero:'Tesorero'};
   const rolColor={vendedor:'s-rendido',autorizante:'s-auth_pendiente',tesorero:'s-aprobado'};
-  el.innerHTML=`<table class="gt" style="font-size:13px">
-    <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th></th></tr></thead>
-    <tbody>${usuariosDB.map((u,i)=>`<tr>
-      <td>${u.Nombre||'—'}</td>
-      <td style="font-size:12px;color:var(--text2)">${u.Email||'—'}</td>
-      <td><span class="sb ${rolColor[u.Rol]||'s-borrador'}" style="font-size:11px">${u.Rol==='vendedor'?'Solicitante':u.Rol==='autorizante'?'Autorizante':'Tesorero'}</span></td>
-      <td style="font-size:12px;color:var(--text2)">${u.Area||'—'}</td>
+  const activos=usuariosDB.filter(u=>u.Activo!=='NO').length;
+  const tile=(lbl,val,color)=>`<div style="border:0.5px solid var(--border);border-radius:var(--r);padding:10px 12px;background:var(--bg2)">
+      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.03em">${lbl}</div>
+      <div style="font-size:20px;font-weight:500;${color?'color:'+color:''}">${val}</div></div>`;
+  if(resEl)resEl.innerHTML=tile('Usuarios',usuariosDB.length)+tile('Activos',activos,'var(--ok-t)')+tile('Inactivos',usuariosDB.length-activos,'var(--er-t)')
+    +['vendedor','autorizante','tesorero'].map(r=>tile(rolLbl[r]+'s',usuariosDB.filter(u=>u.Rol===r).length)).join('');
+  if(!usuariosDB.length){el.innerHTML='<p style="font-size:13px;color:var(--text2)">No hay usuarios.</p>';return;}
+  const q=((document.getElementById('us-buscar')||{}).value||'').trim().toLowerCase();
+  const lista=usuariosDB.map((u,i)=>({u,i})).filter(({u})=>!q||[u.Nombre,u.Email,u.Area,rolLbl[u.Rol]].some(x=>String(x||'').toLowerCase().includes(q)));
+  if(!lista.length){el.innerHTML='<p style="font-size:13px;color:var(--text2)">Sin resultados para la búsqueda.</p>';return;}
+  const bs='padding:3px 7px;font-size:12px';
+  el.innerHTML=`<table class="gt" style="font-size:13px;width:100%">
+    <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Área</th><th>Clave</th><th>Estado</th><th></th></tr></thead>
+    <tbody>${lista.map(({u,i})=>{const ver=_clavesVisibles.has(i);return `<tr>
+      <td style="font-weight:500">${escU(u.Nombre)||'—'}</td>
+      <td style="font-size:12px;color:var(--text2)">${escU(u.Email)||'—'}</td>
+      <td><span class="sb ${rolColor[u.Rol]||'s-borrador'}" style="font-size:11px">${rolLbl[u.Rol]||escU(u.Rol)}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${escU(u.Area)||'—'}</td>
+      <td style="white-space:nowrap">
+        <code style="font-size:12px;margin-right:4px">${ver?(escU(u.Clave)||'(sin clave)'):'••••••'}</code>
+        <button class="btn" style="${bs}" title="${ver?'Ocultar':'Ver'} clave" onclick="verClaveUsuario(${i})"><i class="ti ti-eye${ver?'-off':''}"></i></button>
+        <button class="btn" style="${bs}" title="Copiar clave" onclick="copiarClaveUsuario(${i})"><i class="ti ti-copy"></i></button>
+      </td>
       <td><span style="font-size:12px;color:${u.Activo==='NO'?'var(--er-t)':'var(--ok-t)'}">${u.Activo==='NO'?'Inactivo':'Activo'}</span></td>
-      <td><button class="btn" style="padding:3px 8px;font-size:12px" onclick="toggleUsuario(${i})">${u.Activo==='NO'?'Activar':'Desactivar'}</button></td>
-    </tr>`).join('')}</tbody>
+      <td><button class="btn" style="${bs}" onclick="toggleUsuario(${i})">${u.Activo==='NO'?'Activar':'Desactivar'}</button></td>
+    </tr>`;}).join('')}</tbody>
   </table>`;
+}
+function verClaveUsuario(i){_clavesVisibles.has(i)?_clavesVisibles.delete(i):_clavesVisibles.add(i);renderUsuariosList();}
+function copiarClaveUsuario(i){
+  const c=(usuariosDB[i]&&usuariosDB[i].Clave)||'';
+  if(!c){showToast('Este usuario no tiene clave cargada.','wa');return;}
+  navigator.clipboard.writeText(String(c)).then(()=>showToast('Clave copiada.','ok'),()=>showToast('No se pudo copiar.','er'));
+}
+function abrirNuevoUsuario(){
+  ['nu-nombre','nu-email','nu-clave'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  const a=document.getElementById('nu-area');if(a)a.value='';
+  openOv('ov-nuevo-usuario');
+  setTimeout(()=>{const n=document.getElementById('nu-nombre');if(n)n.focus();},50);
 }
 async function agregarUsuario(){
   const nombre=document.getElementById('nu-nombre').value.trim();
   const email=document.getElementById('nu-email').value.trim().toLowerCase();
   const rol=document.getElementById('nu-rol').value;
+  const area=(document.getElementById('nu-area')||{}).value||'';
   const clave=document.getElementById('nu-clave').value.trim()||'cuenca2026';
   if(!nombre||!email){showToast('Completá nombre y email','wa');return;}
+  if(usuariosDB.some(u=>(u.Email||'').toLowerCase()===email)){showToast('Ya existe un usuario con ese email.','wa');return;}
   try{
-    await api({action:'saveUsuario',nombre,email,rol,clave,activo:'SI'});
-    usuariosDB.push({Nombre:nombre,Email:email,Rol:rol,Activo:'SI'});
+    await api({action:'saveUsuario',nombre,email,rol,area,clave,activo:'SI'});
+    usuariosDB.push({Nombre:nombre,Email:email,Rol:rol,Area:area,Clave:clave,Activo:'SI'});
+    closeOv('ov-nuevo-usuario');
     renderUsuariosList();
-    document.getElementById('nu-nombre').value='';
-    document.getElementById('nu-email').value='';
-    document.getElementById('nu-clave').value='';
     showToast(`Usuario ${nombre} agregado.`,'ok');
   }catch(e){showToast('Error: '+e.message,'er');}
 }
@@ -2144,7 +2211,7 @@ async function toggleUsuario(i){
   const u=usuariosDB[i];
   const nuevo=u.Activo==='NO'?'SI':'NO';
   try{
-    await api({action:'saveUsuario',nombre:u.Nombre,email:u.Email,rol:u.Rol,clave:u.Clave||'',activo:nuevo});
+    await api({action:'saveUsuario',nombre:u.Nombre,email:u.Email,rol:u.Rol,area:u.Area||'',clave:u.Clave||'',activo:nuevo});
     usuariosDB[i].Activo=nuevo;renderUsuariosList();
     showToast(`Usuario ${nuevo==='SI'?'activado':'desactivado'}.`,'ok');
   }catch(e){showToast('Error: '+e.message,'er');}
