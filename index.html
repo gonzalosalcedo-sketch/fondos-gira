@@ -587,7 +587,29 @@ function apiPost(params){
 }
 
 
+// Llamadas al Apps Script con fetch SIN cookies (credentials:'omit').
+// Si el navegador tiene sesiones de Google abiertas, el JSONP manda esas cookies y
+// Apps Script puede fallar ("Error de red" en celulares; en incógnito funciona).
+// Si fetch falla por red, se reintenta con el método JSONP anterior.
 function api(params){
+  const qs=new URLSearchParams(Object.assign({},params,{_t:Date.now()})).toString();
+  const ctrl=new AbortController();
+  const to=setTimeout(()=>ctrl.abort(),20000);
+  let backendErr=null;
+  return fetch(AS_URL+'?'+qs,{credentials:'omit',cache:'no-store',signal:ctrl.signal})
+    .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.text();})
+    .then(t=>{
+      const data=JSON.parse(t);
+      if(data&&data.error){backendErr=new Error(data.error);throw backendErr;}
+      return data;
+    })
+    .catch(e=>{
+      if(backendErr)throw backendErr;
+      return apiJsonp(Object.assign({},params));
+    })
+    .finally(()=>clearTimeout(to));
+}
+function apiJsonp(params){
   return new Promise((resolve,reject)=>{
     const cb='cb_'+Date.now()+'_'+(++api._n||(api._n=1))+'_'+Math.floor(Math.random()*9999);
     window[cb]=(data)=>{
