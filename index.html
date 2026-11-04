@@ -435,6 +435,21 @@ table.gt tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<!-- OVERLAY RESTABLECER CLAVE -->
+<div class="ov" id="ov-reset-clave">
+  <div class="ovbox" style="width:min(460px,96vw)">
+    <div style="font-weight:500;font-size:15px;margin-bottom:.5rem"><i class="ti ti-key"></i> Restablecer clave</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1rem" id="rc-usuario"></div>
+    <div class="fi" style="margin-bottom:.5rem"><label>Clave nueva</label><input type="text" id="rc-clave" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter')confirmarResetClave()"></div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:.75rem">Pasale esta clave al usuario; puede cambiarla después desde "Mi clave".</div>
+    <div id="rc-err" style="font-size:12px;color:var(--er-t);min-height:16px;margin-bottom:.5rem"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="closeOv('ov-reset-clave')">Cancelar</button>
+      <button class="btn ok" id="rc-btn" onclick="confirmarResetClave()"><i class="ti ti-check"></i> Guardar clave</button>
+    </div>
+  </div>
+</div>
+
 <!-- HEADER -->
 <div class="hdr">
   <div class="hdr-brand">
@@ -2144,7 +2159,6 @@ async function abrirUsuarios(){
     renderUsuariosList();
   }catch(e){document.getElementById('usuarios-lista').innerHTML=`<p style="color:var(--er-t)">Error: ${e.message}</p>`;}
 }
-const _clavesVisibles=new Set();
 const escU=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function renderUsuariosList(){
   const el=document.getElementById('usuarios-lista');
@@ -2164,26 +2178,39 @@ function renderUsuariosList(){
   const bs='padding:3px 7px;font-size:12px';
   el.innerHTML=`<table class="gt" style="font-size:13px;width:100%;table-layout:auto">
     <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Área</th><th>Clave</th><th>Estado</th><th></th></tr></thead>
-    <tbody>${lista.map(({u,i})=>{const ver=_clavesVisibles.has(i);return `<tr>
+    <tbody>${lista.map(({u,i})=>{return `<tr>
       <td style="font-weight:500">${escU(u.Nombre)||'—'}</td>
       <td style="font-size:12px;color:var(--text2);white-space:nowrap">${escU(u.Email)||'—'}</td>
       <td><span class="sb ${rolColor[u.Rol]||'s-borrador'}" style="font-size:11px">${rolLbl[u.Rol]||escU(u.Rol)}</span></td>
       <td style="font-size:12px;color:var(--text2)">${escU(u.Area)||'—'}</td>
-      <td style="white-space:nowrap">
-        <code style="font-size:12px;margin-right:4px">${ver?(escU(u.Clave)||'(sin clave)'):'••••••'}</code>
-        <button class="btn" style="${bs}" title="${ver?'Ocultar':'Ver'} clave" onclick="verClaveUsuario(${i})"><i class="ti ti-eye${ver?'-off':''}"></i> ${ver?'Ocultar':'Ver'}</button>
-        <button class="btn" style="${bs}" title="Copiar clave" onclick="copiarClaveUsuario(${i})"><i class="ti ti-copy"></i> Copiar</button>
-      </td>
+      <td><button class="btn" style="${bs}" title="Asignar una clave nueva" onclick="abrirResetClave(${i})"><i class="ti ti-key"></i> Restablecer</button></td>
       <td><span style="font-size:12px;color:${u.Activo==='NO'?'var(--er-t)':'var(--ok-t)'}">${u.Activo==='NO'?'Inactivo':'Activo'}</span></td>
       <td><button class="btn" style="${bs}" onclick="toggleUsuario(${i})">${u.Activo==='NO'?'Activar':'Desactivar'}</button></td>
     </tr>`;}).join('')}</tbody>
   </table>`;
 }
-function verClaveUsuario(i){_clavesVisibles.has(i)?_clavesVisibles.delete(i):_clavesVisibles.add(i);renderUsuariosList();}
-function copiarClaveUsuario(i){
-  const c=(usuariosDB[i]&&usuariosDB[i].Clave)||'';
-  if(!c){showToast('Este usuario no tiene clave cargada.','wa');return;}
-  navigator.clipboard.writeText(String(c)).then(()=>showToast('Clave copiada.','ok'),()=>showToast('No se pudo copiar.','er'));
+let _resetIdx=null;
+function abrirResetClave(i){
+  const u=usuariosDB[i]; if(!u)return;
+  _resetIdx=i;
+  document.getElementById('rc-usuario').textContent=(u.Nombre||'')+' ('+(u.Email||'')+')';
+  document.getElementById('rc-clave').value='';
+  document.getElementById('rc-err').textContent='';
+  openOv('ov-reset-clave');
+  setTimeout(()=>document.getElementById('rc-clave').focus(),50);
+}
+async function confirmarResetClave(){
+  const u=usuariosDB[_resetIdx]; if(!u)return;
+  const nueva=document.getElementById('rc-clave').value.trim();
+  const err=document.getElementById('rc-err'); err.textContent='';
+  if(nueva.length<6){err.textContent='Mínimo 6 caracteres.';return;}
+  const btn=document.getElementById('rc-btn'); btn.disabled=true;
+  try{
+    await api({action:'cambiarClave',email:u.Email,clave:nueva});
+    closeOv('ov-reset-clave');
+    showToast('Clave de '+(u.Nombre||u.Email)+' restablecida.','ok');
+  }catch(e){err.textContent='Error: '+e.message;}
+  finally{btn.disabled=false;}
 }
 function abrirNuevoUsuario(){
   ['nu-nombre','nu-email','nu-clave'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
@@ -2211,7 +2238,7 @@ async function toggleUsuario(i){
   const u=usuariosDB[i];
   const nuevo=u.Activo==='NO'?'SI':'NO';
   try{
-    await api({action:'saveUsuario',nombre:u.Nombre,email:u.Email,rol:u.Rol,area:u.Area||'',clave:u.Clave||'',activo:nuevo});
+    await api({action:'saveUsuario',nombre:u.Nombre,email:u.Email,rol:u.Rol,area:u.Area||'',activo:nuevo});
     usuariosDB[i].Activo=nuevo;renderUsuariosList();
     showToast(`Usuario ${nuevo==='SI'?'activado':'desactivado'}.`,'ok');
   }catch(e){showToast('Error: '+e.message,'er');}
