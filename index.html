@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Fondos de Gira — Cuenca del Sur</title>
-<meta name="version" content="2.1">
+<meta name="version" content="2.2">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -605,6 +605,7 @@ function api(params){
     })
     .catch(e=>{
       if(backendErr)throw backendErr;
+      window.__apiDiag='fetch: '+((e&&e.name)||'')+' '+((e&&e.message)||'');
       return apiJsonp(Object.assign({},params));
     })
     .finally(()=>clearTimeout(to));
@@ -657,7 +658,7 @@ async function doLogin(){
       err.textContent=(r.error||'Email o contraseña incorrectos.')+' (usuario: '+email+')';
       btn.disabled=false;btn.innerHTML='Ingresar';
     }
-  }catch(e){err.textContent='Error de conexión: '+e.message;btn.disabled=false;btn.innerHTML='Ingresar';}
+  }catch(e){err.textContent='Error de conexión: '+e.message+' ['+(window.__apiDiag||'-')+' | v'+((document.querySelector('meta[name=version]')||{}).content||'?')+' | '+(navigator.onLine?'online':'offline')+']';btn.disabled=false;btn.innerHTML='Ingresar';}
 }
 
 function logout(showMsg){
