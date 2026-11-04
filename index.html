@@ -37,6 +37,9 @@
 }}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:var(--text);background:var(--bg3);min-height:100vh}
 .app{max-width:960px;margin:0 auto;padding:1.5rem}
+.topbar{position:sticky;top:0;z-index:50;background:var(--bg3);margin:-.75rem 0 1.25rem;padding:.75rem 0;border-bottom:0.5px solid var(--border)}
+.topbar .hdr{margin-bottom:.75rem}
+.topbar .tabs{margin-bottom:0}
 .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px}
 .hdr-brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:500}
 .hdr-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -472,6 +475,8 @@ table.gt tr:last-child td{border-bottom:none}
   </div>
 </div>
 
+<!-- BARRA SUPERIOR FIJA (header + pestañas) -->
+<div class="topbar">
 <!-- HEADER -->
 <div class="hdr">
   <div class="hdr-brand">
@@ -498,6 +503,7 @@ table.gt tr:last-child td{border-bottom:none}
   <button class="tab" id="t-rendicion" onclick="showTab('rendicion')" style="display:none"><i class="ti ti-receipt"></i> Rendición</button>
   <button class="tab" id="t-tesoreria" onclick="showTab('tesoreria')" style="display:none"><i class="ti ti-building-bank"></i> Tesorería <span class="nb" id="badge-tes" style="display:none">0</span></button>
   <button class="tab" id="t-dashboard" onclick="showTab('dashboard')" style="display:none"><i class="ti ti-chart-bar"></i> Dashboard</button>
+</div>
 </div>
 
 <div id="panel-solicitudes" class="panel on"></div>
