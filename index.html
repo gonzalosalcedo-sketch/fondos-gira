@@ -125,7 +125,7 @@ table.gt tr:last-child td{border-bottom:none}
 .fbtn.on{background:var(--text);color:var(--bg);border-color:var(--text)}
 .pbar2{height:4px;background:var(--bg2);border-radius:999px;overflow:hidden;margin-top:6px}
 .pfill{height:100%;border-radius:999px;transition:width .3s}
-.ov{display:none;min-height:520px;background:rgba(0,0,0,.52);align-items:flex-start;justify-content:center;margin:-1.5rem;padding:2rem;padding-top:2.5rem}
+.ov{display:none;position:fixed;inset:0;z-index:1000;overflow-y:auto;background:rgba(0,0,0,.52);align-items:flex-start;justify-content:center;margin:0;padding:2rem;padding-top:2.5rem}
 .ov.open{display:flex}
 .ovbox{background:var(--bg);border-radius:var(--rl);border:0.5px solid var(--border);padding:1.5rem;width:480px;max-width:100%}
 .ovbox.er{border:2px solid var(--er-b)}
@@ -191,7 +191,7 @@ table.gt tr:last-child td{border-bottom:none}
     display:block!important
   }
   /* Overlay autorizacion */
-  .ov{padding:1rem;padding-top:1.5rem;margin:-1rem}
+  .ov{padding:1rem;padding-top:1.5rem}
 }
 
 @media(max-width:600px){
@@ -558,7 +558,7 @@ function apiPost(params){
 
 function api(params){
   return new Promise((resolve,reject)=>{
-    const cb='cb_'+Date.now()+'_'+Math.floor(Math.random()*9999);
+    const cb='cb_'+Date.now()+'_'+(++api._n||(api._n=1))+'_'+Math.floor(Math.random()*9999);
     window[cb]=(data)=>{
       delete window[cb];
       document.getElementById(cb)&&document.getElementById(cb).remove();
@@ -657,18 +657,22 @@ async function cargarDatos(){
   document.getElementById('panel-solicitudes').innerHTML=
     '<div style="display:flex;align-items:center;justify-content:center;gap:10px;padding:3rem;color:var(--text2)"><div class="spin"></div> Cargando...</div>';
   try{
-    const [sols,cfgData]=await Promise.all([api({action:'getSolicitudes'}),api({action:'getConfig'})]);
+    const [sols,cfgData,allG]=await Promise.all([api({action:'getSolicitudes'}),api({action:'getConfig'}),api({action:'getAllGastos'}).catch(()=>null)]);
     solicitudes=Array.isArray(sols)?sols.map(parseSol):[];
     if(cfgData&&!cfgData.error){
       CFG.viaticos=parseFloat(cfgData.viaticos)||60000;
       CFG.hospedaje=parseFloat(cfgData.hospedaje)||100000;
       CFG.diasLimite=parseInt(cfgData.diasLimite)||5;
     }
-    for(const s of solicitudes.filter(x=>['aprobado','rendido','observado','cerrado'].includes(x.status))){
-      try{
-        const g=await api({action:'getGastos',id:s.id});
-        s.gastos=Array.isArray(g)?g.map(r=>({tipo:r.tipo,rubro:parseInt(r.rubro)||172,detalle:r.detalle,importe:parseFloat(r.importe)||0})):[];
-      }catch{s.gastos=[];}
+    // Gastos: una sola llamada (getAllGastos) si el backend la soporta; si no, llamadas en paralelo
+    const mapG=g=>Array.isArray(g)?g.map(r=>({tipo:r.tipo,rubro:parseInt(r.rubro)||172,detalle:r.detalle,importe:parseFloat(r.importe)||0})):[];
+    const conGastos=solicitudes.filter(x=>['aprobado','rendido','observado','cerrado'].includes(x.status));
+    if(allG&&typeof allG==='object'&&!Array.isArray(allG)){
+      conGastos.forEach(s=>{s.gastos=mapG(allG[String(s.id)]);});
+    }else{
+      await Promise.all(conGastos.map(async s=>{
+        try{s.gastos=mapG(await api({action:'getGastos',id:s.id}));}catch{s.gastos=[];}
+      }));
     }
   }catch(e){showToast('Error al cargar: '+e.message,'er');}
   updateBadges();
