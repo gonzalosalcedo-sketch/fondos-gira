@@ -719,7 +719,7 @@ async function cargarDatos(){
       CFG.diasLimite=parseInt(cfgData.diasLimite)||5;
     }
     // Gastos: una sola llamada (getAllGastos) si el backend la soporta; si no, llamadas en paralelo
-    const mapG=g=>Array.isArray(g)?g.map(r=>({tipo:r.tipo,rubro:parseInt(r.rubro)||172,detalle:r.detalle,importe:parseFloat(r.importe)||0})):[];
+    const mapG=g=>Array.isArray(g)?g.map(r=>({tipo:r.tipo,rubro:parseInt(r.rubro)||172,detalle:r.detalle,importe:parseFloat(r.importe)||0,driveUrl:r.driveUrl||'',nroComprobante:r.nroComprobante||''})):[];
     const conGastos=solicitudes.filter(x=>['aprobado','rendido','observado','cerrado'].includes(x.status));
     if(allG&&typeof allG==='object'&&!Array.isArray(allG)){
       conGastos.forEach(s=>{s.gastos=mapG(allG[String(s.id)]);});
@@ -1250,6 +1250,12 @@ async function ejecutarAnalisisIA(){
   }
 }
 
+// Botón a la carpeta de Drive con las fotos de los comprobantes
+function btnComprobantes(s){
+  if(!s||!s.folderId)return '';
+  return `<a class="btn" href="https://drive.google.com/drive/folders/${encodeURIComponent(s.folderId)}" target="_blank" rel="noopener" style="font-size:12px;padding:5px 12px;text-decoration:none;white-space:nowrap" title="Ver las fotos de los comprobantes en Drive"><i class="ti ti-photo"></i> Comprobantes</a>`;
+}
+
 function irRendicion(idx){
   currentSol=solicitudes[idx];
   gastoRows=currentSol.gastos?JSON.parse(JSON.stringify(currentSol.gastos)):[];
@@ -1289,6 +1295,7 @@ function renderRendicion(){
           <span class="sb s-${estaVencida(currentSol)?'vencido':currentSol.status}">${estaVencida(currentSol)?'Vencida':ESTADOS[currentSol.status]||currentSol.status}</span>
         </div>
       </div>
+      ${btnComprobantes(currentSol)}
     </div>
 
     ${isA&&currentSol.status==='auth_pendiente'?`
@@ -1961,6 +1968,7 @@ function renderTesoreria(){
             <span>${s.fechaSalida} → ${s.fechaLlegada}</span>
           </div></div>
           <button class="btn in" style="font-size:12px;padding:5px 12px" onclick="irRendicion(${idx})"><i class="ti ti-eye"></i> Ver detalle</button>
+          ${btnComprobantes(s)}
         </div>
         <div style="display:flex;gap:1.5rem;font-size:13px;flex-wrap:wrap;margin-bottom:.75rem">
           <span>Entregado: <strong>${fmt(tot)}</strong></span>
