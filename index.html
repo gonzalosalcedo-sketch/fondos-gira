@@ -512,7 +512,7 @@ table.gt tr:last-child td{border-bottom:none}
 <!-- Inputs para cámara y galería -->
 <input type="file" id="scan-input-camara" accept="image/*" capture="environment"
   style="display:none" onchange="procesarScan(this.files[0]);this.value=''">
-<input type="file" id="scan-input-galeria" accept="image/*"
+<input type="file" id="scan-input-galeria" accept="image/*,application/pdf"
   style="display:none" onchange="procesarScan(this.files[0]);this.value=''">
 </div>
 </div>
@@ -560,59 +560,30 @@ const TODAY=new Date(); TODAY.setHours(0,0,0,0);
 // ── API JSONP ──────────────────────────────────────────────────
 // POST via form+iframe con JSONP callback para leer la respuesta
 function apiPost(params){
-  return new Promise((resolve, reject) => {
-    // Usar JSONP callback para que el Apps Script devuelva la respuesta via script tag
-    const cb = 'postCb_' + Date.now() + '_' + Math.floor(Math.random()*9999);
-    const iframeId = 'iframe_' + cb;
-
-    window[cb] = (data) => {
-      delete window[cb];
-      try { document.body.removeChild(iframe); } catch(e) {}
-      try { document.body.removeChild(form); } catch(e) {}
-      clearTimeout(timeout);
-      if(data && data.error) reject(new Error(data.error));
-      else resolve(data);
-    };
-
-    const iframe = document.createElement('iframe');
-    iframe.name = iframeId;
-    iframe.id = iframeId;
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = AS_URL;
-    form.target = iframeId;
-    form.style.display = 'none';
-
-    // Payload como campo oculto
-    const inp = document.createElement('input');
-    inp.type = 'hidden';
-    inp.name = 'payload';
-    // Incluir callback en el payload para que el script lo use
-    const p = Object.assign({}, params, {callback: cb});
-    inp.value = JSON.stringify(p);
-    form.appendChild(inp);
-
-    document.body.appendChild(form);
-
-    const timeout = setTimeout(() => {
-      delete window[cb];
-      try { document.body.removeChild(iframe); } catch(e) {}
-      try { document.body.removeChild(form); } catch(e) {}
-      reject(new Error('Timeout guardando imagen'));
-    }, 45000);
-
-    form.submit();
+  // POST con fetch sin cookies: el Apps Script responde JSON y la app puede leer el resultado (ej. driveUrl).
+  // Sin reintento automático para no duplicar archivos en Drive.
+  const ctrl=new AbortController();
+  const to=setTimeout(()=>ctrl.abort(),90000);
+  return fetch(AS_URL,{method:'POST',credentials:'omit',signal:ctrl.signal,
+      body:new URLSearchParams({payload:JSON.stringify(params)})})
+    .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.text();})
+    .then(t=>{
+      let data;try{data=JSON.parse(t);}catch(e){throw new Error('Respuesta inválida del servidor');}
+      if(data&&data.error)throw new Error(data.error);
+      return data;
+    })
+    .catch(e=>{if(e&&e.name==='AbortError')throw new Error('Timeout guardando archivo');throw e;})
+    .finally(()=>clearTimeout(to));
+}
+function fileToBase64(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onerror=()=>reject(new Error('No se pudo leer el archivo'));
+    r.onload=()=>resolve(String(r.result).split(',')[1]||'');
+    r.readAsDataURL(file);
   });
 }
 
-
-// Llamadas al Apps Script con fetch SIN cookies (credentials:'omit').
-// Si el navegador tiene sesiones de Google abiertas, el JSONP manda esas cookies y
-// Apps Script puede fallar ("Error de red" en celulares; en incógnito funciona).
-// Si fetch falla por red, se reintenta con el método JSONP anterior.
 function api(params){
   const qs=new URLSearchParams(Object.assign({},params,{_t:Date.now()})).toString();
   const ctrl=new AbortController();
@@ -1776,7 +1747,7 @@ function simScan(){
       <i class="ti ti-camera"></i>&nbsp; Sacar foto ahora
     </button>
     <button class="btn in" style="width:100%;padding:12px;font-size:14px;justify-content:center" onclick="document.getElementById('scan-opciones-ov').remove();document.getElementById('scan-input-galeria').click()">
-      <i class="ti ti-photo"></i>&nbsp; Elegir de la galería
+      <i class="ti ti-photo"></i>&nbsp; Elegir de la galería o PDF
     </button>
     <button class="btn" style="width:100%;padding:10px;font-size:13px;background:transparent;border:0.5px solid var(--border)" onclick="document.getElementById('scan-opciones-ov').remove()">
       Cancelar
@@ -1788,11 +1759,13 @@ function simScan(){
 
 async function procesarScanFinal(file){
   if(!file) return;
-  if(!file.type.startsWith('image/')){showToast('Seleccioná una imagen','wa');return;}
+  const esPdf = file.type==='application/pdf';
+  if(!esPdf && !file.type.startsWith('image/')){showToast('Seleccioná una imagen o un PDF','wa');return;}
+  if(esPdf && file.size>15*1024*1024){showToast('El PDF es muy grande (máx. 15 MB).','wa');return;}
 
-  const mediaType = 'image/jpeg';
+  const mediaType = esPdf ? 'application/pdf' : 'image/jpeg';
   const nroComp = gastoRows.length + 1;
-  const nombre = 'comp_' + nroComp + '_' + Date.now() + '.jpg';
+  const nombre = 'comp_' + nroComp + '_' + Date.now() + (esPdf ? '.pdf' : '.jpg');
 
   // Agregar la card inmediatamente para que el usuario vea que se está procesando
   let nuevoGasto = {tipo:'Ticket / Factura C', rubro:172, detalle:'Procesando...', importe:0, driveUrl:'', nroComprobante:''};
@@ -1800,13 +1773,13 @@ async function procesarScanFinal(file){
   gastoRows.push(nuevoGasto);
 
   try {
-    const base64Full = await resizeImage(file, 1000, 0.75);
-    nuevoGasto.preview = 'data:image/jpeg;base64,' + await resizeImage(file, 400, 0.5);
+    const base64Full = esPdf ? await fileToBase64(file) : await resizeImage(file, 1000, 0.75);
+    if(!esPdf) nuevoGasto.preview = 'data:image/jpeg;base64,' + await resizeImage(file, 400, 0.5);
     nuevoGasto.detalle = '';
     renderGastoTable();
     showToast('Guardando en Drive...','in');
 
-    // Drive via iframe POST
+    // Drive via POST (fetch)
     try {
       const dr = await apiPost({
         action:'guardarComprobante',
@@ -1829,6 +1802,9 @@ async function procesarScanFinal(file){
         showToast('Guardado en Drive ✓. Leyendo con IA...','ok');
       }
     } catch(e){ console.warn('Drive:', e.message); showToast('Drive falló. Leyendo con IA...','wa'); }
+
+    // Los PDF no se leen con IA: el usuario completa los datos
+    if(esPdf){ showToast(nuevoGasto.driveUrl ? 'PDF guardado. Completá los datos.' : 'No se pudo guardar el PDF. Probá de nuevo.','wa'); return; }
 
     // IA via JSONP con imagen comprimida
     try {
@@ -1874,7 +1850,8 @@ async function procesarScanFinal(file){
 let _cropper=null,_cropFile=null,_cropUrl=null;
 function procesarScan(file){
   if(!file)return;
-  if(!file.type||!file.type.startsWith('image/')){showToast('Seleccioná una imagen','wa');return;}
+  if(file.type==='application/pdf'){procesarScanFinal(file);return;} // PDF: sin recorte
+  if(!file.type||!file.type.startsWith('image/')){showToast('Seleccioná una imagen o un PDF','wa');return;}
   if(typeof Cropper==='undefined'){procesarScanFinal(file);return;} // sin librería: sigue como antes
   _cropFile=file;
   const img=document.getElementById('crop-img');
