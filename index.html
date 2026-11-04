@@ -390,7 +390,7 @@ table.gt tr:last-child td{border-bottom:none}
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <input type="text" id="us-buscar" placeholder="Buscar por nombre, email, rol o área..." oninput="renderUsuariosList()" style="padding:7px 10px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg);color:inherit;font:inherit;font-size:13px;min-width:230px">
         <button class="btn ok" onclick="abrirNuevoUsuario()"><i class="ti ti-user-plus"></i> Agregar usuario</button>
-        <button class="btn" onclick="closeOv('ov-usuarios')" title="Cerrar"><i class="ti ti-x"></i></button>
+        <button class="btn" onclick="closeOv('ov-usuarios')" title="Cerrar"><i class="ti ti-x"></i> Cerrar</button>
       </div>
     </div>
     <div id="usuarios-resumen" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:1rem"></div>
@@ -403,7 +403,7 @@ table.gt tr:last-child td{border-bottom:none}
   <div class="ovbox" style="width:min(560px,96vw)">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
       <div style="font-weight:500;font-size:15px"><i class="ti ti-user-plus"></i> Agregar usuario</div>
-      <button class="btn" onclick="closeOv('ov-nuevo-usuario')" title="Cerrar"><i class="ti ti-x"></i></button>
+      <button class="btn" onclick="closeOv('ov-nuevo-usuario')" title="Cerrar"><i class="ti ti-x"></i> Cerrar</button>
     </div>
     <div class="fg" style="margin-bottom:1rem">
         <div class="fi"><label>Nombre</label><input id="nu-nombre" placeholder="Nombre completo"></div>
@@ -2162,17 +2162,17 @@ function renderUsuariosList(){
   const lista=usuariosDB.map((u,i)=>({u,i})).filter(({u})=>!q||[u.Nombre,u.Email,u.Area,rolLbl[u.Rol]].some(x=>String(x||'').toLowerCase().includes(q)));
   if(!lista.length){el.innerHTML='<p style="font-size:13px;color:var(--text2)">Sin resultados para la búsqueda.</p>';return;}
   const bs='padding:3px 7px;font-size:12px';
-  el.innerHTML=`<table class="gt" style="font-size:13px;width:100%">
+  el.innerHTML=`<table class="gt" style="font-size:13px;width:100%;table-layout:auto">
     <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Área</th><th>Clave</th><th>Estado</th><th></th></tr></thead>
     <tbody>${lista.map(({u,i})=>{const ver=_clavesVisibles.has(i);return `<tr>
       <td style="font-weight:500">${escU(u.Nombre)||'—'}</td>
-      <td style="font-size:12px;color:var(--text2)">${escU(u.Email)||'—'}</td>
+      <td style="font-size:12px;color:var(--text2);white-space:nowrap">${escU(u.Email)||'—'}</td>
       <td><span class="sb ${rolColor[u.Rol]||'s-borrador'}" style="font-size:11px">${rolLbl[u.Rol]||escU(u.Rol)}</span></td>
       <td style="font-size:12px;color:var(--text2)">${escU(u.Area)||'—'}</td>
       <td style="white-space:nowrap">
         <code style="font-size:12px;margin-right:4px">${ver?(escU(u.Clave)||'(sin clave)'):'••••••'}</code>
-        <button class="btn" style="${bs}" title="${ver?'Ocultar':'Ver'} clave" onclick="verClaveUsuario(${i})"><i class="ti ti-eye${ver?'-off':''}"></i></button>
-        <button class="btn" style="${bs}" title="Copiar clave" onclick="copiarClaveUsuario(${i})"><i class="ti ti-copy"></i></button>
+        <button class="btn" style="${bs}" title="${ver?'Ocultar':'Ver'} clave" onclick="verClaveUsuario(${i})"><i class="ti ti-eye${ver?'-off':''}"></i> ${ver?'Ocultar':'Ver'}</button>
+        <button class="btn" style="${bs}" title="Copiar clave" onclick="copiarClaveUsuario(${i})"><i class="ti ti-copy"></i> Copiar</button>
       </td>
       <td><span style="font-size:12px;color:${u.Activo==='NO'?'var(--er-t)':'var(--ok-t)'}">${u.Activo==='NO'?'Inactivo':'Activo'}</span></td>
       <td><button class="btn" style="${bs}" onclick="toggleUsuario(${i})">${u.Activo==='NO'?'Activar':'Desactivar'}</button></td>
