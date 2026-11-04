@@ -9,6 +9,8 @@
 <title>Fondos de Gira — Cuenca del Sur</title>
 <meta name="version" content="2.2">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -446,6 +448,26 @@ table.gt tr:last-child td{border-bottom:none}
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="btn" onclick="closeOv('ov-reset-clave')">Cancelar</button>
       <button class="btn ok" id="rc-btn" onclick="confirmarResetClave()"><i class="ti ti-check"></i> Guardar clave</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY RECORTE DE COMPROBANTE -->
+<div class="ov" id="ov-crop">
+  <div class="ovbox" style="width:min(720px,96vw);padding:1rem">
+    <div style="font-weight:500;font-size:15px;margin-bottom:.25rem"><i class="ti ti-crop"></i> Recortar comprobante</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:.75rem">Ajustá el recuadro para que quede solo el comprobante.</div>
+    <div style="height:min(58vh,520px);background:#000;border-radius:var(--r);overflow:hidden"><img id="crop-img" alt="" style="display:block;max-width:100%"></div>
+    <div style="display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;margin-top:.75rem">
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="cropRotar(-90)" title="Girar a la izquierda">↺ Girar</button>
+        <button class="btn" onclick="cropRotar(90)" title="Girar a la derecha">Girar ↻</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="cerrarCrop()">Cancelar</button>
+        <button class="btn" onclick="cropSinRecortar()">Usar sin recortar</button>
+        <button class="btn ok" onclick="cropConfirmar()"><i class="ti ti-check"></i> Recortar y guardar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1666,16 +1688,16 @@ function renderGastoTable(){
   if(ro){
     // Vista solo lectura — tabla simple
     el.innerHTML=`<table class="gt"><colgroup><col style="width:25%"><col style="width:30%"><col style="width:28%"><col style="width:17%"></colgroup>
-      <thead><tr><th>Tipo</th><th>Rubro</th><th>Detalle</th><th style="text-align:right">Importe</th></tr></thead>
+      <thead><tr><th>Tipo</th><th>Rubro</th><th>Detalle</th><th style="text-align:right">Importe</th><th style="width:80px;text-align:center">Comprobante</th></tr></thead>
       <tbody>${gastoRows.map((g,gi)=>`<tr>
         <td>${g.tipo}</td>
         <td style="font-size:12px;color:var(--text2)">${RUBROS.find(r=>r.cod===g.rubro)?.desc||g.rubro}</td>
         <td>
           ${g.detalle}
-          ${g.preview?`<button class="btn in" style="padding:2px 8px;font-size:11px;margin-left:4px" onclick="verImagen('${g.preview}')"><i class="ti ti-eye"></i></button>`:''}
-          ${g.driveUrl&&!g.preview?`<a href="${g.driveUrl}" target="_blank" class="btn in" style="padding:2px 8px;font-size:11px;margin-left:4px;text-decoration:none"><i class="ti ti-eye"></i> Ver</a>`:''}
         </td>
         <td style="text-align:right">${fmt(g.importe)}</td>
+        <td style="text-align:center">${g.preview?`<button class="btn in" style="padding:2px 8px;font-size:11px" onclick="verImagen('${g.preview}')"><i class="ti ti-eye"></i> Ver</button>`:g.driveUrl?`<a href="${g.driveUrl}" target="_blank" rel="noopener" class="btn in" style="padding:2px 8px;font-size:11px;text-decoration:none"><i class="ti ti-eye"></i> Ver</a>`:'<span style="color:var(--text3,var(--text2));font-size:11px">—</span>'}</td>
+      
       </tr>`).join('')}</tbody>
     </table>`;
   }else{
@@ -1764,7 +1786,7 @@ function simScan(){
   document.body.appendChild(ov);
 }
 
-async function procesarScan(file){
+async function procesarScanFinal(file){
   if(!file) return;
   if(!file.type.startsWith('image/')){showToast('Seleccioná una imagen','wa');return;}
 
@@ -1847,6 +1869,44 @@ async function procesarScan(file){
   }
 }
 
+
+// ── RECORTE DE FOTO ANTES DE GUARDAR ──────────────────────────
+let _cropper=null,_cropFile=null,_cropUrl=null;
+function procesarScan(file){
+  if(!file)return;
+  if(!file.type||!file.type.startsWith('image/')){showToast('Seleccioná una imagen','wa');return;}
+  if(typeof Cropper==='undefined'){procesarScanFinal(file);return;} // sin librería: sigue como antes
+  _cropFile=file;
+  const img=document.getElementById('crop-img');
+  if(_cropper){_cropper.destroy();_cropper=null;}
+  if(_cropUrl)URL.revokeObjectURL(_cropUrl);
+  _cropUrl=URL.createObjectURL(file);
+  img.onload=()=>{
+    _cropper=new Cropper(img,{viewMode:1,autoCropArea:0.9,dragMode:'move',background:false,responsive:true,
+      checkOrientation:true,toggleDragModeOnDblclick:false});
+  };
+  img.onerror=()=>{const f=_cropFile;cerrarCrop();procesarScanFinal(f);};
+  openOv('ov-crop');
+  img.src=_cropUrl;
+}
+function cerrarCrop(){
+  if(_cropper){_cropper.destroy();_cropper=null;}
+  if(_cropUrl){URL.revokeObjectURL(_cropUrl);_cropUrl=null;}
+  const img=document.getElementById('crop-img');img.onload=null;img.onerror=null;img.removeAttribute('src');
+  closeOv('ov-crop');
+}
+function cropRotar(g){if(_cropper)_cropper.rotate(g);}
+function cropSinRecortar(){const f=_cropFile;cerrarCrop();if(f)procesarScanFinal(f);}
+function cropConfirmar(){
+  if(!_cropper){cropSinRecortar();return;}
+  const f=_cropFile;
+  const canvas=_cropper.getCroppedCanvas({maxWidth:2000,maxHeight:2000,fillColor:'#fff',imageSmoothingQuality:'high'});
+  if(!canvas){cropSinRecortar();return;}
+  canvas.toBlob(b=>{
+    cerrarCrop();
+    procesarScanFinal(b?new File([b],'comprobante.jpg',{type:'image/jpeg'}):f);
+  },'image/jpeg',0.9);
+}
 
 function resizeImage(file, maxWidth, quality){
   quality = quality || 0.7;
