@@ -1702,6 +1702,12 @@ function renderGastoTable(){
             <i class="ti ti-trash"></i> Eliminar
           </button>
         </div>
+        <div style="margin-bottom:8px">
+          <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Fecha del comprobante</label>
+          <input type="date" style="width:170px;max-width:100%;font-size:13px;padding:6px 8px"
+            value="${fechaISO(g.fechaComprobante)}" max="${fechaISO(new Date())}"
+            onchange="gastoRows[${i}].fechaComprobante=this.value">
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
           <div>
             <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Tipo de comprobante</label>
@@ -1727,12 +1733,6 @@ function renderGastoTable(){
               ${RUBROS.map(r=>`<option value="${r.cod}"${g.rubro===r.cod?' selected':''}>${r.desc}</option>`).join('')}
             </select>
           </div>
-        </div>
-        <div style="margin-bottom:8px">
-          <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Fecha del comprobante</label>
-          <input type="date" style="width:100%;font-size:13px;padding:6px 8px"
-            value="${fechaISO(g.fechaComprobante)}" max="${fechaISO(new Date())}"
-            onchange="gastoRows[${i}].fechaComprobante=this.value">
         </div>
         <div style="margin-bottom:8px">
           <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Detalle / Descripción</label>
