@@ -719,7 +719,7 @@ async function cargarDatos(){
       CFG.diasLimite=parseInt(cfgData.diasLimite)||5;
     }
     // Gastos: una sola llamada (getAllGastos) si el backend la soporta; si no, llamadas en paralelo
-    const mapG=g=>Array.isArray(g)?g.map(r=>({tipo:r.tipo,rubro:parseInt(r.rubro)||172,detalle:r.detalle,importe:parseFloat(r.importe)||0,driveUrl:r.driveUrl||'',nroComprobante:r.nroComprobante||''})):[];
+    const mapG=g=>Array.isArray(g)?g.map(r=>({tipo:r.tipo,rubro:parseInt(r.rubro)||172,detalle:r.detalle,importe:parseFloat(r.importe)||0,driveUrl:r.driveUrl||'',nroComprobante:r.nroComprobante||'',fechaComprobante:fechaISO(r.fechaComprobante)})):[];
     const conGastos=solicitudes.filter(x=>['aprobado','rendido','observado','cerrado'].includes(x.status));
     if(allG&&typeof allG==='object'&&!Array.isArray(allG)){
       conGastos.forEach(s=>{s.gastos=mapG(allG[String(s.id)]);});
@@ -1416,7 +1416,18 @@ function renderResumen(byTipo,gasAct,saldo){
     <div class="rr"><span style="color:var(--text2)">${saldo>=0?'A reintegrar':'El tesorero debe abonar'}</span>
     <span style="font-weight:500;color:var(--${saldo>=0?'wa':'ok'}-t)">${fmt(Math.abs(saldo))}</span></div>`;
 }
-function addGasto(){gastoRows.push({tipo:'Factura B',rubro:172,detalle:'',importe:0,nroComprobante:''});renderGastoTable();}
+// Fecha del comprobante: se guarda como AAAA-MM-DD
+function fechaISO(v){
+  if(!v)return '';
+  const s=String(v).trim();
+  let m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m)return m[1]+'-'+m[2]+'-'+m[3];
+  m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/);
+  if(m){const y=m[3].length===2?'20'+m[3]:m[3];return y+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');}
+  const dt=new Date(s); if(isNaN(dt))return '';
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+}
+function fechaCorta(v){const f=fechaISO(v);if(!f)return '—';const p=f.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function addGasto(){gastoRows.push({tipo:'Factura B',rubro:172,detalle:'',importe:0,nroComprobante:'',fechaComprobante:''});renderGastoTable();}
 
 // Analizar rendición con IA — detecta gastos prohibidos, montos atípicos, duplicados, incoherencias
 async function analizarRendicionIA(silencioso){
@@ -1509,7 +1520,8 @@ async function guardarGastosParcial(){
     const gastosParaGuardar=gastoRows.map(g=>({
       tipo:g.tipo,rubro:g.rubro,detalle:g.detalle,
       importe:g.importe,driveUrl:g.driveUrl||'',
-      nroComprobante:g.nroComprobante||''
+      nroComprobante:g.nroComprobante||'',
+      fechaComprobante:fechaISO(g.fechaComprobante)
     }));
     await api({action:'saveGastos',id:currentSol.id,
       gastos:JSON.stringify(gastosParaGuardar),
@@ -1553,6 +1565,7 @@ function imprimirRendicion(){
   const filas=gastoRows.map((g,i)=>`
     <tr>
       <td>${i+1}</td>
+      <td>${fechaCorta(g.fechaComprobante)}</td>
       <td>${g.tipo}</td>
       <td>${RUBROS.find(r=>r.cod===g.rubro)?.desc||g.rubro}</td>
       <td>${g.detalle}</td>
@@ -1612,10 +1625,10 @@ function imprimirRendicion(){
 
   <h2>Detalle de comprobantes</h2>
   <table>
-    <tr><th>#</th><th>Tipo</th><th>Rubro</th><th>Detalle</th><th style="text-align:right">Importe</th></tr>
+    <tr><th>#</th><th>Fecha</th><th>Tipo</th><th>Rubro</th><th>Detalle</th><th style="text-align:right">Importe</th></tr>
     ${filas}
     <tr style="background:#e8f0f8;font-weight:bold">
-      <td colspan="4" style="text-align:right">TOTAL</td>
+      <td colspan="5" style="text-align:right">TOTAL</td>
       <td style="text-align:right">${fmt(gas)}</td>
     </tr>
   </table>
@@ -1666,8 +1679,9 @@ function renderGastoTable(){
   if(ro){
     // Vista solo lectura — tabla simple
     el.innerHTML=`<table class="gt"><colgroup><col style="width:25%"><col style="width:30%"><col style="width:28%"><col style="width:17%"></colgroup>
-      <thead><tr><th>Tipo</th><th>Rubro</th><th>Detalle</th><th style="text-align:right">Importe</th><th style="width:80px;text-align:center">Comprobante</th></tr></thead>
+      <thead><tr><th style="width:90px">Fecha</th><th>Tipo</th><th>Rubro</th><th>Detalle</th><th style="text-align:right">Importe</th><th style="width:80px;text-align:center">Comprobante</th></tr></thead>
       <tbody>${gastoRows.map((g,gi)=>`<tr>
+        <td style="font-size:12px;white-space:nowrap">${fechaCorta(g.fechaComprobante)}</td>
         <td>${g.tipo}</td>
         <td style="font-size:12px;color:var(--text2)">${RUBROS.find(r=>r.cod===g.rubro)?.desc||g.rubro}</td>
         <td>
@@ -1713,6 +1727,12 @@ function renderGastoTable(){
               ${RUBROS.map(r=>`<option value="${r.cod}"${g.rubro===r.cod?' selected':''}>${r.desc}</option>`).join('')}
             </select>
           </div>
+        </div>
+        <div style="margin-bottom:8px">
+          <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Fecha del comprobante</label>
+          <input type="date" style="width:100%;font-size:13px;padding:6px 8px"
+            value="${fechaISO(g.fechaComprobante)}" max="${fechaISO(new Date())}"
+            onchange="gastoRows[${i}].fechaComprobante=this.value">
         </div>
         <div style="margin-bottom:8px">
           <label style="font-size:11px;color:var(--text2);display:block;margin-bottom:3px">Detalle / Descripción</label>
@@ -1775,7 +1795,7 @@ async function procesarScanFinal(file){
   const nombre = 'comp_' + nroComp + '_' + Date.now() + (esPdf ? '.pdf' : '.jpg');
 
   // Agregar la card inmediatamente para que el usuario vea que se está procesando
-  let nuevoGasto = {tipo:'Ticket / Factura C', rubro:172, detalle:'Procesando...', importe:0, driveUrl:'', nroComprobante:''};
+  let nuevoGasto = {tipo:'Ticket / Factura C', rubro:172, detalle:'Procesando...', importe:0, driveUrl:'', nroComprobante:'', fechaComprobante:''};
   const idxGasto = gastoRows.length;
   gastoRows.push(nuevoGasto);
 
@@ -1835,6 +1855,7 @@ async function procesarScanFinal(file){
           nuevoGasto.detalle        = r.detalle || '';
           nuevoGasto.importe        = parseFloat(r.importe) || 0;
           nuevoGasto.nroComprobante = r.nroComprobante || '';
+          if(r.fecha||r.fechaComprobante) nuevoGasto.fechaComprobante = fechaISO(r.fecha||r.fechaComprobante);
           renderGastoTable();
           showToast('Leído: ' + fmt(nuevoGasto.importe), 'ok');
         } else {
@@ -1933,7 +1954,8 @@ async function _enviarRend(){
       detalle:        String(g.detalle||'').substring(0,200),
       importe:        parseFloat(g.importe)||0,
       driveUrl:       String(g.driveUrl||'').substring(0,500),
-      nroComprobante: String(g.nroComprobante||'').substring(0,50)
+      nroComprobante: String(g.nroComprobante||'').substring(0,50),
+      fechaComprobante: fechaISO(g.fechaComprobante)
     }));
 
     const jsonGastos = JSON.stringify(gastosParaGuardar);
