@@ -610,6 +610,14 @@ function api(params){
     })
     .finally(()=>clearTimeout(to));
 }
+// Guardar gastos por POST (sin límite de tamaño de URL). Si el Apps Script
+// todavía no acepta saveGastos por POST, cae al GET anterior (sirve sólo para rendiciones chicas).
+function apiSaveGastos(params){
+  return apiPost(params).catch(e=>{
+    if(e&&/no reconocida/i.test(e.message||''))return api(params);
+    throw e;
+  });
+}
 function apiJsonp(params){
   return new Promise((resolve,reject)=>{
     const cb='cb_'+Date.now()+'_'+(++api._n||(api._n=1))+'_'+Math.floor(Math.random()*9999);
@@ -1523,7 +1531,7 @@ async function guardarGastosParcial(){
       nroComprobante:g.nroComprobante||'',
       fechaComprobante:fechaISO(g.fechaComprobante)
     }));
-    await api({action:'saveGastos',id:currentSol.id,
+    await apiSaveGastos({action:'saveGastos',id:currentSol.id,
       gastos:JSON.stringify(gastosParaGuardar),
       usuario:currentSol.solicitante});
     currentSol.gastos=JSON.parse(JSON.stringify(gastoRows));
@@ -1959,7 +1967,7 @@ async function _enviarRend(){
     }));
 
     const jsonGastos = JSON.stringify(gastosParaGuardar);
-    await api({action:'saveGastos',id:currentSol.id,gastos:jsonGastos,usuario:currentSol.solicitante});
+    await apiSaveGastos({action:'saveGastos',id:currentSol.id,gastos:jsonGastos,usuario:currentSol.solicitante});
     await api({action:'updateStatus',id:currentSol.id,status:'rendido',usuario:currentSol.solicitante});
     await api({action:'sendMail',tipo:'rendicion_enviada',id:currentSol.id,
       solicitante:currentSol.solicitante,emailSolicitante:currentSol.email,
