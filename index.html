@@ -615,6 +615,7 @@ function api(params){
 function apiSaveGastos(params){
   return apiPost(params).catch(e=>{
     if(e&&/no reconocida/i.test(e.message||''))return api(params);
+    if(e&&/^Timeout/.test(e.message||''))throw new Error('Timeout guardando gastos. Recargá la rendición para ver si quedaron guardados antes de reintentar.');
     throw e;
   });
 }
